@@ -3273,5 +3273,32 @@
       var st=document.createElement('style'); st.textContent='*{-webkit-user-select:none;-moz-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}.kr{display:flex;justify-content:center;gap:5px;margin:5px 2px}.kk{flex:1;max-width:34px;height:40px;background:#fff;border-radius:6px;box-shadow:0 1px 0 rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;font:17px Inter;color:#111}.kk.wd{max-width:none;flex:1.6;background:#adb4bd;font-size:12px;font-weight:600}.kk.sp{flex:5;max-width:none}.kk.tel{max-width:none;height:46px;font-size:21px}.kk:active{background:#c7ccd3}[data-pencil-name="chip direccion"]{cursor:pointer}[data-pencil-name="Mis Domicilios MOBILE — propuesta"]::-webkit-scrollbar{width:0;height:0;display:none}'; document.head.appendChild(st);
     })();
     </script>
+    <script>
+    /* WI-12790 mobile · aviso de cobertura en el listado (sin sync con el pen) */
+    (function(){
+      function fix(card){
+        if(!card || card.__covFixed) return;
+        var ind=card.querySelector('[data-pencil-name="indicador"]'); if(ind&&ind.parentNode) ind.parentNode.removeChild(ind);   // sin icono de prohibido en el nombre
+        var tag=card.querySelector('[data-pencil-name="tag"]'); if(tag&&tag.parentNode) tag.parentNode.removeChild(tag);          // sin tag
+        if(!card.querySelector('.cov-callout')){                                                                                  // advertencia en fila nueva
+          var co=document.createElement('div'); co.className='cov-callout';
+          co.style.cssText='display:flex;align-items:flex-start;gap:7px;background:#fbeccb;border-radius:8px;padding:9px 11px;width:100%;box-sizing:border-box';
+          co.innerHTML='<svg width="15" height="15" viewBox="0 0 18 18" style="flex:0 0 auto;margin-top:1px"><circle cx="9" cy="9" r="8" fill="none" stroke="#b58a3c" stroke-width="2"></circle><path d="M4 4L14 14" stroke="#b58a3c" stroke-width="2" stroke-linecap="round"></path></svg><span style="font:400 12.5px/1.35 &#39;Open Sans&#39;,system-ui,sans-serif;color:#7a5f2a">S&uacute;per no llega a este domicilio. Prob&aacute; con otro mundo o eleg&iacute; otra direcci&oacute;n.</span>';
+          card.appendChild(co);
+        }
+        card.style.justifyContent='flex-start';
+        card.__covFixed=true;
+      }
+      function run(){
+        var cards=document.querySelectorAll('[data-pencil-name="Cno. Carrasco 4890"]');   // ambas copias (Paso 1 y Paso 2)
+        if(!cards.length) return false;
+        [].slice.call(cards).forEach(fix);
+        return true;
+      }
+      function loop(n){ if(run()||n>50) return; setTimeout(function(){ loop(n+1); }, 80); }
+      if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', function(){ setTimeout(function(){loop(0);}, 120); });
+      else setTimeout(function(){ loop(0); }, 120);
+    })();
+    </script>
   </body>
 </html>
