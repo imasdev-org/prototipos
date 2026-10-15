@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Selector de millas · prototipo</title>
+  <meta name="description" content="Prototipo navegable del nuevo selector de millas de Tienda Volar (Itaú): ficha, carrito y checkout.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/prototipo.css">
+</head>
+<body>
+  <nav id="barra" aria-label="Controles del prototipo">
+    <span class="titulo">Selector de millas</span>
+
+    <div class="grupo"><span>Paso</span>
+      <div class="seg" id="b-pasos">
+        <button type="button" data-valor="ficha">Ficha</button>
+        <button type="button" data-valor="carrito">Carrito</button>
+        <button type="button" data-valor="entrega">Entrega</button>
+        <button type="button" data-valor="pago">Forma de pago</button>
+        <button type="button" data-valor="confirmacion">Confirmación</button>
+      </div>
+    </div>
+
+    <div class="grupo"><span>Vista</span>
+      <div class="seg" id="b-vista">
+        <button type="button" data-valor="desktop">Desktop</button>
+        <button type="button" data-valor="mobile">Mobile</button>
+      </div>
+    </div>
+
+    <div class="grupo"><span>Cliente</span>
+      <div class="seg" id="b-cliente">
+        <button type="button" data-valor="pb">Personal Bank</button>
+        <button type="button" data-valor="comun">Común</button>
+      </div>
+    </div>
+
+    <div class="grupo"><span title="Suma de las millas elegidas en las fichas de los productos del carrito">Fichas</span>
+      <div class="seg" id="b-escenario">
+        <button type="button" data-valor="normal">2.000 millas</button>
+        <button type="button" data-valor="tope">6.000 (supera el máximo)</button>
+      </div>
+    </div>
+
+    <button type="button" class="accion" id="b-notas" aria-pressed="false">Notas para desarrollo</button>
+    <button type="button" class="accion" id="b-reiniciar">Reiniciar</button>
+    <a class="accion" href="https://github.com/imasdev-org/selector-millas-itau/blob/main/docs/especificacion.md" target="_blank" rel="noopener">Especificación</a>
+  </nav>
+
+  <main id="escenario"></main>
+  <div id="notas-capa"></div>
+
+  <script src="js/reglas.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

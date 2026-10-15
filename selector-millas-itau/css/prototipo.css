@@ -1,0 +1,205 @@
+:root {
+  --barra: 56px;
+  --z: 1;
+  --naranja: #FF6200;
+  --naranja-oscuro: #DE5500;
+  --naranja-suave-activo: #FEEEE3;
+  --gris-titulo: #464646;
+  --gris-texto: #5F6062;
+  --gris-ayuda: #828282;
+  --borde-campo: #CCCCCC;
+  --azul-acento: #223F83;
+  --azul-pb: #000D3C;
+  --nota-fondo: #FFF6CC;
+  --nota-borde: #D9B800;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  background: #E9EBEF;
+  font-family: 'Source Sans 3', 'Myriad Pro', system-ui, sans-serif;
+  color: #333;
+}
+
+/* ---------- Barra del prototipo ---------- */
+#barra {
+  position: fixed; inset: 0 0 auto 0; min-height: 56px; z-index: 100;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 9px 14px;
+  background: #1F2430; color: #fff; font-size: 13px; white-space: nowrap;
+}
+#barra .titulo { font-weight: 700; font-size: 14px; margin-right: 4px; }
+#barra .grupo { display: inline-flex; align-items: center; gap: 6px; }
+#barra .grupo > span { color: #AEB4C2; }
+#barra .seg { display: inline-flex; border: 1px solid #3B4254; border-radius: 6px; overflow: hidden; }
+#barra button {
+  font: inherit; color: #DDE1EA; background: transparent; border: 0; padding: 6px 10px; cursor: pointer;
+}
+#barra .seg button + button { border-left: 1px solid #3B4254; }
+#barra button[aria-pressed="true"] { background: #FF6200; color: #fff; }
+#barra button:disabled { color: #5D6476; cursor: not-allowed; }
+#barra .accion { border: 1px solid #3B4254; border-radius: 6px; }
+#barra a.accion { color: #DDE1EA; text-decoration: none; padding: 6px 10px; }
+#barra a.accion:hover { color: #fff; border-color: #6B7385; }
+#barra .accion[aria-pressed="true"] { background: #D9B800; color: #1F2430; border-color: #D9B800; }
+/* En el celular la barra es una sola fila que se desliza de costado */
+@media (max-width: 700px) {
+  #barra { flex-wrap: nowrap; overflow-x: auto; padding: 8px 10px; gap: 10px; scrollbar-width: none; }
+  #barra::-webkit-scrollbar { display: none; }
+  #barra .titulo { display: none; }
+  #barra .grupo, #barra .accion { flex: none; }
+}
+
+#escenario { padding-top: calc(var(--barra) + 16px); padding-bottom: 40px; }
+
+/* ---------- Lienzo desktop ---------- */
+.lienzo { margin: 0 auto; zoom: var(--z); box-shadow: 0 2px 16px rgba(0,0,0,.12); background: #fff; }
+.pantalla { position: relative; background-repeat: no-repeat; background-size: 100% auto; background-color: #fff; }
+.capa { position: absolute; }
+.tapa { position: absolute; background: #fff; }
+.zona { position: absolute; cursor: pointer; border-radius: 8px; }
+.zona:hover { outline: 2px solid rgba(34, 63, 131, .35); outline-offset: 2px; }
+.zona:focus-visible { outline: 3px solid #223F83; outline-offset: 2px; }
+
+/* ---------- Teléfono (mobile) ---------- */
+.telefono {
+  position: relative; width: 410px; height: 864px; margin: 0 auto;
+  border: 10px solid #111; border-radius: 44px; background: #fff; overflow: hidden;
+  box-shadow: 0 8px 30px rgba(0,0,0,.25);
+}
+.telefono .scroll { position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden; }
+.telefono .pantalla { width: 390px; margin: 0 auto; }
+@media (max-width: 600px) {
+  .telefono { width: 100%; height: calc(100vh - var(--barra)); border: 0; border-radius: 0; box-shadow: none; }
+  #escenario.mobile { padding-top: var(--barra); padding-bottom: 0; }
+}
+
+/* ---------- Carrito lateral ---------- */
+.cajon-fondo { position: fixed; inset: var(--barra) 0 0 0; background: rgba(0,0,0,.45); z-index: 50; }
+.cajon { position: fixed; top: var(--barra); right: 0; bottom: 0; overflow-y: auto; background: #fff; z-index: 51;
+  box-shadow: -6px 0 24px rgba(0,0,0,.2); animation: entra .25s ease-out; }
+.cajon .contenido { zoom: var(--z); }
+.telefono .cajon-fondo { position: absolute; inset: 0; }
+.telefono .cajon { position: absolute; top: 0; }
+@keyframes entra { from { transform: translateX(100%); } to { transform: translateX(0); } }
+
+/* ---------- Componentes nuevos (HTML real) ---------- */
+.txt { position: absolute; white-space: nowrap; line-height: 1.42; }
+
+/* Control deslizante */
+.control { position: absolute; height: 44px; touch-action: none; }
+.control .pista { position: absolute; left: 0; right: 0; top: 17px; height: 11px; border-radius: 5.5px; }
+.control .relleno { position: absolute; left: 0; top: 0; height: 11px; border-radius: 5.5px; }
+.control .tirador {
+  position: absolute; top: 7px; width: 30px; height: 30px; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center; cursor: grab;
+}
+.control .tirador img { width: 17px; height: 14px; pointer-events: none; }
+.control:focus-visible { outline: none; }
+.control:focus-visible .tirador { outline: 3px solid #223F83; outline-offset: 2px; }
+.control.arrastrando .tirador { cursor: grabbing; }
+
+/* Campo de millas */
+.campo {
+  position: absolute; display: flex; align-items: center; justify-content: flex-end; gap: 6px;
+  padding: 0 10px; background: #fff; border: 1px solid var(--borde-campo); border-radius: 4px;
+}
+.campo input {
+  border: 0; outline: 0; background: transparent; padding: 0; margin: 0; min-width: 0; width: 100%;
+  text-align: right; font: 400 16px 'Source Sans 3', sans-serif; color: #000;
+}
+.campo span { font-size: 13px; color: #636363; }
+.campo:focus-within { border-color: #8C9BC4; }
+
+/* "Usar el máximo" (botón de la ficha, funciona como interruptor) */
+.boton-max {
+  position: absolute; display: flex; align-items: center; justify-content: center;
+  background: #fff; border: 1px solid #FF6200; color: var(--naranja-oscuro);
+  font: 400 14px 'Source Sans 3', sans-serif; cursor: pointer; padding: 0;
+}
+.boton-max[aria-pressed="true"] { background: var(--naranja-suave-activo); border: 2px solid #DE5500; font-weight: 600; }
+
+/* Tarjeta "Tus millas" (mismo lenguaje que "Tu pedido") */
+.tarjeta-millas { position: absolute; background: #fff; border-radius: 15px; box-shadow: 0 0 2px #CCCCCC; overflow: hidden; }
+.tarjeta-millas .banda { position: absolute; left: 0; top: 0; right: 0; background: #3E3F40; color: #fff;
+  font-weight: 700; font-size: 16px; display: flex; align-items: center; padding-left: 15px; }
+.tarjeta-millas .pregunta { font-size: 18px; color: var(--gris-titulo); }
+.tarjeta-millas .saldo { font-size: 14px; color: #000; }
+.tarjeta-millas .escala { font-size: 12px; color: var(--gris-ayuda); }
+.tarjeta-millas .divisoria { position: absolute; height: 1px; background: #DCDCDC; }
+.tarjeta-millas .total { font-size: 14px; font-weight: 700; color: var(--gris-titulo); }
+
+/* Etiqueta de ahorro */
+.etiqueta-ahorro {
+  position: absolute; display: inline-flex; align-items: center; gap: 6px; height: 26px;
+  padding: 0 10px 0 8px; border-radius: 4px; font-size: 14px; white-space: nowrap;
+}
+.etiqueta-ahorro svg { width: 16px; height: 16px; flex: none; }
+
+/* Resumen (desktop): caja fija al hacer scroll */
+.columna-resumen { position: absolute; }
+.resumen {
+  position: sticky; top: 16px; width: 278px; background: #fff; border: 1px solid #E6E6E6; border-radius: 5px;
+}
+.resumen .fila, .resumen-mobile .fila { position: absolute; height: 34px; display: flex; align-items: center; font-size: 14px; font-weight: 300; }
+.resumen .titulo, .resumen-mobile .titulo { position: absolute; left: 0; right: 0; text-align: center; color: var(--naranja); font-size: 14px; }
+.resumen .hr { position: absolute; left: 2px; right: 2px; top: 38px; height: 1px; background: #EEEEEE; }
+.resumen .sep, .resumen-mobile .sep { position: absolute; height: 2px; background: #D6D6D6; }
+.resumen .chevron, .resumen-mobile .chevron { position: absolute; width: 10px; height: 6px; }
+.resumen-mobile { position: absolute; background: #fff; }
+.resumen-mobile .hr { position: absolute; left: 0; right: 0; height: 1px; background: #EEEEEE; }
+
+/* Filas del Resumen del carrito completo (escenario con tope) */
+.fila-resumen { position: absolute; display: flex; align-items: center; justify-content: space-between; font-size: 14px; font-weight: 300; }
+.separador-resumen { position: absolute; height: 2px; background: #D6D6D6; }
+
+/* Botón Continuar (cambia de texto al saltear el pago) */
+.boton-continuar {
+  position: absolute; display: flex; align-items: center; justify-content: center; border: 0; cursor: pointer;
+  background: #FF6200; color: #fff; border-radius: 17px; font: 400 14px 'Source Sans 3', sans-serif;
+  box-shadow: 0 2px 4px rgba(0,0,0,.25);
+}
+
+/* Contador del carrito */
+.contador { position: absolute; background: #00A80A; color: #fff; border-radius: 8px; font-size: 9px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; pointer-events: none; }
+
+/* ---------- Notas para desarrollo ---------- */
+.pin {
+  position: absolute; z-index: 40; width: 24px; height: 24px; margin: -12px 0 0 -12px; border-radius: 50%;
+  background: #FFD84D; border: 2px solid #8A6D00; color: #4A3A00; font: 700 12px 'Source Sans 3', sans-serif;
+  display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 1px 4px rgba(0,0,0,.3);
+}
+.pin[aria-expanded="true"] { background: #1F2430; color: #FFD84D; border-color: #FFD84D; }
+.panel-notas {
+  position: fixed; z-index: 90; right: 12px; top: calc(var(--barra) + 12px); width: 360px;
+  max-height: calc(100vh - var(--barra) - 24px); overflow-y: auto;
+  background: var(--nota-fondo); border: 1px solid var(--nota-borde); border-radius: 10px;
+  box-shadow: 0 6px 24px rgba(0,0,0,.18); font-size: 13.5px; line-height: 1.45; color: #2F2A10;
+}
+.panel-notas header { position: sticky; top: 0; background: var(--nota-fondo); padding: 12px 14px 8px;
+  border-bottom: 1px solid #EAD98A; font-weight: 700; font-size: 12px; letter-spacing: .04em; text-transform: uppercase; color: #6B5A00; }
+.panel-notas ol { margin: 0; padding: 10px 14px 14px 14px; list-style: none; }
+.panel-notas li { display: grid; grid-template-columns: 26px 1fr; gap: 8px; padding: 8px 0; border-bottom: 1px dashed #EAD98A; }
+.panel-notas li:last-child { border-bottom: 0; }
+.panel-notas li b.n { width: 22px; height: 22px; border-radius: 50%; background: #FFD84D; border: 2px solid #8A6D00;
+  display: flex; align-items: center; justify-content: center; font-size: 11px; }
+.panel-notas li.resaltada { background: rgba(255, 216, 77, .35); border-radius: 6px; }
+.panel-notas code { font-size: 12px; background: rgba(0,0,0,.06); padding: 0 3px; border-radius: 3px; }
+
+/* Anotación del prototipo dentro de una pantalla (no es parte de la UI) */
+.aviso-prototipo { position: absolute; inset: 14px 30px; display: flex; align-items: center; padding: 0 16px;
+  background: var(--nota-fondo); border: 1px dashed var(--nota-borde); border-radius: 8px; font-size: 13.5px; color: #6B5A00; }
+
+/* ---------- Fin del recorrido ---------- */
+.modal-fondo { position: fixed; inset: 0; z-index: 120; background: rgba(0,0,0,.45); display: flex; align-items: center; justify-content: center; }
+.modal { background: #fff; border-radius: 12px; padding: 22px 24px; max-width: 420px; box-shadow: 0 10px 40px rgba(0,0,0,.3); }
+.modal h2 { margin: 0 0 8px; font-size: 18px; color: var(--gris-titulo); }
+.modal p { margin: 0 0 16px; color: var(--gris-texto); font-size: 14px; line-height: 1.5; }
+.modal button { background: #FF6200; color: #fff; border: 0; border-radius: 17px; padding: 8px 20px; font: 400 14px 'Source Sans 3', sans-serif; cursor: pointer; }
+
+/* Panel de notas en pantallas angostas: abajo, sin tapar el teléfono entero */
+@media (max-width: 900px) {
+  .panel-notas { top: auto; bottom: 12px; left: 12px; right: 12px; width: auto; max-height: 38vh; }
+}
