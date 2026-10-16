@@ -34,11 +34,11 @@ Referencia ejecutable: [`js/reglas.js`](../js/reglas.js) (el prototipo calcula t
 ### Resumen de compra (mismo cálculo que hoy)
 
 - **SubTotal** = productos antes de descuentos − valor en pesos de las millas (los descuentos se restan en su propia fila).
-- **Descuentos** en su fila; **millas** en su fila, con la cantidad (no en pesos).
+- **Descuentos** en su fila; **Millas aplicadas** en su fila, con la cantidad (no en pesos). Hoy ese rótulo dice «millas»; el nuevo va con mayúscula como el resto de las filas y explica por qué el SubTotal ya viene descontado. Aplica al Resumen del carrito y del checkout.
 - **Total** = SubTotal − Descuentos + entrega.
 - Con todo cubierto por millas: **SubTotal $ 0** y **sin fila de Descuentos**.
 
-Ejemplo (Personal Bank, retiro): 2.000 millas → SubTotal $ 1.500 · Descuentos $ -10 · Gastos de Preparación $ 0 · millas 2.000 · **Total $ 1.490**.
+Ejemplo (Personal Bank, retiro): 2.000 millas → SubTotal $ 1.500 · Descuentos $ -10 · Gastos de Preparación $ 0 · Millas aplicadas 2.000 · **Total $ 1.490**.
 
 ### Cuándo se saltea Forma de pago
 
@@ -59,7 +59,7 @@ Con envío a domicilio el envío siempre se paga con tarjeta: **no se saltea**.
 - **«Usar el máximo»** es un interruptor: al activarlo guarda el valor anterior y pone el máximo; al desactivarlo vuelve al valor anterior. Si se mueve el control o se edita el campo, se desactiva.
   - Normal: fondo blanco, borde 1 px `#FF6200`, texto `#DE5500`.
   - Activo: fondo `#FEEEE3`, borde 2 px `#DE5500`, texto semibold. `aria-pressed="true"`.
-- Debajo: «Tus millas disponibles: 100.000» y «Podés ajustarlas al pagar.» (12 px `#828282`).
+- Debajo: «Tus millas disponibles: 100.000» y la aclaración **siempre visible** «Es un estimado: al pagar se ajusta al total del pedido y a tus millas.» (12 px `#828282`; puede ocupar dos renglones). Va visible y no en un tooltip: es lo que evita la sorpresa al pagar, y en mobile un tooltip pide un toque que casi nadie da.
 - **«Agregar al Carrito»** solo sube el contador del ícono; el carrito lateral se abre tocando el ícono.
 - Lo elegido se guarda en el producto y se suma en el checkout.
 - Menú de usuario del encabezado (desktop), como en el sitio: etiqueta «Personal» (fondo `#000D3C`, texto blanco 9 px), nombre (14/300) y saldo «100.000 millas» (12/600 `#FF6200`) alineados a la derecha. El cliente común no lleva la etiqueta «Personal»; en mobile, tampoco el ícono PB.
@@ -67,6 +67,10 @@ Con envío a domicilio el envío siempre se paga con tarjeta: **no se saltea**.
 ### Carrito lateral y carrito completo
 
 - Encabezado «$ X + N millas»: N = valor inicial del checkout (suma de las fichas **con tope**). Hoy el sitio suma sin tope (caso real: 8.324 millas con saldo 6.058).
+- Por el tope, el carrito puede mostrar **menos millas que las elegidas en las fichas**. Pasa en dos casos:
+  - **Descuentos**: la ficha calcula su máximo sin promociones. El aceite solo, con «Usar el máximo» en la ficha (801), aplica 720 en el carrito ($ 375 × 1,92).
+  - **Varios productos**: la suma de lo elegido en las fichas supera el máximo del pedido o el saldo (en el prototipo, «Fichas: 6.000»).
+  - El carrito no muestra un aviso: la aclaración de la ficha ya anticipa que es un estimado.
 - Sin millas por producto en las líneas.
 - El Resumen del carrito completo usa el mismo cálculo que el checkout.
 - En desktop, la caja del Resumen del carrito completo queda **fija al hacer scroll**, igual que en el checkout. **Hoy no lo está** *(verificado en la KB trunk: `wCartFull`, `wCartFullWC` y `wCartSummary` no tienen ninguna clase sticky; la única del carrito es `wStickyEmptyCart`, del carrito lateral)*.
@@ -83,7 +87,7 @@ Con envío a domicilio el envío siempre se paga con tarjeta: **no se saltea**.
   - «Usar el máximo»: el mismo componente de la ficha, alto 34 y radio 4.
   - Etiqueta **«Ahorrás $ X»** arriba a la derecha (alto 26, radio 4, ícono Lucide `piggy-bank` 16 px; monto con `font-weight: 600`). Se muestra **una sola vez**.
 - «Continuar» pasa a Forma de pago, o a Confirmación si se salteó el pago. En el prototipo, ahí termina el recorrido.
-- Mobile: debajo del campo, divisoria y **«Total a pagar con tarjeta $ X»** = total + envío (en mobile el Resumen no está en este paso: su columna es `hidden-xs hidden-sm`).
+- Mobile: debajo del campo, divisoria y **«Total a pagar con tarjeta $ X»** = total + envío (rótulo 14/700 `#464646`, monto 16/700) (en mobile el Resumen no está en este paso: su columna es `hidden-xs hidden-sm`).
 - Teclado en el control: flechas ±10, Shift + flechas ±100, RePág/AvPág ±10 %, Inicio/Fin.
 
 ### Checkout · Resumen fijo (desktop)

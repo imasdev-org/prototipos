@@ -26,11 +26,15 @@ html, body {
 /* ---------- Barra del prototipo ---------- */
 #barra {
   position: fixed; inset: 0 0 auto 0; min-height: 56px; z-index: 100;
-  display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; padding: 9px 14px;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px; padding: 9px 16px;
   background: #1F2430; color: #fff; font-size: 13px; white-space: nowrap;
 }
 #barra .titulo { font-weight: 700; font-size: 14px; margin-right: 4px; }
-#barra .grupo { display: inline-flex; align-items: center; gap: 6px; }
+#barra .grupo { display: inline-flex; align-items: center; gap: 8px; }
+/* separador entre grupos de controles */
+#barra .grupo + .grupo { border-left: 1px solid #3B4254; padding-left: 20px; }
+#barra [hidden] { display: none !important; }
+#barra .notas { margin-left: auto; }
 #barra .grupo > span { color: #AEB4C2; }
 #barra .seg { display: inline-flex; border: 1px solid #3B4254; border-radius: 6px; overflow: hidden; }
 #barra button {
@@ -43,7 +47,7 @@ html, body {
 #barra a.accion { color: #DDE1EA; text-decoration: none; padding: 6px 10px; }
 #barra a.accion:hover { color: #fff; border-color: #6B7385; }
 #barra .accion[aria-pressed="true"] { background: #D9B800; color: #1F2430; border-color: #D9B800; }
-#barra .plegar { margin-left: auto; display: inline-flex; align-items: center; padding: 6px 9px; }
+#barra .plegar { display: inline-flex; align-items: center; padding: 6px 9px; }
 #barra .plegar svg, #solapa svg { width: 12px; height: 8px; }
 
 /* Barra plegada: queda una solapa chica arriba a la derecha */
@@ -103,7 +107,11 @@ body.barra-plegada #solapa { display: inline-flex; }
   height: calc(100vh - var(--barra)); height: calc(100dvh - var(--barra));
   box-shadow: 0 0 24px rgba(0,0,0,.12);
 }
-.telefono .scroll { position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden; }
+/* Sin barra de desplazamiento: se desplaza con el dedo, la rueda o arrastrando con el mouse */
+.telefono .scroll, .telefono .cajon { scrollbar-width: none; -ms-overflow-style: none; }
+.telefono .scroll::-webkit-scrollbar, .telefono .cajon::-webkit-scrollbar { display: none; }
+.telefono .scroll { position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden; cursor: grab; }
+.telefono .arrastrando { cursor: grabbing; user-select: none; }
 .telefono .pantalla { width: 390px; margin: 0 auto; }
 @media (max-width: 600px) {
   .telefono { width: 100%; box-shadow: none; }
@@ -163,6 +171,7 @@ body.barra-plegada #solapa { display: inline-flex; }
 .tarjeta-millas .escala { font-size: 12px; color: var(--gris-ayuda); }
 .tarjeta-millas .divisoria { position: absolute; height: 1px; background: #DCDCDC; }
 .tarjeta-millas .total { font-size: 14px; font-weight: 700; color: var(--gris-titulo); }
+.tarjeta-millas .total-monto { font-size: 16px; }
 
 /* Etiqueta de ahorro */
 .etiqueta-ahorro {

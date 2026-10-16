@@ -203,7 +203,9 @@
       alTocar: function () { alternarMaximo(obj, max); repintarTodo(); } });
     g.appendChild(campo.nodo); g.appendChild(boton.nodo);
     g.appendChild(texto('Tus millas disponibles: ' + R.miles(R.SALDO), '', P2.x, P2.dispY, 'font-size:12px;color:#828282'));
-    g.appendChild(texto('Podés ajustarlas al pagar.', '', P2.x, P2.ajusY, 'font-size:12px;color:#828282'));
+    var aclaracion = texto('Es un estimado: al pagar se ajusta al total del pedido y a tus millas.', '', P2.x, P2.ajusY, 'font-size:12px;color:#828282;white-space:normal');
+    aclaracion.style.width = P2.ancho + 'px';
+    g.appendChild(aclaracion);
     return {
       nodo: g,
       actualizar: function () {
@@ -246,8 +248,8 @@
     var totalValor;
     if (!d) {
       t.appendChild(pos(el('div', { class: 'divisoria' }), 15, 248, 320));
-      var fila = pos(el('div', { class: 'txt total', style: 'display:flex;justify-content:space-between' }), 15, 260, 320);
-      totalValor = el('span');
+      var fila = pos(el('div', { class: 'txt total', style: 'display:flex;justify-content:space-between;align-items:baseline' }), 15, 258, 320);
+      totalValor = el('span', { class: 'total-monto' });
       fila.appendChild(el('span', null, 'Total a pagar con tarjeta')); fila.appendChild(totalValor);
       t.appendChild(fila);
     }
@@ -270,7 +272,7 @@
     var filas = [{ t: 'SubTotal', v: R.pesos(r.subtotal), c: '#5F6062' }];
     if (r.mostrarDescuento) filas.push({ t: 'Descuentos', v: R.pesos(-r.descuento), c: '#223F83', chevron: true });
     filas.push({ t: r.rotuloEntrega, v: R.pesos(r.entrega), c: '#5F6062' });
-    filas.push({ t: 'millas', v: R.miles(r.millas), c: '#223F83' });
+    filas.push({ t: 'Millas aplicadas', v: R.miles(r.millas), c: '#223F83' });
     // Título centrado en la franja de 38 px que cierra la línea gris
     var h = '<div class="titulo" style="top:9px;line-height:20px">RESUMEN</div><div class="hr"></div>';
     filas.forEach(function (f, i) {
@@ -312,7 +314,7 @@
       fila('Descuentos', R.pesos(-r.descuento), y, 'color:#223F83', X.izq + 5); y += 33;
       fila('10%OFF-Personal Bank', R.pesos(-r.descuento), y, 'color:#223F83;font-size:11px', X.det[0], X.det[1], 21); y += 16;
     }
-    fila('millas', R.miles(r.millas), y, 'color:#223F83');
+    fila('Millas aplicadas', R.miles(r.millas), y, 'color:#223F83');
     g.appendChild(pos(el('div', { class: 'separador-resumen' }), X.izq, y + 43, X.der - X.izq));
     fila('Total', R.pesos(r.total), y + 57, 'color:#464646;font-weight:700');
     return g;
@@ -330,27 +332,27 @@
   // ---------------------------------------------------------------- notas para desarrollo
   var NOTAS = {
     ficha: [
-      { d: [893, 300], m: [8, 535], t: 'La ficha es un <b>semi-simulador</b>: en la ficha no se conocen los descuentos, así que el máximo se calcula sobre el precio sin promoción ($ 417 × 1,92 = 801). El ajuste fino se hace al pagar. Lo elegido se guarda en el producto y se suma en el checkout.' },
+      { d: [893, 300], m: [8, 535], t: 'La ficha es un <b>semi-simulador</b>: en la ficha no se conocen los descuentos, así que el máximo se calcula sobre el precio sin promoción ($ 417 × 1,92 = 801). El ajuste fino se hace al pagar, y por eso la aclaración visible: «Es un estimado: al pagar se ajusta al total del pedido y a tus millas.» (siempre visible, sin tooltip). Lo elegido se guarda en el producto y se suma en el checkout.' },
       { d: [893, 352], m: [8, 586], t: 'Precio = precio sin promoción − millas ÷ 1,92, redondeado y nunca menor a $ 0. Valor por defecto: la mitad del máximo (sin cambios respecto de hoy). Rótulos fijos: solo cambian los valores. Colores del precio: Personal Bank todo en azul marino <code>#000D3C</code>; cliente común pesos en naranja <code>#FF6200</code> y millas en gris <code>#5F6062</code>, como hoy para quien no es Personal Bank.' },
       { d: [1234, 456], m: [376, 691], t: '<b>«Usar el máximo»</b> funciona como interruptor. Activo: fondo <code>#FEEEE3</code>, borde 2 px <code>#DE5500</code>, texto semibold. Al desactivarlo vuelve al valor anterior. Si se mueve el control o se edita el campo, se desactiva.' },
       { d: [893, 568], m: [8, 803], t: '«Agregar al carrito» solo sube el contador del ícono; el carrito lateral se abre tocando el ícono. <b>En este prototipo el aceite no aparece en la lista del carrito</b> (simplificación: el carrito del diseño tiene 3 productos).' },
       { d: [950, 30], m: [290, 30], t: 'Menú de usuario como en el sitio: etiqueta «Personal», nombre y saldo de millas. El cliente común no lleva la etiqueta «Personal» (en mobile, el ícono PB).' }
     ],
     cajon: [
-      { d: [190, 99], m: [175, 99], t: 'Encabezado «$ X + N millas»: N es el menor entre la suma de lo elegido en las fichas, el saldo y el máximo del pedido (<b>tope</b>). Hoy el sitio suma sin tope (caso real: 8.324 millas con saldo 6.058). El tope entra en el alcance. Probalo con «Fichas: 6.000 (supera el máximo)» en la barra.' },
+      { d: [190, 99], m: [175, 99], t: 'Encabezado «$ X + N millas»: N es el menor entre la suma de lo elegido en las fichas, el saldo y el máximo del pedido (<b>tope</b>). Por eso el carrito puede mostrar <b>menos millas que las elegidas en las fichas</b>: (1) por descuentos: la ficha calcula su máximo sin promociones; el aceite solo, con «Usar el máximo» (801), aplica 720 ($ 375 × 1,92); (2) porque la suma de varias fichas supera el máximo del pedido o el saldo. No hay aviso en el carrito: la ficha ya avisa que es un estimado. Hoy el sitio suma sin tope (caso real: 8.324 millas con saldo 6.058). El tope entra en el alcance. Probalo con «Fichas: 6.000 (supera el máximo)» en la barra.' },
       { d: [10, 420], m: [10, 420], t: 'Sin millas por producto en las líneas del carrito.' }
     ],
     carrito: [
-      { d: [1030, 605], m: [12, 1533], t: 'Resumen del carrito completo: mismo cálculo que el checkout (fila «millas» con la cantidad, SubTotal ya descontadas las millas, con tope). En desktop queda <b>fijo al hacer scroll</b>, como en el checkout: <b>hoy no lo está</b> (<code>wCartFull</code>, <code>wCartFullWC</code> y <code>wCartSummary</code> no tienen ninguna regla sticky). Título «RESUMEN» centrado en su franja.' }
+      { d: [1030, 605], m: [12, 1533], t: 'Resumen del carrito completo: mismo cálculo que el checkout (fila «Millas aplicadas» con la cantidad, SubTotal ya descontadas las millas, con tope). En desktop queda <b>fijo al hacer scroll</b>, como en el checkout: <b>hoy no lo está</b> (<code>wCartFull</code>, <code>wCartFullWC</code> y <code>wCartSummary</code> no tienen ninguna regla sticky). Título «RESUMEN» centrado en su franja.' }
     ],
     entrega: [
       { d: [125, 388], m: [20, 330], t: 'Tarjeta <b>«Tus millas»</b> antes de «Tu pedido», con el mismo estilo de tarjeta (banda <code>#3E3F40</code>, radio 15, sombra <code>#CCCCCC</code> 2 px). Se elige después del tipo de entrega y la sucursal o dirección: ahí el monto con tarjeta ya es definitivo.' },
       { d: [125, 513], m: [22, 457], t: 'Valor inicial = suma de lo elegido en las fichas, con tope. Máximo del pedido = piso(total de productos con descuentos × 1,92), nunca más que el saldo. Las millas se aplican después de los descuentos (así no se usan de más) y <b>no cubren el envío</b> (por ahora).' },
       { d: [1008, 514], m: [372, 530], t: 'Control, campo y «Usar el máximo» sincronizados; el valor se acota entre 0 y el máximo. «Usar el máximo» es el mismo componente de la ficha. Teclado: flechas ±10, Shift+flechas ±100, Inicio/Fin.' },
       { d: [846, 440], m: [372, 420], t: 'Ahorro = millas ÷ 1,92, redondeado. Se muestra una sola vez. Etiqueta: azul en Personal Bank (fondo <code>#223F83</code> al 10 %), naranja suave en cliente común (fondo <code>#FF6200</code> al 10 %, texto gris por contraste). Monto en <code>font-weight: 600</code>. Ícono: Lucide piggy-bank (ISC).' },
-      { d: [1043, 110], m: null, t: '<b>Resumen fijo al hacer scroll</b> (<code>position: sticky</code>) en los pasos del checkout, desktop. Título «RESUMEN» centrado en su franja. SubTotal en pesos ya descontadas las millas; fila «millas» con la cantidad; Total = SubTotal − Descuentos + entrega. Con todo cubierto: SubTotal $ 0 y sin fila de Descuentos.' },
+      { d: [1043, 110], m: null, t: '<b>Resumen fijo al hacer scroll</b> (<code>position: sticky</code>) en los pasos del checkout, desktop. Título «RESUMEN» centrado en su franja. SubTotal en pesos ya descontadas las millas; fila «Millas aplicadas» con la cantidad (hoy dice «millas»); Total = SubTotal − Descuentos + entrega. Con todo cubierto: SubTotal $ 0 y sin fila de Descuentos.' },
       { d: [792, 40], m: null, t: 'Si las millas cubren todo y la entrega no tiene costo, se saltea Forma de pago como hoy: <code>wCheckout</code> pone la clase <code>PaymentTabHidden</code>, la pestaña FORMA DE PAGO se oculta y CONFIRMACIÓN pasa a su lugar. El botón dice «Continuar a Confirmación». Probalo con «Usar el máximo».' },
-      { d: null, m: [22, 585], t: 'En mobile el Resumen no está en este paso (la columna es <code>hidden-xs hidden-sm</code>): la tarjeta muestra «Total a pagar con tarjeta» = total + envío. Con envío a domicilio el envío siempre va con tarjeta: no se saltea Forma de pago.' }
+      { d: null, m: [22, 585], t: 'En mobile el Resumen no está en este paso (la columna es <code>hidden-xs hidden-sm</code>): la tarjeta muestra «Total a pagar con tarjeta» = total + envío (rótulo 14/700, monto 16/700). Con envío a domicilio el envío siempre va con tarjeta: no se saltea Forma de pago.' }
     ]
   };
   var NOMBRES = { ficha: 'Ficha de producto', cajon: 'Carrito lateral', carrito: 'Carrito', entrega: 'Entrega' };
@@ -403,6 +405,7 @@
       actualizadores.push(function () { ponerTexto(s, 'contador', estado.ficha.agregado ? '4' : '3'); });
       s.appendChild(zona(P(d, [913, 551, 370, 34], [15, 786, 360, 34]), 'Agregar al Carrito', function () { estado.ficha.agregado = true; repintarTodo(); }));
       s.appendChild(zona(P(d, [1108, 18, 48, 47], [339, 8, 40, 38]), 'Abrir el carrito', function () { estado.cajon = true; render(false); }));
+      if (d) s.appendChild(zona(1243, 17.5, 70, 34, 'Pagar', function () { irA('entrega'); }));
     }
 
     if (p === 'carrito') {
@@ -410,6 +413,7 @@
       var proceder = function () { irA('entrega'); };
       if (d) {
         s.appendChild(menuUsuario());
+        s.appendChild(zona(1243, 17.5, 70, 34, 'Pagar', proceder));
         // Resumen fijo al hacer scroll: la caja del diseño pasa a una columna con position: sticky
         var caja = marca(s, 'resumen-carrito');
         var colCarrito = pos(el('div', { class: 'columna-resumen' }), 1035, 537, 277.5, 1020 - 24 - 537);
@@ -492,6 +496,34 @@
     b2.focus();
   }
 
+  // Vista mobile sin barra de desplazamiento: con el mouse se desplaza arrastrando, como con el dedo.
+  function arrastrarParaDesplazar(cont) {
+    var inicio = null, movido = false;
+    cont.addEventListener('pointerdown', function (ev) {
+      if (ev.pointerType !== 'mouse' || ev.button !== 0) return;
+      if (ev.target.closest('input, textarea, select, .control')) return; // el control y el campo conservan su arrastre
+      inicio = { y: ev.clientY, top: cont.scrollTop, id: ev.pointerId }; movido = false;
+    });
+    cont.addEventListener('pointermove', function (ev) {
+      if (!inicio || ev.pointerId !== inicio.id) return;
+      var dy = ev.clientY - inicio.y;
+      if (!movido && Math.abs(dy) < 5) return;
+      if (!movido) { movido = true; cont.setPointerCapture(ev.pointerId); cont.classList.add('arrastrando'); }
+      cont.scrollTop = inicio.top - dy;
+    });
+    function fin() {
+      if (!inicio) return;
+      inicio = null; cont.classList.remove('arrastrando');
+      if (!movido) return;
+      // un arrastre no es un toque: se descarta el clic que sigue
+      var cancelar = function (e) { e.stopPropagation(); e.preventDefault(); };
+      cont.addEventListener('click', cancelar, true);
+      setTimeout(function () { cont.removeEventListener('click', cancelar, true); }, 0);
+    }
+    cont.addEventListener('pointerup', fin);
+    cont.addEventListener('pointercancel', fin);
+  }
+
   // ---------------------------------------------------------------- render, barra y solapa
   var zoomActual = 1, altoBarra = 56, barraPlegada = false;
   function anchoVentana() { return document.documentElement.clientWidth || window.innerWidth || 1440; }
@@ -505,6 +537,7 @@
     document.documentElement.style.setProperty('--barra', altoBarra + 'px');
   }
   function render(irArriba) {
+    pintarBarra();
     medirBarra();
     var esc = document.getElementById('escenario');
     var scrollPrevio = irArriba ? 0 : (estado.vista === 'desktop' ? window.scrollY : (esc.querySelector('.scroll') || {}).scrollTop || 0);
@@ -541,6 +574,8 @@
       if (conPanel) tel.style.marginLeft = Math.max(16, (ancho - 384 - 390) / 2) + 'px';
       esc.appendChild(tel);
       if (estado.cajon) construirCajon(tel, true);
+      arrastrarParaDesplazar(sc);
+      var cajonTel = tel.querySelector('.cajon'); if (cajonTel) arrastrarParaDesplazar(cajonTel);
       sc.scrollTop = scrollPrevio;
       window.scrollTo(0, 0);
     }
@@ -557,6 +592,8 @@
     marcar('#b-vista', estado.vista);
     marcar('#b-cliente', estado.segmento);
     marcar('#b-escenario', estado.escenario);
+    // «Fichas» solo cambia el carrito y el checkout: en la ficha se muestra solo con el carrito lateral abierto
+    document.getElementById('g-escenario').hidden = estado.pantalla === 'ficha' && !estado.cajon;
     document.getElementById('b-notas').setAttribute('aria-pressed', estado.notas ? 'true' : 'false');
   }
 
@@ -580,7 +617,6 @@
       estado.escenario = b.dataset.valor; reiniciarPedido(); render(false);
     });
     document.getElementById('b-notas').addEventListener('click', function () { estado.notas = !estado.notas; render(false); });
-    document.getElementById('b-reiniciar').addEventListener('click', function () { estado = estadoInicial(estado); render(true); });
     document.getElementById('b-plegar').addEventListener('click', function () { plegar(true); });
     document.getElementById('solapa').addEventListener('click', function () { plegar(false); });
     var t; window.addEventListener('resize', function () { clearTimeout(t); t = setTimeout(function () { render(false); }, 120); });

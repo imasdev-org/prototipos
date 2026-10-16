@@ -15,15 +15,16 @@ La barra de arriba controla el prototipo. Con la flecha de la derecha se pliega 
 | **Paso** | Salta a Ficha, Carrito o Entrega. También se puede recorrer tocando la pantalla (Agregar al Carrito, ícono del carrito, Pagar, Ver Carrito Completo, Proceder al Pago, Continuar) |
 | **Vista** | Desktop (retiro) o Mobile (envío a domicilio) |
 | **Cliente** | Personal Bank o cliente común |
-| **Fichas** | Suma de las millas elegidas en las fichas: 2.000, o 6.000 para ver el tope |
+| **Fichas** | Suma de las millas elegidas en las fichas: 2.000, o 6.000 para ver el tope. Aparece solo donde tiene efecto (carrito y Entrega) |
 | **Notas para desarrollo** | Muestra pines numerados sobre la pantalla y un panel con las reglas de cada parte |
-| **Reiniciar** | Vuelve al estado inicial |
 
 Para probar el salteo de Forma de pago: Vista **Desktop** → **Entrega** → «Usar el máximo».
 
 ## Correrlo localmente
 
 Abrir `index.html` en el navegador (no necesita build).
+
+En la vista mobile no hay barra de desplazamiento: se desplaza con el dedo, la rueda o arrastrando con el mouse.
 
 ## Estructura
 
