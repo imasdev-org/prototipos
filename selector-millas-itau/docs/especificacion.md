@@ -76,7 +76,7 @@ Con envío a domicilio el envío siempre se paga con tarjeta: **no se saltea**.
 - Encabezado «$ X + N millas»: N = valor inicial del checkout (suma de las fichas **con tope**). Hoy el sitio suma sin tope (caso real: 8.324 millas con saldo 6.058).
 - Por el tope, el carrito puede mostrar **menos millas que las elegidas en las fichas**. Pasa en dos casos:
   - **Descuentos**: la ficha calcula su máximo sin promociones. El aceite solo, con «Usar el máximo» en la ficha (801), aplica 720 en el carrito ($ 375 × 1,92).
-  - **Varios productos o saldo insuficiente**: la suma de lo elegido en las fichas supera el máximo del pedido o el saldo. En el prototipo: «Millas elegidas en los productos: 6.000» se recorta al máximo del pedido (4.861); con «Saldo de millas: 3.000», al saldo (3.000).
+  - **Varios productos o saldo insuficiente**: la suma de lo elegido en las fichas supera el máximo del pedido o el saldo. En el prototipo, control «Millas elegidas en las fichas → aplicadas al pedido»: «6.000 → 4.861 (tope)» se recorta al máximo del pedido; con «Saldo de millas: 3.000» pasa a «6.000 → 3.000 (tope)», recortado al saldo.
   - El carrito no muestra un aviso: la aclaración de la ficha ya anticipa que es un estimado.
 - Sin millas por producto en las líneas.
 - El Resumen del carrito completo usa el mismo cálculo que el checkout.

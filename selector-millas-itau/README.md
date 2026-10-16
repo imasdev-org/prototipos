@@ -16,7 +16,7 @@ La barra de arriba controla el prototipo. Con la flecha de la derecha se pliega 
 | **Vista** | Desktop (retiro) o Mobile (envío a domicilio) |
 | **Cliente** | Personal Bank o cliente común |
 | **Saldo de millas** | Millas disponibles del cliente: 100.000, o 3.000 para ver el tope por saldo |
-| **Millas elegidas en los productos** | Suma de lo que el cliente eligió en las fichas de los productos del carrito: 2.000 (se usan todas) o 6.000 (se recortan al máximo del pedido). Aparece solo donde tiene efecto (carrito y Entrega) |
+| **Millas elegidas en las fichas → aplicadas al pedido** | Cuántas millas eligió el cliente, sumando las fichas de los productos que tiene en el carrito, y cuántas aplica el pedido. «2.000 → 2.000»: se aplican todas. «6.000 → 4.861 (tope)»: supera el máximo y el pedido aplica solo el máximo (con saldo 3.000, «6.000 → 3.000»). Aparece solo donde tiene efecto (carrito y Entrega) |
 | **Notas para desarrollo** | Muestra pines numerados sobre la pantalla y un panel con las reglas de cada parte |
 
 Tocando un lugar de la pantalla que no hace nada se marcan por un momento las zonas que sí responden.

@@ -340,7 +340,7 @@
       { d: [950, 30], m: [290, 30], t: 'Menú de usuario como en el sitio: etiqueta «Personal», nombre y saldo de millas. El cliente común no lleva la etiqueta «Personal» (en mobile, el ícono PB).' }
     ],
     cajon: [
-      { d: [190, 99], m: [175, 99], t: 'Encabezado «$ X + N millas»: N es el menor entre la suma de lo elegido en las fichas, el saldo y el máximo del pedido (<b>tope</b>). Por eso el carrito puede mostrar <b>menos millas que las elegidas en las fichas</b>: (1) por descuentos: la ficha calcula su máximo sin promociones; el aceite solo, con «Usar el máximo» (801), aplica 720 ($ 375 × 1,92); (2) porque la suma de varias fichas supera el máximo del pedido o el saldo (probalo con «Saldo de millas: 3.000»). No hay aviso en el carrito: la ficha ya avisa que es un estimado. Hoy el sitio suma sin tope (caso real: 8.324 millas con saldo 6.058). El tope entra en el alcance. Probalo con «Millas elegidas en los productos: 6.000» en la barra.' },
+      { d: [190, 99], m: [175, 99], t: 'Encabezado «$ X + N millas»: N es el menor entre la suma de lo elegido en las fichas, el saldo y el máximo del pedido (<b>tope</b>). Por eso el carrito puede mostrar <b>menos millas que las elegidas en las fichas</b>: (1) por descuentos: la ficha calcula su máximo sin promociones; el aceite solo, con «Usar el máximo» (801), aplica 720 ($ 375 × 1,92); (2) porque la suma de varias fichas supera el máximo del pedido o el saldo (probalo con «Saldo de millas: 3.000» y «6.000 → 3.000 (tope)»). No hay aviso en el carrito: la ficha ya avisa que es un estimado. Hoy el sitio suma sin tope (caso real: 8.324 millas con saldo 6.058). El tope entra en el alcance. Probalo con «6.000 → 4.861 (tope)» en la barra.' },
       { d: [10, 420], m: [10, 420], t: 'Sin millas por producto en las líneas del carrito.' }
     ],
     carrito: [
@@ -594,7 +594,10 @@
     marcar('#b-cliente', estado.segmento);
     marcar('#b-escenario', estado.escenario);
     marcar('#b-saldo', String(R.saldo()));
-    // «Millas elegidas en los productos» solo cambia el carrito y el checkout: en la ficha se muestra solo con el carrito lateral abierto
+    // lo que el pedido aplica de lo elegido en las fichas (depende del cliente y del saldo)
+    document.getElementById('aplicadas-normal').textContent = R.miles(R.valorInicialPedido(estado.segmento, 'normal'));
+    document.getElementById('aplicadas-tope').textContent = R.miles(R.valorInicialPedido(estado.segmento, 'tope'));
+    // «Millas elegidas en las fichas → aplicadas al pedido» solo cambia el carrito y el checkout: en la ficha se muestra solo con el carrito lateral abierto
     document.getElementById('g-escenario').hidden = estado.pantalla === 'ficha' && !estado.cajon;
     document.getElementById('b-notas').setAttribute('aria-pressed', estado.notas ? 'true' : 'false');
   }
