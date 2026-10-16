@@ -61,6 +61,7 @@ function estiloTexto(t, fuentes) {
 }
 function nodo(n, o, fuentes, anchoPadre) {
   if (o.omitir.has(n.id)) return '';
+  if (o.mover[n.id]) n = Object.assign({}, n, { x: n.x + o.mover[n.id][0], y: n.y + o.mover[n.id][1] });
   const marca = o.marcar[n.id] ? ` data-k="${o.marcar[n.id]}"` : '';
   const derecha = o.derecha.has(n.id);
   if (n.k === 'g') {
@@ -98,18 +99,31 @@ function resolver(arbol, sufijos) {
   return Object.fromEntries(sufijos.map(s => [s, encontrados[s][0]]));
 }
 function gen(arbol, opciones) {
-  const op = Object.assign({ omitir: [], marcar: {}, derecha: [], rutaImg: 'assets/img/' }, opciones || {});
-  const ids = resolver(arbol, [...new Set([...op.omitir, ...Object.keys(op.marcar), ...op.derecha])]);
+  const op = Object.assign({ omitir: [], marcar: {}, derecha: [], mover: {}, rutaImg: 'assets/img/' }, opciones || {});
+  const ids = resolver(arbol, [...new Set([...op.omitir, ...Object.keys(op.marcar), ...op.derecha, ...Object.keys(op.mover)])]);
   const o = {
     rutaImg: op.rutaImg,
     omitir: new Set(op.omitir.map(s => ids[s])),
     derecha: new Set(op.derecha.map(s => ids[s])),
-    marcar: Object.fromEntries(Object.entries(op.marcar).map(([s, k]) => [ids[s], k]))
+    marcar: Object.fromEntries(Object.entries(op.marcar).map(([s, k]) => [ids[s], k])),
+    mover: Object.fromEntries(Object.entries(op.mover).map(([s, d]) => [ids[s], d]))
   };
   const fuentes = new Set();
   const html = (arbol.c || []).map(c => nodo(c, o, fuentes, arbol.w)).join('');
   const imagenes = new Set();
   html.replace(/url\(([^)]+)\)/g, (m, u) => { imagenes.add(u.split('/').pop()); return m; });
-  return { html, fuentes: [...fuentes], imagenes: [...imagenes], ancho: arbol.w, alto: arbol.h };
+  return { html, fuentes: [...fuentes], imagenes: [...imagenes], ancho: arbol.w, alto: arbol.h, bandas: bandas(arbol) };
+}
+// Franjas de color que ocupan todo el ancho del tablero (por ejemplo el pie gris): el prototipo
+// las extiende hasta los bordes de la ventana. Las blancas no hace falta extenderlas.
+function bandas(arbol) {
+  const out = [];
+  (function w(n, ox, oy, prof) {
+    const ax = ox + n.x, ay = oy + n.y;
+    const color = n.f && n.f.length === 1 && n.f[0].c;
+    if (prof > 0 && n.k === 'b' && ax <= 1 && ax + n.w >= arbol.w - 1 && color && !/^#fff(fff)?$/i.test(color)) { out.push([r2(ay), r2(n.h), color]); return; }
+    if (prof < 4) (n.c || []).forEach(c => w(c, n.k === 'g' ? ox : ax, n.k === 'g' ? oy : ay, prof + 1));
+  })(arbol, -arbol.x, -arbol.y, 0);
+  return out;
 }
 module.exports = gen;

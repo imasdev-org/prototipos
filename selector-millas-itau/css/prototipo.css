@@ -26,7 +26,7 @@ html, body {
 /* ---------- Barra del prototipo ---------- */
 #barra {
   position: fixed; inset: 0 0 auto 0; min-height: 56px; z-index: 100;
-  display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 9px 14px;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; padding: 9px 14px;
   background: #1F2430; color: #fff; font-size: 13px; white-space: nowrap;
 }
 #barra .titulo { font-weight: 700; font-size: 14px; margin-right: 4px; }
@@ -64,11 +64,15 @@ body.barra-plegada #solapa { display: inline-flex; }
   #barra .grupo, #barra .accion { flex: none; }
 }
 
-#escenario { padding-top: calc(var(--barra) + 16px); padding-bottom: 40px; }
+#escenario { padding-top: var(--barra); }
 
 /* ---------- Lienzo desktop ---------- */
-.lienzo { margin: 0 auto; zoom: var(--z); box-shadow: 0 2px 16px rgba(0,0,0,.12); background: #fff; }
-.pantalla { position: relative; background: #fff; overflow: hidden; }
+/* La página ocupa todo el ancho de la ventana; la pantalla del diseño va centrada encima */
+.lienzo { position: relative; zoom: var(--z); background: #fff; overflow-x: clip; }
+.lienzo .banda { position: absolute; left: 0; right: 0; }
+.lienzo > .pantalla { position: absolute; top: 0; }
+/* overflow: clip (no hidden) para no romper el Resumen con position: sticky */
+.pantalla { position: relative; background: #fff; overflow: clip; }
 .capa { position: absolute; }
 .zona { position: absolute; cursor: pointer; border-radius: 8px; background: transparent; border: 0; padding: 0; }
 
@@ -93,16 +97,16 @@ body.barra-plegada #solapa { display: inline-flex; }
 .zona:focus-visible { outline: 3px solid #223F83; outline-offset: 2px; }
 
 /* ---------- Teléfono (mobile) ---------- */
+/* Sin marco de dispositivo: de borde a borde en alto, con el ancho de un teléfono */
 .telefono {
-  position: relative; width: 410px; height: 864px; margin: 0 auto;
-  border: 10px solid #111; border-radius: 44px; background: #fff; overflow: hidden;
-  box-shadow: 0 8px 30px rgba(0,0,0,.25);
+  position: relative; width: 390px; margin: 0 auto; background: #fff; overflow: hidden;
+  height: calc(100vh - var(--barra)); height: calc(100dvh - var(--barra));
+  box-shadow: 0 0 24px rgba(0,0,0,.12);
 }
 .telefono .scroll { position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden; }
 .telefono .pantalla { width: 390px; margin: 0 auto; }
 @media (max-width: 600px) {
-  .telefono { width: 100%; height: calc(100vh - var(--barra)); border: 0; border-radius: 0; box-shadow: none; }
-  #escenario.mobile { padding-top: var(--barra); padding-bottom: 0; }
+  .telefono { width: 100%; box-shadow: none; }
 }
 
 /* ---------- Carrito lateral ---------- */

@@ -4,6 +4,7 @@
 // "omitir": partes que el prototipo reemplaza por componentes vivos (selector, Resumen, botón Continuar…)
 // "marcar": nodos que el prototipo cambia según el estado (contador, precios del cliente común…)
 // "derecha": textos que crecen hacia la izquierda (importes alineados a la derecha)
+// "mover": correcciones de posición [dx, dy] sobre el diseño (por ejemplo, centrar el título del Resumen)
 // Los ids son los últimos 6 caracteres del id de Penpot.
 const fs = require('fs'), path = require('path'), gen = require('./gen');
 
@@ -28,17 +29,19 @@ const PANTALLAS = {
   },
   'carrito-desktop': {
     omitir: ['dad877', 'db0883', 'dad867', 'dad868', 'dad869', 'dad86a', 'dad86b'],
-    marcar: { dad83e: 'pb-etiqueta', dad838: 'cuchillo-unidad', dad83c: 'cuchillo-total' },
-    derecha: ['dad83c']
+    marcar: { dad83e: 'pb-etiqueta', dad838: 'cuchillo-unidad', dad83c: 'cuchillo-total', dad85f: 'resumen-carrito' },
+    derecha: ['dad83c'],
+    mover: { dad875: [0, -15] }
   },
   'carrito-mobile': {
     omitir: ['1e7708', '1e773b', '1e773c', '1e773d', '1e773e', '1e773f'],
     marcar: { '1e76d7': 'pb-etiqueta', '1e76d1': 'cuchillo-unidad', '1e76d5': 'cuchillo-total', '1e7774': 'pb-icono' },
-    derecha: ['1e76d5']
+    derecha: ['1e76d5'],
+    mover: { '1e7706': [0, -14.5] }
   },
   'entrega-desktop': {
     omitir: ['09b4cc', 'bc9304', 'bc9359'],
-    marcar: { bc92fc: 'tab-pago', bc9300: 'tab-confirmacion' }
+    marcar: { bc92fc: 'tab-pago', bc9300: 'tab-confirmacion', bc92e2: 'ancla-izquierda' }
   },
   'entrega-mobile': {
     omitir: ['c9a5ef'],
@@ -55,7 +58,7 @@ for (const [nombre, cfg] of Object.entries(PANTALLAS)) {
   const arbol = JSON.parse(fs.readFileSync(path.join(__dirname, 'penpot', nombre + '.json'), 'utf8'));
   const r = gen(arbol, cfg);
   r.fuentes.forEach(f => fuentes.add(f)); r.imagenes.forEach(i => imagenes.add(i));
-  const js = `window.PANTALLAS = window.PANTALLAS || {};\nwindow.PANTALLAS[${JSON.stringify(nombre)}] = ${JSON.stringify({ w: r.ancho, h: r.alto, html: r.html })};\n`;
+  const js = `window.PANTALLAS = window.PANTALLAS || {};\nwindow.PANTALLAS[${JSON.stringify(nombre)}] = ${JSON.stringify({ w: r.ancho, h: r.alto, bandas: r.bandas, html: r.html })};\n`;
   fs.writeFileSync(path.join(raiz, 'pantallas', nombre + '.js'), js);
   console.log(nombre, Math.round(js.length / 1024) + ' KB');
 }

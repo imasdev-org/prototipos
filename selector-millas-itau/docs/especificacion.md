@@ -11,7 +11,7 @@ Este documento acompaña al prototipo. El prototipo muestra **cómo se ve y se c
 | Ficha de producto | Control de millas con «Usar disponibles» | Mismo control, botón **«Usar el máximo»** que funciona como interruptor y escala «0 … Máximo para este producto: N». Sigue siendo un **semi-simulador** |
 | Carrito lateral y carrito completo | Suma lo elegido en las fichas **sin tope** | Misma suma, **con tope** (saldo y máximo del pedido) |
 | Checkout · Entrega | — | Tarjeta nueva **«Tus millas»** antes de «Tu pedido»: control, campo, «Usar el máximo» y etiqueta «Ahorrás $ X» |
-| Checkout · Resumen (desktop) | Se va con el scroll | **Fijo al hacer scroll** (`position: sticky`) |
+| Resumen del carrito completo y del checkout (desktop) | Se va con el scroll | **Fijo al hacer scroll** (`position: sticky`) |
 | Checkout · Forma de pago | Siempre | **Se saltea** si las millas cubren todo y la entrega no tiene costo |
 
 ## 2. Reglas de cálculo
@@ -69,6 +69,8 @@ Con envío a domicilio el envío siempre se paga con tarjeta: **no se saltea**.
 - Encabezado «$ X + N millas»: N = valor inicial del checkout (suma de las fichas **con tope**). Hoy el sitio suma sin tope (caso real: 8.324 millas con saldo 6.058).
 - Sin millas por producto en las líneas.
 - El Resumen del carrito completo usa el mismo cálculo que el checkout.
+- En desktop, la caja del Resumen del carrito completo queda **fija al hacer scroll**, igual que en el checkout. **Hoy no lo está** *(verificado en la KB trunk: `wCartFull`, `wCartFullWC` y `wCartSummary` no tienen ninguna clase sticky; la única del carrito es `wStickyEmptyCart`, del carrito lateral)*.
+- Su título «RESUMEN» va centrado en vertical en su franja: hoy queda bajo y la línea gris lo corta.
 - Cliente común: sin precio ni etiqueta «Con Personal Bank» (en el ejemplo, el cuchillo vale $ 100 en lugar de $ 90) y sin fila de Descuentos.
 
 ### Checkout · Entrega
@@ -79,12 +81,14 @@ Con envío a domicilio el envío siempre se paga con tarjeta: **no se saltea**.
   - Control (desktop 470 px, mobile 305 px) con escala «0 … Máximo para este pedido: N» (12 px `#828282`).
   - Campo (166 × 34 desktop, 154 × 34 mobile; borde `#CCCCCC`, radio 4, valor 16/400 alineado a la derecha + «millas»).
   - «Usar el máximo»: el mismo componente de la ficha, alto 34 y radio 4.
-  - Etiqueta **«Ahorrás $ X»** arriba a la derecha (alto 26, radio 4, ícono Lucide `piggy-bank` 16 px). Se muestra **una sola vez**.
+  - Etiqueta **«Ahorrás $ X»** arriba a la derecha (alto 26, radio 4, ícono Lucide `piggy-bank` 16 px; monto con `font-weight: 600`). Se muestra **una sola vez**.
 - «Continuar» pasa a Forma de pago, o a Confirmación si se salteó el pago. En el prototipo, ahí termina el recorrido.
 - Mobile: debajo del campo, divisoria y **«Total a pagar con tarjeta $ X»** = total + envío (en mobile el Resumen no está en este paso: su columna es `hidden-xs hidden-sm`).
 - Teclado en el control: flechas ±10, Shift + flechas ±100, RePág/AvPág ±10 %, Inicio/Fin.
 
 ### Checkout · Resumen fijo (desktop)
+
+Aplica también al carrito completo (ver arriba).
 
 - La caja del Resumen queda **fija al hacer scroll** en Entrega, Forma de pago y Confirmación (`position: sticky` dentro de su columna). Hoy no existe esa regla *(verificado: el Resumen es el componente `Componentoverview` en `col-xs-12 hidden-xs hidden-sm col-md-3`, sin sticky)*.
 - El título «RESUMEN» va centrado en vertical en su franja (hasta la línea gris de 1 px que la cierra).
@@ -126,5 +130,7 @@ Regla: en Personal Bank el azul marino es para el precio con millas, el control 
 
 - Las pantallas son HTML generado desde el diseño en Penpot (`herramientas/`): textos, cajas y vectores reales en posición absoluta, como en el diseño. Las fotos y logos son las imágenes del sitio. Lo que cambia con el estado (selector, tarjeta, Resumen, totales, contador, cliente común) son componentes vivos.
 - Desktop recorre **retiro** (Gastos de Preparación $ 0); mobile recorre **envío a domicilio** (Gastos de Envío $ 150).
+- Desktop ocupa todo el ancho de la ventana con el contenido en 1200 px centrados, como el sitio. Con ventanas de menos de 1232 px el prototipo achica la pantalla proporcionalmente en vez de reacomodarla.
+- En el carrito completo, la columna del Resumen llega hasta el pie para que se vea el efecto fijo con solo 3 productos.
 - El aceite agregado desde la ficha **no aparece** en la lista del carrito (el carrito del diseño tiene 3 productos).
 - El recorrido termina en Entrega.

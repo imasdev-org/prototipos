@@ -166,7 +166,7 @@
     var e = el('div', { class: 'etiqueta-ahorro', role: 'status' });
     e.style.background = colores.etiquetaFondo; e.style.color = colores.etiquetaTexto;
     e.innerHTML = '<span style="color:' + colores.icono + ';display:flex">' + ICONO_CHANCHITO + '</span>' +
-      '<span>Ahorrás <b style="font-weight:700;color:' + colores.etiquetaMonto + '">' + R.pesos(monto) + '</b></span>';
+      '<span>Ahorrás <b style="font-weight:600;color:' + colores.etiquetaMonto + '">' + R.pesos(monto) + '</b></span>';
     return e;
   }
 
@@ -295,10 +295,11 @@
   }
 
   // Filas del Resumen del carrito completo (mismo cálculo que el checkout, sin entrega).
-  function filasResumenCarrito(d) {
+  // origen: esquina de la caja que las contiene, en coordenadas de la pantalla.
+  function filasResumenCarrito(d, origen) {
     var r = R.resumenCarrito(estado.segmento, millasIniciales());
     var X = d ? { izq: 1056, der: 1292, y: 588, det: [1072, 1299], chev: 1044 } : { izq: 35, der: 356, y: 1516, det: [50, 362], chev: 23 };
-    var g = el('div', { class: 'capa', style: 'left:0;top:0' });
+    var g = el('div', { class: 'capa', style: 'left:' + (-origen[0]) + 'px;top:' + (-origen[1]) + 'px' });
     function fila(t, v, y, estilo, izq, der, alto) {
       var f = pos(el('div', { class: 'fila-resumen', style: estilo }), izq || X.izq, y, (der || X.der) - (izq || X.izq), alto || 34);
       f.appendChild(el('span', null, t)); f.appendChild(el('span', null, v));
@@ -340,13 +341,13 @@
       { d: [10, 420], m: [10, 420], t: 'Sin millas por producto en las líneas del carrito.' }
     ],
     carrito: [
-      { d: [1030, 605], m: [12, 1533], t: 'Resumen del carrito completo: mismo cálculo que el checkout (fila «millas» con la cantidad, SubTotal ya descontadas las millas, con tope).' }
+      { d: [1030, 605], m: [12, 1533], t: 'Resumen del carrito completo: mismo cálculo que el checkout (fila «millas» con la cantidad, SubTotal ya descontadas las millas, con tope). En desktop queda <b>fijo al hacer scroll</b>, como en el checkout: <b>hoy no lo está</b> (<code>wCartFull</code>, <code>wCartFullWC</code> y <code>wCartSummary</code> no tienen ninguna regla sticky). Título «RESUMEN» centrado en su franja.' }
     ],
     entrega: [
       { d: [125, 388], m: [20, 330], t: 'Tarjeta <b>«Tus millas»</b> antes de «Tu pedido», con el mismo estilo de tarjeta (banda <code>#3E3F40</code>, radio 15, sombra <code>#CCCCCC</code> 2 px). Se elige después del tipo de entrega y la sucursal o dirección: ahí el monto con tarjeta ya es definitivo.' },
       { d: [125, 513], m: [22, 457], t: 'Valor inicial = suma de lo elegido en las fichas, con tope. Máximo del pedido = piso(total de productos con descuentos × 1,92), nunca más que el saldo. Las millas se aplican después de los descuentos (así no se usan de más) y <b>no cubren el envío</b> (por ahora).' },
       { d: [1008, 514], m: [372, 530], t: 'Control, campo y «Usar el máximo» sincronizados; el valor se acota entre 0 y el máximo. «Usar el máximo» es el mismo componente de la ficha. Teclado: flechas ±10, Shift+flechas ±100, Inicio/Fin.' },
-      { d: [846, 440], m: [372, 420], t: 'Ahorro = millas ÷ 1,92, redondeado. Se muestra una sola vez. Etiqueta: azul en Personal Bank (fondo <code>#223F83</code> al 10 %), naranja suave en cliente común (fondo <code>#FF6200</code> al 10 %, texto gris por contraste). Ícono: Lucide piggy-bank (ISC).' },
+      { d: [846, 440], m: [372, 420], t: 'Ahorro = millas ÷ 1,92, redondeado. Se muestra una sola vez. Etiqueta: azul en Personal Bank (fondo <code>#223F83</code> al 10 %), naranja suave en cliente común (fondo <code>#FF6200</code> al 10 %, texto gris por contraste). Monto en <code>font-weight: 600</code>. Ícono: Lucide piggy-bank (ISC).' },
       { d: [1043, 110], m: null, t: '<b>Resumen fijo al hacer scroll</b> (<code>position: sticky</code>) en los pasos del checkout, desktop. Título «RESUMEN» centrado en su franja. SubTotal en pesos ya descontadas las millas; fila «millas» con la cantidad; Total = SubTotal − Descuentos + entrega. Con todo cubierto: SubTotal $ 0 y sin fila de Descuentos.' },
       { d: [792, 40], m: null, t: 'Si las millas cubren todo y la entrega no tiene costo, se saltea Forma de pago como hoy: <code>wCheckout</code> pone la clase <code>PaymentTabHidden</code>, la pestaña FORMA DE PAGO se oculta y CONFIRMACIÓN pasa a su lugar. El botón dice «Continuar a Confirmación». Probalo con «Usar el máximo».' },
       { d: null, m: [22, 585], t: 'En mobile el Resumen no está en este paso (la columna es <code>hidden-xs hidden-sm</code>): la tarjeta muestra «Total a pagar con tarjeta» = total + envío. Con envío a domicilio el envío siempre va con tarjeta: no se saltea Forma de pago.' }
@@ -405,10 +406,22 @@
     }
 
     if (p === 'carrito') {
-      if (d) s.appendChild(menuUsuario());
       aplicarCliente(s);
-      s.appendChild(filasResumenCarrito(d));
-      s.appendChild(zona(P(d, [1057, 786, 234, 34], [35, 1714, 320, 34]), 'Proceder al Pago', function () { irA('entrega'); }));
+      var proceder = function () { irA('entrega'); };
+      if (d) {
+        s.appendChild(menuUsuario());
+        // Resumen fijo al hacer scroll: la caja del diseño pasa a una columna con position: sticky
+        var caja = marca(s, 'resumen-carrito');
+        var colCarrito = pos(el('div', { class: 'columna-resumen' }), 1035, 537, 277.5, 1020 - 24 - 537);
+        caja.style.position = 'sticky'; caja.style.left = 'auto';
+        caja.style.top = ((altoBarra + 16) / zoomActual) + 'px';
+        colCarrito.appendChild(caja); s.appendChild(colCarrito);
+        caja.appendChild(filasResumenCarrito(d, [1035, 537]));
+        caja.appendChild(zona(22, 249, 234, 34, 'Proceder al Pago', proceder));
+      } else {
+        s.appendChild(filasResumenCarrito(d, [0, 0]));
+        s.appendChild(zona(35, 1714, 320, 34, 'Proceder al Pago', proceder));
+      }
     }
 
     if (p === 'entrega') {
@@ -481,7 +494,8 @@
 
   // ---------------------------------------------------------------- render, barra y solapa
   var zoomActual = 1, altoBarra = 56, barraPlegada = false;
-  function anchoVentana() { return window.innerWidth || document.documentElement.clientWidth || 1440; }
+  function anchoVentana() { return document.documentElement.clientWidth || window.innerWidth || 1440; }
+  var CONTENIDO = 1200, MARGEN = 16; // el contenido del sitio ocupa 1200 px centrados
   function leerPreferencia() { try { return localStorage.getItem('selector-millas:barra') === 'plegada'; } catch (e) { return false; } }
   function guardarPreferencia() { try { localStorage.setItem('selector-millas:barra', barraPlegada ? 'plegada' : 'abierta'); } catch (e) { /* sin almacenamiento */ } }
   // La barra puede ocupar dos renglones en pantallas angostas; plegada no ocupa lugar.
@@ -499,12 +513,21 @@
     var p = estado.pantalla, m = window.PANTALLAS[p + '-' + estado.vista], ancho = anchoVentana();
     var conPanel = estado.notas && ancho > 900; // en pantallas angostas el panel de notas va abajo
     if (estado.vista === 'desktop') {
-      var disponible = ancho - 32 - (conPanel ? 384 : 0);
-      zoomActual = Math.max(0.2, Math.min(1, disponible / m.w));
+      // La página ocupa todo el ancho: las franjas de fondo llegan a los bordes y el contenido
+      // (1200 px, centrado) se achica proporcionalmente solo si la ventana no le da lugar.
+      var disponible = ancho - (conPanel ? 384 : 0);
+      zoomActual = Math.max(0.2, Math.min(1, disponible / (CONTENIDO + 2 * MARGEN)));
       document.documentElement.style.setProperty('--z', zoomActual);
-      var lienzo = el('div', { class: 'lienzo' }); lienzo.style.width = m.w + 'px';
-      if (conPanel) lienzo.style.marginLeft = Math.max(16, (ancho - 384 - m.w * zoomActual) / 2) / zoomActual + 'px';
-      lienzo.appendChild(construirPantalla());
+      var anchoLienzo = disponible / zoomActual;
+      var lienzo = el('div', { class: 'lienzo' });
+      lienzo.style.width = anchoLienzo + 'px'; lienzo.style.height = m.h + 'px';
+      (m.bandas || []).forEach(function (b) { lienzo.appendChild(el('div', { class: 'banda', style: 'top:' + b[0] + 'px;height:' + b[1] + 'px;background:' + b[2] })); });
+      var pantalla = construirPantalla();
+      var izquierda = (anchoLienzo - m.w) / 2;
+      pantalla.style.left = izquierda + 'px';
+      // lo que en el diseño está fuera de la columna de 1200 px (logo del checkout) queda pegado al borde de la ventana
+      Array.prototype.forEach.call(pantalla.querySelectorAll('[data-k="ancla-izquierda"]'), function (n) { n.style.transform = 'translateX(' + (-izquierda) + 'px)'; });
+      lienzo.appendChild(pantalla);
       esc.appendChild(lienzo);
       if (estado.cajon) construirCajon(esc, false);
       window.scrollTo(0, scrollPrevio);
@@ -515,7 +538,7 @@
       var pant = construirPantalla();
       if (ancho < 390) pant.style.zoom = ancho / 390;
       sc.appendChild(pant); tel.appendChild(sc);
-      if (conPanel) tel.style.marginLeft = Math.max(16, (ancho - 384 - 410) / 2) + 'px';
+      if (conPanel) tel.style.marginLeft = Math.max(16, (ancho - 384 - 390) / 2) + 'px';
       esc.appendChild(tel);
       if (estado.cajon) construirCajon(tel, true);
       sc.scrollTop = scrollPrevio;
