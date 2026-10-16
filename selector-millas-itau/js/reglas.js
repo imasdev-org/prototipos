@@ -14,7 +14,7 @@
   var COSTO_ENTREGA = { desktop: 0, mobile: 150 };
   var ROTULO_ENTREGA = { desktop: 'Gastos de Preparación', mobile: 'Gastos de Envío' };
 
-  // Carrito del mock: leche $ 82 + cuchillo $ 90 (Personal Bank; normal $ 100) + sopera $ 2.360.
+  // Carrito del mock: leche $ 82 + cuchillo $ 90 (Personal Bank; cliente común $ 100) + sopera $ 2.360.
   // "final" = lo que se paga por los productos con los descuentos ya aplicados.
   // "descuento" = descuentos que el Resumen muestra en su propia fila.
   var CARRITO = {
@@ -57,18 +57,27 @@
   // SubTotal en pesos ya descontadas las millas, fila "millas" con la cantidad,
   // Total = SubTotal − Descuentos + entrega. Con todo cubierto: SubTotal $ 0 y sin fila de Descuentos.
   function resumen(segmento, vista, millas) {
+    return calcular(segmento, millas, COSTO_ENTREGA[vista], ROTULO_ENTREGA[vista]);
+  }
+
+  // Resumen del carrito: mismo cálculo, todavía sin costo de entrega.
+  function resumenCarrito(segmento, millas) {
+    return calcular(segmento, millas, 0, null);
+  }
+
+  function calcular(segmento, millas, costoEntrega, rotuloEntrega) {
     var c = CARRITO[segmento];
     var cubierto = Math.min(millas / TASA, c.final);
     var resto = c.final - cubierto;
     var todoCubierto = resto < 0.5;
     var subtotal = todoCubierto ? 0 : Math.round(resto + c.descuento);
     var descuento = todoCubierto ? 0 : c.descuento;
-    var entrega = COSTO_ENTREGA[vista];
+    var entrega = costoEntrega;
     return {
       subtotal: subtotal,
       descuento: descuento,
       mostrarDescuento: descuento > 0,
-      rotuloEntrega: ROTULO_ENTREGA[vista],
+      rotuloEntrega: rotuloEntrega,
       entrega: entrega,
       millas: millas,
       total: subtotal - descuento + entrega,
@@ -87,8 +96,8 @@
   }
 
   window.Reglas = {
-    TASA: TASA, SALDO: SALDO, FICHA: FICHA, SUMA_FICHAS: SUMA_FICHAS, CARRITO: CARRITO,
+    TASA: TASA, SALDO: SALDO, FICHA: FICHA, SUMA_FICHAS: SUMA_FICHAS, CARRITO: CARRITO, PRECIO_CUCHILLO: { pb: 90, comun: 100 },
     maximoPedido: maximoPedido, valorInicialPedido: valorInicialPedido, acotar: acotar,
-    ahorro: ahorro, precioFicha: precioFicha, resumen: resumen, miles: miles, pesos: pesos
+    ahorro: ahorro, precioFicha: precioFicha, resumen: resumen, resumenCarrito: resumenCarrito, miles: miles, pesos: pesos
   };
 })();

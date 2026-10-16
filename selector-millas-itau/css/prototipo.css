@@ -43,6 +43,19 @@ html, body {
 #barra a.accion { color: #DDE1EA; text-decoration: none; padding: 6px 10px; }
 #barra a.accion:hover { color: #fff; border-color: #6B7385; }
 #barra .accion[aria-pressed="true"] { background: #D9B800; color: #1F2430; border-color: #D9B800; }
+#barra .plegar { margin-left: auto; display: inline-flex; align-items: center; padding: 6px 9px; }
+#barra .plegar svg, #solapa svg { width: 12px; height: 8px; }
+
+/* Barra plegada: queda una solapa chica arriba a la derecha */
+#solapa {
+  display: none; position: fixed; top: 0; right: 16px; z-index: 100; align-items: center; gap: 6px;
+  padding: 3px 10px 5px; border: 0; border-radius: 0 0 8px 8px; background: #1F2430; color: #DDE1EA;
+  font: 600 11px 'Source Sans 3', sans-serif; letter-spacing: .03em; cursor: pointer; opacity: .85;
+  box-shadow: 0 2px 8px rgba(0,0,0,.25);
+}
+#solapa:hover, #solapa:focus-visible { opacity: 1; color: #fff; }
+body.barra-plegada #barra { display: none; }
+body.barra-plegada #solapa { display: inline-flex; }
 /* En el celular la barra es una sola fila que se desliza de costado */
 @media (max-width: 700px) {
   #barra { flex-wrap: nowrap; overflow-x: auto; padding: 8px 10px; gap: 10px; scrollbar-width: none; }
@@ -55,10 +68,27 @@ html, body {
 
 /* ---------- Lienzo desktop ---------- */
 .lienzo { margin: 0 auto; zoom: var(--z); box-shadow: 0 2px 16px rgba(0,0,0,.12); background: #fff; }
-.pantalla { position: relative; background-repeat: no-repeat; background-size: 100% auto; background-color: #fff; }
+.pantalla { position: relative; background: #fff; overflow: hidden; }
 .capa { position: absolute; }
-.tapa { position: absolute; background: #fff; }
-.zona { position: absolute; cursor: pointer; border-radius: 8px; }
+.zona { position: absolute; cursor: pointer; border-radius: 8px; background: transparent; border: 0; padding: 0; }
+
+/* Pantallas generadas desde Penpot (herramientas/gen.js): cajas, textos y vectores con posición absoluta */
+.pv .b, .pv .t, .pv .v { position: absolute; box-sizing: border-box; }
+.pv .t { display: flex; flex-direction: column; }
+.pv .g { position: absolute; left: 0; top: 0; }
+.pv .v svg { position: absolute; display: block; overflow: visible; }
+
+/* Menú de usuario del encabezado desktop */
+.chip-personal { position: absolute; background: #000D3C; color: #fff; border-radius: 3px;
+  font: 400 9px/12px 'Source Sans 3', sans-serif; text-align: center; }
+.datos-usuario { position: absolute; right: 337px; top: 15px; text-align: right; white-space: nowrap; }
+.nombre-usuario { font: 300 14px/18px 'Source Sans 3', sans-serif; color: #464646; }
+.saldo-usuario { font: 600 12px/16px 'Source Sans 3', sans-serif; color: #FF6200; margin-top: 2px; }
+
+/* Encabezado del carrito lateral: «$ X + N millas» */
+.total-cajon { position: absolute; display: flex; align-items: baseline; gap: 5px; color: #464646; white-space: nowrap; }
+.total-cajon .importe { font: 400 18px/1.44 'Source Sans 3', sans-serif; }
+.total-cajon .unidad { font: italic 400 15px/1.4 'Source Sans 3', sans-serif; }
 .zona:hover { outline: 2px solid rgba(34, 63, 131, .35); outline-offset: 2px; }
 .zona:focus-visible { outline: 3px solid #223F83; outline-offset: 2px; }
 
@@ -142,13 +172,11 @@ html, body {
 .resumen {
   position: sticky; top: 16px; width: 278px; background: #fff; border: 1px solid #E6E6E6; border-radius: 5px;
 }
-.resumen .fila, .resumen-mobile .fila { position: absolute; height: 34px; display: flex; align-items: center; font-size: 14px; font-weight: 300; }
-.resumen .titulo, .resumen-mobile .titulo { position: absolute; left: 0; right: 0; text-align: center; color: var(--naranja); font-size: 14px; }
+.resumen .fila { position: absolute; height: 34px; display: flex; align-items: center; font-size: 14px; font-weight: 300; }
+.resumen .titulo { position: absolute; left: 0; right: 0; text-align: center; color: var(--naranja); font-size: 14px; }
 .resumen .hr { position: absolute; left: 2px; right: 2px; top: 38px; height: 1px; background: #EEEEEE; }
-.resumen .sep, .resumen-mobile .sep { position: absolute; height: 2px; background: #D6D6D6; }
-.resumen .chevron, .resumen-mobile .chevron { position: absolute; width: 10px; height: 6px; }
-.resumen-mobile { position: absolute; background: #fff; }
-.resumen-mobile .hr { position: absolute; left: 0; right: 0; height: 1px; background: #EEEEEE; }
+.resumen .sep { position: absolute; height: 2px; background: #D6D6D6; }
+.chevron { display: block; width: 10px; height: 6px; }
 
 /* Filas del Resumen del carrito completo (escenario con tope) */
 .fila-resumen { position: absolute; display: flex; align-items: center; justify-content: space-between; font-size: 14px; font-weight: 300; }
@@ -188,9 +216,6 @@ html, body {
 .panel-notas li.resaltada { background: rgba(255, 216, 77, .35); border-radius: 6px; }
 .panel-notas code { font-size: 12px; background: rgba(0,0,0,.06); padding: 0 3px; border-radius: 3px; }
 
-/* Anotación del prototipo dentro de una pantalla (no es parte de la UI) */
-.aviso-prototipo { position: absolute; inset: 14px 30px; display: flex; align-items: center; padding: 0 16px;
-  background: var(--nota-fondo); border: 1px dashed var(--nota-borde); border-radius: 8px; font-size: 13.5px; color: #6B5A00; }
 
 /* ---------- Fin del recorrido ---------- */
 .modal-fondo { position: fixed; inset: 0; z-index: 120; background: rgba(0,0,0,.45); display: flex; align-items: center; justify-content: center; }
@@ -198,6 +223,7 @@ html, body {
 .modal h2 { margin: 0 0 8px; font-size: 18px; color: var(--gris-titulo); }
 .modal p { margin: 0 0 16px; color: var(--gris-texto); font-size: 14px; line-height: 1.5; }
 .modal button { background: #FF6200; color: #fff; border: 0; border-radius: 17px; padding: 8px 20px; font: 400 14px 'Source Sans 3', sans-serif; cursor: pointer; }
+.modal button.secundario { background: #fff; color: #DE5500; border: 1px solid #FF6200; margin-left: 8px; }
 
 /* Panel de notas en pantallas angostas: abajo, sin tapar el teléfono entero */
 @media (max-width: 900px) {

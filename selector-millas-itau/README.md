@@ -1,6 +1,6 @@
 # Selector de millas · Tienda Volar (Itaú)
 
-Prototipo navegable del nuevo selector de millas en la ficha de producto, el carrito y el checkout.
+Prototipo navegable del nuevo selector de millas en la ficha de producto, el carrito y el paso de Entrega del checkout.
 
 **Abrir el prototipo:** <https://imasdev-org.github.io/selector-millas-itau/>
 
@@ -8,34 +8,40 @@ Prototipo navegable del nuevo selector de millas en la ficha de producto, el car
 
 ## Cómo se usa
 
-La barra de arriba controla el prototipo:
+La barra de arriba controla el prototipo. Con la flecha de la derecha se pliega a una solapa chica; tocando la solapa vuelve.
 
 | Control | Qué hace |
 |---|---|
-| **Paso** | Salta a Ficha, Carrito, Entrega, Forma de pago o Confirmación. También se puede recorrer tocando la pantalla (Agregar al Carrito, ícono del carrito, Pagar, Continuar, una tarjeta guardada, Confirmar Pedido) |
+| **Paso** | Salta a Ficha, Carrito o Entrega. También se puede recorrer tocando la pantalla (Agregar al Carrito, ícono del carrito, Pagar, Ver Carrito Completo, Proceder al Pago, Continuar) |
 | **Vista** | Desktop (retiro) o Mobile (envío a domicilio) |
-| **Cliente** | Personal Bank o cliente común (aplica a las pantallas del checkout) |
+| **Cliente** | Personal Bank o cliente común |
 | **Fichas** | Suma de las millas elegidas en las fichas: 2.000, o 6.000 para ver el tope |
 | **Notas para desarrollo** | Muestra pines numerados sobre la pantalla y un panel con las reglas de cada parte |
 | **Reiniciar** | Vuelve al estado inicial |
 
-Para probar el salteo de Forma de pago: Vista **Desktop** → **Entrega** → «Usar el máximo» → «Continuar a Confirmación».
+Para probar el salteo de Forma de pago: Vista **Desktop** → **Entrega** → «Usar el máximo».
 
 ## Correrlo localmente
 
-Abrir `index.html` en el navegador (no necesita build). Si se prefiere un servidor:
-
-```powershell
-npx --yes http-server -p 8080 .
-```
+Abrir `index.html` en el navegador (no necesita build).
 
 ## Estructura
 
 | Carpeta | Contenido |
 |---|---|
-| `assets/screens/` | Capturas de las pantallas diseñadas (Penpot, página «Propuesta») |
-| `assets/icons/` | Logo Volar del tirador y chanchito (Lucide `piggy-bank`, licencia ISC) |
+| `pantallas/` | Pantallas generadas desde Penpot (HTML real: textos, cajas y vectores) |
+| `assets/img/` | Fotos de producto y logos del sitio que usan las pantallas |
+| `assets/icons/` | Logo Volar del tirador e ícono de la pestaña |
 | `js/reglas.js` | Reglas de cálculo (máximo, valor inicial, ahorro, Resumen, salteo del pago) |
-| `js/app.js` | Componentes, pantallas, notas para desarrollo y barra del prototipo |
-| `css/prototipo.css` | Estilos de los componentes nuevos y del prototipo |
+| `js/app.js` | Componentes vivos, notas para desarrollo y barra del prototipo |
+| `css/prototipo.css` | Estilos de los componentes y del prototipo |
 | `docs/especificacion.md` | Especificación para desarrollo |
+| `herramientas/` | Exportación desde Penpot y generador de `pantallas/` |
+
+## Regenerar las pantallas desde Penpot
+
+1. Levantar un receptor local en `http://127.0.0.1:8766` que guarde el cuerpo de cada `POST /save?f=<ruta>`.
+2. Con la página «WI-13915 · Propuesta» abierta en Penpot, ejecutar `herramientas/penpot-exportar.js` en el plugin (por ejemplo con el MCP de Penpot). Deja un `.json` por tablero y sus imágenes.
+3. Copiar los `.json` a `herramientas/penpot/` y correr `node herramientas/construir.js <carpeta con las imágenes>`.
+
+`herramientas/construir.js` define, por pantalla, qué partes reemplaza el prototipo por componentes vivos.

@@ -45,8 +45,8 @@ Ejemplo (Personal Bank, retiro): 2.000 millas → SubTotal $ 1.500 · Descuentos
 Solo si **las millas cubren todo** y **la entrega cuesta $ 0**. En ese caso:
 
 - la pestaña FORMA DE PAGO se oculta **como hoy**: `wCheckout` pone la clase `PaymentTabHidden` y `ItauWeb.css` tiene `.PaymentTabHidden .PaymentTab { display: none; }` *(verificado en la KB, 15/10)*;
-- el botón de Entrega dice **«Continuar a Confirmación»** y lleva directo a Confirmación;
-- en Confirmación no hay tarjeta: el bloque de forma de pago no aplica (*cómo se muestra: a confirmar*).
+- la pestaña CONFIRMACIÓN pasa al lugar de FORMA DE PAGO, como hoy en el sitio *(captura del sitio del 16/10)*;
+- el botón de Entrega dice **«Continuar a Confirmación»** y lleva directo a Confirmación.
 
 Con envío a domicilio el envío siempre se paga con tarjeta: **no se saltea**.
 
@@ -54,7 +54,7 @@ Con envío a domicilio el envío siempre se paga con tarjeta: **no se saltea**.
 
 ### Ficha de producto
 
-- Precio en vivo «$ X + N millas» (azul marino `#000D3C`, 26/700 y 17/600).
+- Precio en vivo «$ X + N millas» (26/700 y 17/600): en Personal Bank todo en azul marino `#000D3C`; en cliente común los pesos en naranja `#FF6200` y las millas en gris `#5F6062`, como hoy para quien no es Personal Bank.
 - Control, campo y botón **sincronizados**; el valor se acota entre 0 y 801.
 - **«Usar el máximo»** es un interruptor: al activarlo guarda el valor anterior y pone el máximo; al desactivarlo vuelve al valor anterior. Si se mueve el control o se edita el campo, se desactiva.
   - Normal: fondo blanco, borde 1 px `#FF6200`, texto `#DE5500`.
@@ -62,12 +62,14 @@ Con envío a domicilio el envío siempre se paga con tarjeta: **no se saltea**.
 - Debajo: «Tus millas disponibles: 100.000» y «Podés ajustarlas al pagar.» (12 px `#828282`).
 - **«Agregar al Carrito»** solo sube el contador del ícono; el carrito lateral se abre tocando el ícono.
 - Lo elegido se guarda en el producto y se suma en el checkout.
+- Menú de usuario del encabezado (desktop), como en el sitio: etiqueta «Personal» (fondo `#000D3C`, texto blanco 9 px), nombre (14/300) y saldo «100.000 millas» (12/600 `#FF6200`) alineados a la derecha. El cliente común no lleva la etiqueta «Personal»; en mobile, tampoco el ícono PB.
 
 ### Carrito lateral y carrito completo
 
 - Encabezado «$ X + N millas»: N = valor inicial del checkout (suma de las fichas **con tope**). Hoy el sitio suma sin tope (caso real: 8.324 millas con saldo 6.058).
 - Sin millas por producto en las líneas.
 - El Resumen del carrito completo usa el mismo cálculo que el checkout.
+- Cliente común: sin precio ni etiqueta «Con Personal Bank» (en el ejemplo, el cuchillo vale $ 100 en lugar de $ 90) y sin fila de Descuentos.
 
 ### Checkout · Entrega
 
@@ -78,23 +80,19 @@ Con envío a domicilio el envío siempre se paga con tarjeta: **no se saltea**.
   - Campo (166 × 34 desktop, 154 × 34 mobile; borde `#CCCCCC`, radio 4, valor 16/400 alineado a la derecha + «millas»).
   - «Usar el máximo»: el mismo componente de la ficha, alto 34 y radio 4.
   - Etiqueta **«Ahorrás $ X»** arriba a la derecha (alto 26, radio 4, ícono Lucide `piggy-bank` 16 px). Se muestra **una sola vez**.
+- «Continuar» pasa a Forma de pago, o a Confirmación si se salteó el pago. En el prototipo, ahí termina el recorrido.
 - Mobile: debajo del campo, divisoria y **«Total a pagar con tarjeta $ X»** = total + envío (en mobile el Resumen no está en este paso: su columna es `hidden-xs hidden-sm`).
 - Teclado en el control: flechas ±10, Shift + flechas ±100, RePág/AvPág ±10 %, Inicio/Fin.
 
 ### Checkout · Resumen fijo (desktop)
 
 - La caja del Resumen queda **fija al hacer scroll** en Entrega, Forma de pago y Confirmación (`position: sticky` dentro de su columna). Hoy no existe esa regla *(verificado: el Resumen es el componente `Componentoverview` en `col-xs-12 hidden-xs hidden-sm col-md-3`, sin sticky)*.
+- El título «RESUMEN» va centrado en vertical en su franja (hasta la línea gris de 1 px que la cierra).
 - Se actualiza en vivo con el selector.
 
-### Checkout · Forma de pago
+### Forma de pago y Confirmación
 
-- Las millas se muestran en **solo lectura**. Para cambiarlas se vuelve a Entrega (pestaña ENTREGA; en mobile, «volver»).
-- Mobile: recuadro «Millas aplicadas: N» + «Total a pagar con tarjeta $ X».
-
-### Checkout · Confirmación
-
-- Resumen con las millas aplicadas.
-- Se mantiene el token de canje por SMS.
+No están en el prototipo. Les aplican el Resumen fijo y el salteo de Forma de pago descritos arriba.
 
 ## 4. Colores por segmento
 
@@ -103,7 +101,8 @@ Con envío a domicilio el envío siempre se paga con tarjeta: **no se saltea**.
 | Pista del control | `#B8BDC9` | `#FDD4B9` |
 | Relleno | degradé `#5A6380` → `#000C39` | degradé `#FE9A5A` → `#F95E00` |
 | Tirador (con logo Volar) | `#000D3A` | `#FE6002` |
-| Etiqueta de ahorro · fondo | `#223F83` al 20 % | `#FF6200` al 10 % |
+| Precio con millas en la ficha · pesos / millas | `#000D3C` / `#000D3C` | `#FF6200` / `#5F6062` |
+| Etiqueta de ahorro · fondo | `#223F83` al 10 % | `#FF6200` al 10 % |
 | Etiqueta de ahorro · texto / monto | `#223F83` / `#000D3C` | `#464646` / `#464646` |
 | Etiqueta de ahorro · ícono | `#223F83` | `#C75000` |
 | «Usar el máximo» | naranja (acción) | naranja (acción) |
@@ -119,15 +118,13 @@ Regla: en Personal Bank el azul marino es para el precio con millas, el control 
 ## 6. A confirmar
 
 - **Retiro en Pickup Itaú con costo** *(hipótesis)*: en producción se vio un retiro con $ 189. Si el Pickup Itaú es una «Agencia» con costo de envío, el salteo de Forma de pago solo aplicaría a retiros sin costo.
-- **Pestañas al ocultar FORMA DE PAGO**: no está verificado si en producción las otras pestañas se reacomodan o queda el hueco.
-- **Confirmación sin forma de pago**: cómo se muestra el bloque cuando se salteó el pago.
-- **Fecha de entrega a domicilio** en Confirmación: la redacción usada en el diseño no está verificada contra el sitio.
+- **Confirmación sin forma de pago**: cómo se muestra el bloque de pago cuando se salteó Forma de pago.
+- **Cliente común en el encabezado** *(supuesto)*: que no lleve la etiqueta «Personal» ni el ícono PB se dedujo de cómo se ve un cliente Personal Bank; falta una captura del sitio con un cliente común.
 - **«Usar el máximo» con el valor inicial en el máximo**: cuando la suma de las fichas supera el máximo, el checkout arranca en el máximo con el botón **sin** activar (en el prototipo el botón solo se activa al tocarlo).
 
 ## 7. Simplificaciones del prototipo
 
-- Las pantallas son capturas del diseño; lo nuevo (selector, tarjeta, Resumen, contador, botón Continuar) está construido en HTML/CSS encima.
+- Las pantallas son HTML generado desde el diseño en Penpot (`herramientas/`): textos, cajas y vectores reales en posición absoluta, como en el diseño. Las fotos y logos son las imágenes del sitio. Lo que cambia con el estado (selector, tarjeta, Resumen, totales, contador, cliente común) son componentes vivos.
 - Desktop recorre **retiro** (Gastos de Preparación $ 0); mobile recorre **envío a domicilio** (Gastos de Envío $ 150).
 - El aceite agregado desde la ficha **no aparece** en la lista del carrito (el carrito del diseño tiene 3 productos).
-- La ficha y el carrito están diseñados para Personal Bank: el cambio a cliente común aplica a las pantallas del checkout.
-- «Confirmar Pedido» no envía nada.
+- El recorrido termina en Entrega.
