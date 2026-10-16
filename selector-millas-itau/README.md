@@ -13,14 +13,14 @@ La barra de arriba controla el prototipo. Con la flecha de la derecha se pliega 
 | Control | Qué hace |
 |---|---|
 | **Paso** | Salta a Ficha, Carrito o Entrega. También se puede recorrer tocando la pantalla (Agregar al Carrito, ícono del carrito, Pagar, Ver Carrito Completo, Proceder al Pago, Continuar) |
-| **Vista** | Desktop (retiro) o Mobile (envío a domicilio) |
+| **Vista** | Desktop o Mobile (las dos con envío a domicilio) |
 | **Cliente** | Personal Bank o cliente común |
 | **Saldo de millas** | Millas disponibles del cliente: 100.000, o 3.000 para ver en Entrega el máximo limitado por el saldo |
 | **Notas para desarrollo** | Muestra pines numerados sobre la pantalla y un panel con las reglas de cada parte |
 
 Tocando un lugar de la pantalla que no hace nada se marcan por un momento las zonas que sí responden.
 
-Para probar el salteo de Forma de pago: Vista **Desktop** → **Entrega** → «Usar el máximo».
+El salteo de Forma de pago (millas que cubren todo con entrega sin costo) no se ve en este recorrido, porque el envío a domicilio cuesta $ 150; está descrito en la especificación.
 
 ## Correrlo localmente
 

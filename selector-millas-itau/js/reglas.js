@@ -13,9 +13,11 @@
   function saldo() { return SALDO; }
   function fijarSaldo(n) { SALDO = n; }
 
-  // Envío: el recorrido desktop es con retiro (sin costo) y el mobile con envío a domicilio.
-  var COSTO_ENTREGA = { desktop: 0, mobile: 150 };
-  var ROTULO_ENTREGA = { desktop: 'Gastos de Preparación', mobile: 'Gastos de Envío' };
+  // Envío: el recorrido es con envío a domicilio en desktop y en mobile.
+  var COSTO_ENTREGA = { desktop: 150, mobile: 150 };
+  var ROTULO_ENTREGA = { desktop: 'Gastos de Envío', mobile: 'Gastos de Envío' };
+  // Con envío a domicilio, el Resumen avisa cuánto falta para el envío gratis (umbral de la captura del sitio).
+  var ENVIO_GRATIS_DESDE = 3000;
 
   // Carrito del mock: leche $ 82 + cuchillo $ 90 (Personal Bank; cliente común $ 100) + sopera $ 2.360.
   // "final" = lo que se paga por los productos con los descuentos ya aplicados.
@@ -99,7 +101,7 @@
   }
 
   window.Reglas = {
-    TASA: TASA, saldo: saldo, fijarSaldo: fijarSaldo, FICHA: FICHA, SUMA_FICHAS: SUMA_FICHAS, CARRITO: CARRITO, PRECIO_CUCHILLO: { pb: 90, comun: 100 },
+    TASA: TASA, ENVIO_GRATIS_DESDE: ENVIO_GRATIS_DESDE, saldo: saldo, fijarSaldo: fijarSaldo, FICHA: FICHA, SUMA_FICHAS: SUMA_FICHAS, CARRITO: CARRITO, PRECIO_CUCHILLO: { pb: 90, comun: 100 },
     maximoPedido: maximoPedido, valorInicialPedido: valorInicialPedido, acotar: acotar,
     ahorro: ahorro, precioFicha: precioFicha, resumen: resumen, resumenCarrito: resumenCarrito, miles: miles, pesos: pesos
   };

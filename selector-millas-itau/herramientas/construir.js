@@ -38,9 +38,9 @@ const PANTALLAS = {
     marcar: { '1e76d7': 'pb-etiqueta', '1e76d1': 'cuchillo-unidad', '1e76d5': 'cuchillo-total', '1e7774': 'pb-icono' },
     derecha: ['1e76d5']
   },
-  'entrega-desktop': {
-    omitir: ['09b4cc', 'bc9304', 'bc9359'],
-    marcar: { bc92fc: 'tab-pago', bc9300: 'tab-confirmacion', bc92e2: 'ancla-izquierda' }
+  'entrega-desktop': { // envío a domicilio
+    omitir: ['fef93d', 'feb921', '00be9b'],
+    marcar: { feb919: 'tab-pago', feb91d: 'tab-confirmacion', feb8ff: 'ancla-izquierda' }
   },
   'entrega-mobile': {
     omitir: ['c9a5ef'],

@@ -222,7 +222,7 @@
   function crearTarjeta(vista, repintarTodo) {
     var d = vista === 'desktop';
     var t = el('section', { class: 'tarjeta-millas', 'aria-label': 'Tus millas' });
-    if (d) pos(t, 125, 372, 883, 202); else pos(t, 20, 315, 350, 293);
+    if (d) pos(t, 125, 305, 883, 202); else pos(t, 20, 315, 350, 293);
     var banda = el('div', { class: 'banda' }, 'Tus millas'); banda.style.height = (d ? 35 : 46) + 'px';
     t.appendChild(banda);
     t.appendChild(texto('¿Cuántas millas querés usar?', 'pregunta', 15, d ? 55 : 62));
@@ -273,8 +273,13 @@
     if (r.mostrarDescuento) filas.push({ t: 'Descuentos', v: R.pesos(-r.descuento), c: '#223F83', chevron: true });
     filas.push({ t: r.rotuloEntrega, v: R.pesos(r.entrega), c: '#5F6062' });
     filas.push({ t: 'Millas aplicadas', v: R.miles(r.millas), c: '#223F83' });
-    // Título centrado en la franja de 38 px que cierra la línea gris
-    var h = '<div class="titulo" style="top:9px;line-height:20px">RESUMEN</div><div class="hr"></div>';
+    // Título centrado en la franja de 38 px que cierra la línea gris. Con envío a domicilio, el sitio muestra
+    // cuánto falta para el envío gratis en lugar de «RESUMEN».
+    var falta = R.ENVIO_GRATIS_DESDE - r.subtotal;
+    var titulo = r.entrega > 0 && falta > 0
+      ? '<div class="titulo envio" style="top:9px;line-height:20px">Con ' + R.pesos(falta) + ' más el envío es gratis</div>'
+      : '<div class="titulo" style="top:9px;line-height:20px">RESUMEN</div>';
+    var h = titulo + '<div class="hr"></div>';
     filas.forEach(function (f, i) {
       var y = 51 + i * 33;
       if (f.chevron) h += '<div style="position:absolute;left:9px;top:' + (y + 14) + 'px;width:10px;height:6px">' + CHEVRON + '</div>';
@@ -346,12 +351,12 @@
       { d: [1030, 605], m: [12, 1533], t: 'Resumen del carrito completo: mismo cálculo que el checkout (fila «Millas aplicadas» con la cantidad, SubTotal ya descontadas las millas, con tope). En desktop queda <b>fijo al hacer scroll</b>, como en el checkout: <b>hoy no lo está</b> (<code>wCartFull</code>, <code>wCartFullWC</code> y <code>wCartSummary</code> no tienen ninguna regla sticky). Título «RESUMEN» centrado en su franja.' }
     ],
     entrega: [
-      { d: [125, 388], m: [20, 330], t: 'Tarjeta <b>«Tus millas»</b> antes de «Tu pedido», con el mismo estilo de tarjeta (banda <code>#3E3F40</code>, radio 15, sombra <code>#CCCCCC</code> 2 px). Se elige después del tipo de entrega y la sucursal o dirección: ahí el monto con tarjeta ya es definitivo.' },
-      { d: [125, 513], m: [22, 457], t: 'Valor inicial = suma de lo elegido en las fichas, con tope. Máximo del pedido = piso(total de productos con descuentos × 1,92), nunca más que el saldo. Las millas se aplican después de los descuentos (así no se usan de más) y <b>no cubren el envío</b> (por ahora).' },
-      { d: [1008, 514], m: [372, 530], t: 'Control, campo y «Usar el máximo» sincronizados; el valor se acota entre 0 y el máximo. «Usar el máximo» es el mismo componente de la ficha. Teclado: flechas ±10, Shift+flechas ±100, Inicio/Fin.' },
-      { d: [846, 440], m: [372, 420], t: 'Ahorro = millas ÷ 1,92, redondeado. Se muestra una sola vez. Etiqueta: azul en Personal Bank (fondo <code>#223F83</code> al 10 %), naranja suave en cliente común (fondo <code>#FF6200</code> al 10 %, texto gris por contraste). Monto en <code>font-weight: 600</code>. Ícono: Lucide piggy-bank (ISC).' },
-      { d: [1043, 110], m: null, t: '<b>Resumen fijo al hacer scroll</b> (<code>position: sticky</code>) en los pasos del checkout, desktop. Título «RESUMEN» centrado en su franja. SubTotal en pesos ya descontadas las millas; fila «Millas aplicadas» con la cantidad (hoy dice «millas»); Total = SubTotal − Descuentos + entrega. Con todo cubierto: SubTotal $ 0 y sin fila de Descuentos.' },
-      { d: [792, 40], m: null, t: 'Si las millas cubren todo y la entrega no tiene costo, se saltea Forma de pago como hoy: <code>wCheckout</code> pone la clase <code>PaymentTabHidden</code>, la pestaña FORMA DE PAGO se oculta y CONFIRMACIÓN pasa a su lugar. El botón dice «Continuar a Confirmación». Probalo con «Usar el máximo».' },
+      { d: [125, 321], m: [20, 330], t: 'Tarjeta <b>«Tus millas»</b> antes de «Tu pedido», con el mismo estilo de tarjeta (banda <code>#3E3F40</code>, radio 15, sombra <code>#CCCCCC</code> 2 px). Se elige después del tipo de entrega y la sucursal o dirección: ahí el monto con tarjeta ya es definitivo.' },
+      { d: [125, 446], m: [22, 457], t: 'Valor inicial = suma de lo elegido en las fichas, con tope. Máximo del pedido = piso(total de productos con descuentos × 1,92), nunca más que el saldo. Las millas se aplican después de los descuentos (así no se usan de más) y <b>no cubren el envío</b> (por ahora).' },
+      { d: [1008, 447], m: [372, 530], t: 'Control, campo y «Usar el máximo» sincronizados; el valor se acota entre 0 y el máximo. «Usar el máximo» es el mismo componente de la ficha. Teclado: flechas ±10, Shift+flechas ±100, Inicio/Fin.' },
+      { d: [846, 373], m: [372, 420], t: 'Ahorro = millas ÷ 1,92, redondeado. Se muestra una sola vez. Etiqueta: azul en Personal Bank (fondo <code>#223F83</code> al 10 %), naranja suave en cliente común (fondo <code>#FF6200</code> al 10 %, texto gris por contraste). Monto en <code>font-weight: 600</code>. Ícono: Lucide piggy-bank (ISC).' },
+      { d: [1043, 110], m: null, t: '<b>Resumen fijo al hacer scroll</b> (<code>position: sticky</code>) en los pasos del checkout, desktop. Título «RESUMEN» centrado en su franja. SubTotal en pesos ya descontadas las millas; fila «Millas aplicadas» con la cantidad (hoy dice «millas»); Total = SubTotal − Descuentos + entrega. Con todo cubierto: SubTotal $ 0 y sin fila de Descuentos. Con envío a domicilio, el título dice «Con $ X más el envío es gratis», como hoy en el sitio (X = $ 3.000 − SubTotal; umbral y cálculo tomados de una captura del sitio, a confirmar).' },
+      { d: [792, 40], m: null, t: 'Si las millas cubren todo y la entrega no tiene costo (retiro sin costo o envío gratis), se saltea Forma de pago como hoy: <code>wCheckout</code> pone la clase <code>PaymentTabHidden</code>, la pestaña FORMA DE PAGO se oculta y CONFIRMACIÓN pasa a su lugar, y el botón dice «Continuar a Confirmación». En este recorrido (envío a domicilio con costo) no pasa: el envío siempre va con tarjeta.' },
       { d: null, m: [22, 585], t: 'En mobile el Resumen no está en este paso (la columna es <code>hidden-xs hidden-sm</code>): la tarjeta muestra «Total a pagar con tarjeta» = total + envío (rótulo 14/700, monto 16/700). Con envío a domicilio el envío siempre va con tarjeta: no se saltea Forma de pago.' }
     ]
   };
@@ -437,7 +442,7 @@
         // al ocultar FORMA DE PAGO, CONFIRMACIÓN pasa a su lugar (como en el sitio)
         var centro = function (n) { return izquierdaEnPantalla(n, s) + parseFloat(n.style.width) / 2; };
         var corrimiento = centro(tabPago) - centro(tabConf);
-        var btn = pos(el('button', { class: 'boton-continuar', type: 'button' }), 735, 1035, 278, 34);
+        var btn = pos(el('button', { class: 'boton-continuar', type: 'button' }), 735, 988, 278, 34);
         btn.addEventListener('click', finDelRecorrido);
         s.appendChild(btn);
         actualizadores.push(function () {

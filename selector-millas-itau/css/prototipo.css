@@ -177,7 +177,8 @@ body.barra-plegada #solapa { display: inline-flex; }
   text-align: right; font: 400 16px var(--fuente-sitio); color: #000;
 }
 .campo span { font-size: 13px; color: #636363; }
-.campo:focus-within { border-color: #FE9A5A; box-shadow: 0 0 0 3px rgba(253, 212, 185, .45); }
+/* Foco: solo la aureola, en el naranja de los botones (#FF6200) con transparencia; el borde no cambia */
+.campo:focus-within { box-shadow: 0 0 0 3px rgba(255, 98, 0, .2); }
 
 /* "Usar el máximo" (botón de la ficha, funciona como interruptor) */
 .boton-max {
@@ -214,6 +215,7 @@ body.barra-plegada #solapa { display: inline-flex; }
   position: sticky; top: 16px; width: 278px; background: #fff; border: 1px solid #E6E6E6; border-radius: 5px;
 }
 .resumen .fila { position: absolute; height: 34px; display: flex; align-items: center; font-size: 14px; font-weight: 300; }
+.resumen .titulo.envio { color: #333333; }
 .resumen .titulo { position: absolute; left: 0; right: 0; text-align: center; color: var(--naranja); font-size: 14px; }
 .resumen .hr { position: absolute; left: 2px; right: 2px; top: 38px; height: 1px; background: #EEEEEE; }
 .resumen .sep { position: absolute; height: 2px; background: #D6D6D6; }

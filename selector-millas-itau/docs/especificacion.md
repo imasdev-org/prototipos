@@ -38,7 +38,9 @@ Referencia ejecutable: [`js/reglas.js`](../js/reglas.js) (el prototipo calcula t
 - **Total** = SubTotal − Descuentos + entrega.
 - Con todo cubierto por millas: **SubTotal $ 0** y **sin fila de Descuentos**.
 
-Ejemplo (Personal Bank, retiro): 2.000 millas → SubTotal $ 1.500 · Descuentos $ -10 · Gastos de Preparación $ 0 · Millas aplicadas 2.000 · **Total $ 1.490**.
+Ejemplo (Personal Bank, envío a domicilio): 2.000 millas → SubTotal $ 1.500 · Descuentos $ -10 · Gastos de Envío $ 150 · Millas aplicadas 2.000 · **Total $ 1.640**.
+
+Con envío a domicilio, el título del Resumen dice «Con $ X más el envío es gratis», como hoy en el sitio, en lugar de «RESUMEN». En una captura del sitio se ve «Con $ 3.000 más» con SubTotal $ 0, de donde sale X = $ 3.000 − SubTotal (ya descontadas las millas). *Umbral y cálculo inferidos de esa captura: a confirmar.*
 
 ### Cuándo se saltea Forma de pago
 
@@ -54,7 +56,7 @@ Con envío a domicilio el envío siempre se paga con tarjeta: **no se saltea**.
 
 **Tipografía:** todos los textos del sitio van en **Myriad Pro**, como hoy (`MyriadPro-Regular`, `-Light`, `-Semibold` y `-Bold`, declaradas con `@font-face` en `webapp/Itau/static/hanoi.sass`). En Penpot los textos están en Source Sans 3 porque Penpot no tiene Myriad Pro; el prototipo usa Myriad Pro si está instalada en el equipo y, si no, Source Sans 3.
 
-**Campo de millas en foco** (ficha y Entrega): borde `#FE9A5A` y aureola suave de 3 px `rgba(253, 212, 185, .45)` (el durazno de la pista del control, al 45 %).
+**Campo de millas en foco** (ficha y Entrega): solo una aureola de 3 px en el naranja de los botones con transparencia, `box-shadow: 0 0 0 3px rgba(255, 98, 0, .2)`. El borde no cambia.
 
 ### Ficha de producto
 
@@ -141,7 +143,7 @@ Regla: en Personal Bank el azul marino es para el precio con millas, el control 
 ## 7. Simplificaciones del prototipo
 
 - Las pantallas son HTML generado desde el diseño en Penpot (`herramientas/`): textos, cajas y vectores reales en posición absoluta, como en el diseño. Las fotos y logos son las imágenes del sitio. Lo que cambia con el estado (selector, tarjeta, Resumen, totales, contador, cliente común) son componentes vivos.
-- Desktop recorre **retiro** (Gastos de Preparación $ 0); mobile recorre **envío a domicilio** (Gastos de Envío $ 150).
+- Desktop y mobile recorren **envío a domicilio** (Gastos de Envío $ 150; dirección de ejemplo «Casa · Bv. Artigas 1234»). Por eso el salteo de Forma de pago no se puede recorrer en el prototipo: necesita una entrega sin costo. En Penpot quedan las pantallas de retiro con ese caso.
 - Desktop ocupa todo el ancho de la ventana con el contenido en 1200 px centrados, como el sitio. Con ventanas de menos de 1232 px el prototipo achica la pantalla proporcionalmente en vez de reacomodarla.
 - En el carrito completo, la columna del Resumen llega hasta el pie para que se vea el efecto fijo con solo 3 productos.
 - El aceite agregado desde la ficha **no aparece** en la lista del carrito (el carrito del diseño tiene 3 productos).

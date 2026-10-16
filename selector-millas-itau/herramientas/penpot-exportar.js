@@ -15,7 +15,7 @@ const TABLEROS = {
   'cajon-mobile': 'Propuesta · 02 Carrito lateral · Mobile 390 (panel 351)',
   'carrito-desktop': 'Propuesta · 03 Carrito completo · Desktop 1440',
   'carrito-mobile': 'Propuesta · 03 Carrito completo · Mobile 390',
-  'entrega-desktop': 'Propuesta · 04 Checkout · Entrega (retiro) · millas parcial · síntesis: tarjeta antes de Tu pedido · Desktop 1440',
+  'entrega-desktop': 'Propuesta · 04 Checkout · Entrega (domicilio) · millas parcial · síntesis · Desktop 1440',
   'entrega-mobile': 'Propuesta · 04 Checkout · Entrega (domicilio) · millas parcial · síntesis · Mobile 390'
 };
 
