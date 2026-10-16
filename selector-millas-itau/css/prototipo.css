@@ -1,4 +1,14 @@
+/* Tipografía del sitio: Myriad Pro (la del sitio de Itaú). Se toma de las fuentes instaladas en el equipo;
+   si no está instalada, se usa Source Sans 3, que es la que reemplaza a Myriad Pro en el diseño de Penpot. */
+@font-face { font-family: 'Myriad Sitio'; font-weight: 300; src: local('MyriadPro-Light'), local('Myriad Pro Light'); }
+@font-face { font-family: 'Myriad Sitio'; font-weight: 400 500; src: local('MyriadPro-Regular'), local('Myriad Pro Regular'), local('Myriad Pro'); }
+@font-face { font-family: 'Myriad Sitio'; font-weight: 400 500; font-style: italic; src: local('MyriadPro-It'), local('Myriad Pro Italic'); }
+@font-face { font-family: 'Myriad Sitio'; font-weight: 600; src: local('MyriadPro-Semibold'), local('Myriad Pro Semibold'); }
+@font-face { font-family: 'Myriad Sitio'; font-weight: 600; font-style: italic; src: local('MyriadPro-SemiboldIt'), local('Myriad Pro Semibold Italic'); }
+@font-face { font-family: 'Myriad Sitio'; font-weight: 700 900; src: local('MyriadPro-Bold'), local('Myriad Pro Bold'); }
+
 :root {
+  --fuente-sitio: 'Myriad Sitio', 'Source Sans 3', sans-serif;
   --barra: 56px;
   --z: 1;
   --naranja: #FF6200;
@@ -30,7 +40,9 @@ html, body {
   background: #1F2430; color: #fff; font-size: 13px; white-space: nowrap;
 }
 #barra .titulo { font-weight: 700; font-size: 14px; margin-right: 4px; }
-#barra .grupo { display: inline-flex; align-items: center; gap: 8px; }
+/* cada grupo: nombre arriba, opciones abajo */
+#barra .grupo { display: inline-flex; flex-direction: column; align-items: flex-start; gap: 3px; }
+#barra .grupo > span { font-size: 11px; letter-spacing: .02em; }
 /* separador entre grupos de controles */
 #barra .grupo + .grupo { border-left: 1px solid #3B4254; padding-left: 20px; }
 #barra [hidden] { display: none !important; }
@@ -85,7 +97,7 @@ body.barra-plegada #solapa { display: inline-flex; }
 .lienzo .banda { position: absolute; left: 0; right: 0; }
 .lienzo > .pantalla { position: absolute; top: 0; }
 /* overflow: clip (no hidden) para no romper el Resumen con position: sticky */
-.pantalla { position: relative; background: #fff; overflow: clip; }
+.pantalla { position: relative; background: #fff; overflow: clip; font-family: var(--fuente-sitio); }
 .capa { position: absolute; }
 .zona { position: absolute; cursor: pointer; border-radius: 8px; background: transparent; border: 0; padding: 0; }
 
@@ -97,8 +109,8 @@ body.barra-plegada #solapa { display: inline-flex; }
 
 /* Encabezado del carrito lateral: «$ X + N millas» */
 .total-cajon { position: absolute; display: flex; align-items: baseline; gap: 5px; color: #464646; white-space: nowrap; }
-.total-cajon .importe { font: 400 18px/1.44 'Source Sans 3', sans-serif; }
-.total-cajon .unidad { font: italic 400 15px/1.4 'Source Sans 3', sans-serif; }
+.total-cajon .importe { font: 400 18px/1.44 var(--fuente-sitio); }
+.total-cajon .unidad { font: italic 400 15px/1.4 var(--fuente-sitio); }
 .zona:focus-visible { outline: 3px solid #223F83; outline-offset: 2px; }
 /* Pista de zonas interactivas: aparece un momento al tocar un lugar que no hace nada */
 .ver-zonas .zona, .ver-zonas .boton-continuar, .ver-zonas .boton-max, .ver-zonas .campo, .ver-zonas .control {
@@ -161,16 +173,16 @@ body.barra-plegada #solapa { display: inline-flex; }
 }
 .campo input {
   border: 0; outline: 0; background: transparent; padding: 0; margin: 0; min-width: 0; width: 100%;
-  text-align: right; font: 400 16px 'Source Sans 3', sans-serif; color: #000;
+  text-align: right; font: 400 16px var(--fuente-sitio); color: #000;
 }
 .campo span { font-size: 13px; color: #636363; }
-.campo:focus-within { border-color: #8C9BC4; }
+.campo:focus-within { border-color: #FE9A5A; box-shadow: 0 0 0 3px #FDD4B9; }
 
 /* "Usar el máximo" (botón de la ficha, funciona como interruptor) */
 .boton-max {
   position: absolute; display: flex; align-items: center; justify-content: center;
   background: #fff; border: 1px solid #FF6200; color: var(--naranja-oscuro);
-  font: 400 14px 'Source Sans 3', sans-serif; cursor: pointer; padding: 0;
+  font: 400 14px var(--fuente-sitio); cursor: pointer; padding: 0;
 }
 .boton-max[aria-pressed="true"] { background: var(--naranja-suave-activo); border: 2px solid #DE5500; font-weight: 600; }
 
@@ -210,7 +222,7 @@ body.barra-plegada #solapa { display: inline-flex; }
 /* Botón Continuar (cambia de texto al saltear el pago) */
 .boton-continuar {
   position: absolute; display: flex; align-items: center; justify-content: center; border: 0; cursor: pointer;
-  background: #FF6200; color: #fff; border-radius: 17px; font: 400 14px 'Source Sans 3', sans-serif;
+  background: #FF6200; color: #fff; border-radius: 17px; font: 400 14px var(--fuente-sitio);
   box-shadow: 0 2px 4px rgba(0,0,0,.25);
 }
 

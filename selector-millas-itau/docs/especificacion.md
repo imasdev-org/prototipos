@@ -52,6 +52,10 @@ Con envío a domicilio el envío siempre se paga con tarjeta: **no se saltea**.
 
 ## 3. Pantalla por pantalla
 
+**Tipografía:** todos los textos del sitio van en **Myriad Pro**, como hoy (`MyriadPro-Regular`, `-Light`, `-Semibold` y `-Bold`, declaradas con `@font-face` en `webapp/Itau/static/hanoi.sass`). En Penpot los textos están en Source Sans 3 porque Penpot no tiene Myriad Pro; el prototipo usa Myriad Pro si está instalada en el equipo y, si no, Source Sans 3.
+
+**Campo de millas en foco** (ficha y Entrega): borde `#FE9A5A` y aureola de 3 px `#FDD4B9`, el color durazno de la pista del control.
+
 ### Ficha de producto
 
 - Precio en vivo «$ X + N millas» (26/700 y 17/600): en Personal Bank todo en azul marino `#000D3C`; en cliente común los pesos en naranja `#FF6200` y las millas en gris `#5F6062`, como hoy para quien no es Personal Bank.
@@ -59,6 +63,7 @@ Con envío a domicilio el envío siempre se paga con tarjeta: **no se saltea**.
 - **«Usar el máximo»** es un interruptor: al activarlo guarda el valor anterior y pone el máximo; al desactivarlo vuelve al valor anterior. Si se mueve el control o se edita el campo, se desactiva.
   - Normal: fondo blanco, borde 1 px `#FF6200`, texto `#DE5500`.
   - Activo: fondo `#FEEEE3`, borde 2 px `#DE5500`, texto semibold. `aria-pressed="true"`.
+- Título «ELEGÍ LAS MILLAS A USAR»: 12 px, `font-weight: 600`, `#464646`, `letter-spacing: .04em`. Subtítulo «Tus millas disponibles: **N**»: 12 px `#828282` con el número en 600 `#464646` (mismo criterio que «Millas disponibles» en Entrega).
 - Orden del selector: «ELEGÍ LAS MILLAS A USAR» → «Tus millas disponibles: N» → control con su escala → campo y «Usar el máximo» → aclaración. El saldo va arriba del control porque es un dato para decidir, igual que en la tarjeta de Entrega (pregunta → saldo → control).
 - Aclaración **siempre visible** como texto de ayuda justo debajo del campo: «Es un estimado: al pagar se ajusta al total del pedido y a tus millas.» (12 px `#828282`; puede ocupar dos renglones). Va visible y no en un tooltip: es lo que evita la sorpresa al pagar, y en mobile un tooltip pide un toque que casi nadie da. Queda inmediatamente antes de «Agregar al Carrito».
 - **«Agregar al Carrito»** solo sube el contador del ícono; el carrito lateral se abre tocando el ícono.
@@ -70,7 +75,7 @@ Con envío a domicilio el envío siempre se paga con tarjeta: **no se saltea**.
 - Encabezado «$ X + N millas»: N = valor inicial del checkout (suma de las fichas **con tope**). Hoy el sitio suma sin tope (caso real: 8.324 millas con saldo 6.058).
 - Por el tope, el carrito puede mostrar **menos millas que las elegidas en las fichas**. Pasa en dos casos:
   - **Descuentos**: la ficha calcula su máximo sin promociones. El aceite solo, con «Usar el máximo» en la ficha (801), aplica 720 en el carrito ($ 375 × 1,92).
-  - **Varios productos o saldo insuficiente**: la suma de lo elegido en las fichas supera el máximo del pedido o el saldo. En el prototipo: «Fichas: 6.000» topea en el máximo del pedido (4.861); con «Saldo: 3.000», topea en el saldo (3.000).
+  - **Varios productos o saldo insuficiente**: la suma de lo elegido en las fichas supera el máximo del pedido o el saldo. En el prototipo: «Millas elegidas en los productos: 6.000» se recorta al máximo del pedido (4.861); con «Saldo de millas: 3.000», al saldo (3.000).
   - El carrito no muestra un aviso: la aclaración de la ficha ya anticipa que es un estimado.
 - Sin millas por producto en las líneas.
 - El Resumen del carrito completo usa el mismo cálculo que el checkout.

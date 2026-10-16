@@ -48,7 +48,8 @@ function estiloTexto(t, fuentes) {
   const fam = t.fontFamily && t.fontFamily !== 'mixed' ? t.fontFamily : null;
   if (fam) fuentes.add(fam);
   let s = '';
-  if (fam) s += `font-family:'${fam}',sans-serif;`;
+  // En Penpot, Source Sans 3 reemplaza a Myriad Pro (la fuente del sitio): en el HTML va Myriad Pro primero
+  if (fam) s += fam === 'Source Sans 3' ? "font-family:'Myriad Sitio','Source Sans 3',sans-serif;" : `font-family:'${fam}',sans-serif;`;
   if (t.fontSize && t.fontSize !== 'mixed') s += `font-size:${t.fontSize}px;`;
   if (t.fontWeight && t.fontWeight !== 'mixed') s += `font-weight:${t.fontWeight};`;
   if (t.fontStyle === 'italic') s += 'font-style:italic;';

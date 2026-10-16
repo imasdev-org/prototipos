@@ -187,8 +187,11 @@
     var precio = pos(el('div', { class: 'txt', style: 'display:flex;align-items:baseline;gap:11px' }), P2.x, P2.precioY);
     var pesos = el('span', { style: 'font-size:26px;font-weight:700;line-height:37px' }), mil = el('span', { style: 'font-size:17px;font-weight:600' });
     precio.appendChild(pesos); precio.appendChild(mil); g.appendChild(precio);
-    g.appendChild(texto('ELEGÍ LAS MILLAS A USAR', '', P2.x, P2.rotuloY, 'font-size:12px;color:#5F6062'));
-    g.appendChild(texto('Tus millas disponibles: ' + R.miles(R.saldo()), '', P2.x, P2.dispY, 'font-size:12px;color:#828282'));
+    // Título: semibold, más oscuro y con aire entre letras; subtítulo: texto gris con el número destacado
+    g.appendChild(texto('ELEGÍ LAS MILLAS A USAR', '', P2.x, P2.rotuloY, 'font-size:12px;font-weight:600;color:#464646;letter-spacing:.04em'));
+    var disponibles = texto('', '', P2.x, P2.dispY, 'font-size:12px;color:#828282');
+    disponibles.innerHTML = 'Tus millas disponibles: <b style="font-weight:600;color:#464646">' + R.miles(R.saldo()) + '</b>';
+    g.appendChild(disponibles);
     var obj = estado.ficha, max = R.FICHA.maximo;
     var control = crearControl({ x: P2.x, y: P2.controlY, ancho: P2.ancho, etiqueta: 'Millas para este producto',
       alCambiar: function (v) { cambiarMillas(obj, v, max); repintarTodo(); } });
@@ -337,7 +340,7 @@
       { d: [950, 30], m: [290, 30], t: 'Menú de usuario como en el sitio: etiqueta «Personal», nombre y saldo de millas. El cliente común no lleva la etiqueta «Personal» (en mobile, el ícono PB).' }
     ],
     cajon: [
-      { d: [190, 99], m: [175, 99], t: 'Encabezado «$ X + N millas»: N es el menor entre la suma de lo elegido en las fichas, el saldo y el máximo del pedido (<b>tope</b>). Por eso el carrito puede mostrar <b>menos millas que las elegidas en las fichas</b>: (1) por descuentos: la ficha calcula su máximo sin promociones; el aceite solo, con «Usar el máximo» (801), aplica 720 ($ 375 × 1,92); (2) porque la suma de varias fichas supera el máximo del pedido o el saldo (probalo con «Saldo: 3.000»). No hay aviso en el carrito: la ficha ya avisa que es un estimado. Hoy el sitio suma sin tope (caso real: 8.324 millas con saldo 6.058). El tope entra en el alcance. Probalo con «Fichas: 6.000 (supera el máximo)» en la barra.' },
+      { d: [190, 99], m: [175, 99], t: 'Encabezado «$ X + N millas»: N es el menor entre la suma de lo elegido en las fichas, el saldo y el máximo del pedido (<b>tope</b>). Por eso el carrito puede mostrar <b>menos millas que las elegidas en las fichas</b>: (1) por descuentos: la ficha calcula su máximo sin promociones; el aceite solo, con «Usar el máximo» (801), aplica 720 ($ 375 × 1,92); (2) porque la suma de varias fichas supera el máximo del pedido o el saldo (probalo con «Saldo de millas: 3.000»). No hay aviso en el carrito: la ficha ya avisa que es un estimado. Hoy el sitio suma sin tope (caso real: 8.324 millas con saldo 6.058). El tope entra en el alcance. Probalo con «Millas elegidas en los productos: 6.000» en la barra.' },
       { d: [10, 420], m: [10, 420], t: 'Sin millas por producto en las líneas del carrito.' }
     ],
     carrito: [
@@ -591,7 +594,7 @@
     marcar('#b-cliente', estado.segmento);
     marcar('#b-escenario', estado.escenario);
     marcar('#b-saldo', String(R.saldo()));
-    // «Fichas» solo cambia el carrito y el checkout: en la ficha se muestra solo con el carrito lateral abierto
+    // «Millas elegidas en los productos» solo cambia el carrito y el checkout: en la ficha se muestra solo con el carrito lateral abierto
     document.getElementById('g-escenario').hidden = estado.pantalla === 'ficha' && !estado.cajon;
     document.getElementById('b-notas').setAttribute('aria-pressed', estado.notas ? 'true' : 'false');
   }
