@@ -18,6 +18,8 @@ La barra de arriba controla el prototipo. Con la flecha de la derecha se pliega 
 | **Fichas** | Suma de las millas elegidas en las fichas: 2.000, o 6.000 para ver el tope. Aparece solo donde tiene efecto (carrito y Entrega) |
 | **Notas para desarrollo** | Muestra pines numerados sobre la pantalla y un panel con las reglas de cada parte |
 
+Tocando un lugar de la pantalla que no hace nada se marcan por un momento las zonas que sí responden.
+
 Para probar el salteo de Forma de pago: Vista **Desktop** → **Entrega** → «Usar el máximo».
 
 ## Correrlo localmente

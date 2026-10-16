@@ -19,7 +19,8 @@ function fondo(f, rutaImg) {
   // en CSS solo la última capa puede ser un color: las demás van como degradé plano
   const partes = capas.map(c => c.img || c.grad || `linear-gradient(${c.c}, ${c.c})`);
   const hayImg = capas.some(c => c.img);
-  return `background-image:${partes.join(',')};` + (hayImg ? 'background-size:100% 100%;background-repeat:no-repeat;' : '');
+  // Las fotos se ajustan sin deformar (contain): en el diseño importado algunas cajas no tienen la proporción de la foto
+  return `background-image:${partes.join(',')};` + (hayImg ? 'background-size:contain;background-position:center;background-repeat:no-repeat;' : '');
 }
 function sombras(n) {
   const out = (n.sh || []).map(s => `${s.in ? 'inset ' : ''}${r2(s.x)}px ${r2(s.y)}px ${r2(s.b)}px ${r2(s.s || 0)}px ${s.c}`);

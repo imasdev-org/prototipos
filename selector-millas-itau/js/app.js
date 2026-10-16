@@ -620,6 +620,13 @@
     document.getElementById('b-plegar').addEventListener('click', function () { plegar(true); });
     document.getElementById('solapa').addEventListener('click', function () { plegar(false); });
     var t; window.addEventListener('resize', function () { clearTimeout(t); t = setTimeout(function () { render(false); }, 120); });
+    // Tocar un lugar que no hace nada marca por un momento las zonas que sí responden
+    var esc = document.getElementById('escenario'), pista;
+    esc.addEventListener('click', function (ev) {
+      if (ev.target.closest('button, a, input, label, select, textarea, [role="slider"], .cajon-fondo')) return;
+      esc.classList.remove('ver-zonas'); void esc.offsetWidth; esc.classList.add('ver-zonas');
+      clearTimeout(pista); pista = setTimeout(function () { esc.classList.remove('ver-zonas'); }, 1300);
+    });
     render(true);
   }
   document.addEventListener('DOMContentLoaded', iniciar);
