@@ -62,10 +62,11 @@ Con envío a domicilio el envío siempre se paga con tarjeta: **no se saltea**.
 - Control, campo y botón **sincronizados**; el valor se acota entre 0 y 801.
 - **«Usar el máximo»** es un interruptor: al activarlo guarda el valor anterior y pone el máximo; al desactivarlo vuelve al valor anterior. Si se mueve el control o se edita el campo, se desactiva.
   - Normal: fondo blanco, borde 1 px `#FF6200`, texto `#DE5500`.
-  - Activo: fondo `#FEEEE3`, borde 2 px `#DE5500` y texto engrosado **sin cambiar el ancho de la frase**: `-webkit-text-stroke: .5px currentColor` sobre el peso normal (con `font-weight: 600` la frase se ensancha un 3,7 % y se mueve). `aria-pressed="true"`.
-- Título «ELEGÍ LAS MILLAS A USAR»: 12 px, `font-weight: 600`, `#464646`, `letter-spacing: .04em`. Subtítulo «Tus millas disponibles: **N**»: 12 px `#828282` con el número en 600 `#464646` (mismo criterio que «Millas disponibles» en Entrega).
+  - Activo: fondo `#FEEEE3`, borde 2 px `#DE5500` y texto en semibold (600), como hoy. `aria-pressed="true"`.
+  - La frase **no cambia de ancho** al activarse: el estado normal lleva `letter-spacing: .017em`, que en Myriad Pro 14 px la lleva de 89,7 a 93 px, lo mismo que mide en semibold. Sin esa compensación, la frase se ensancha un 3,7 % y se mueve.
+- Título «ELEGÍ LAS MILLAS A USAR»: 12 px, `font-weight: 600`, `#464646`, `letter-spacing: .04em`. Subtítulo «Tus millas disponibles: **N**»: 12 px `#767676` con el número en 600 `#464646` (mismo criterio que «Millas disponibles» en Entrega).
 - Orden del selector: «ELEGÍ LAS MILLAS A USAR» → «Tus millas disponibles: N» → control con su escala → campo y «Usar el máximo» → aclaración. El saldo va arriba del control porque es un dato para decidir, igual que en la tarjeta de Entrega (pregunta → saldo → control).
-- Aclaración **siempre visible** como texto de ayuda justo debajo del campo: «Es un estimado: al pagar se ajusta al total del pedido y a tus millas.» (12 px `#828282`; puede ocupar dos renglones). Va visible y no en un tooltip: es lo que evita la sorpresa al pagar, y en mobile un tooltip pide un toque que casi nadie da. Queda inmediatamente antes de «Agregar al Carrito».
+- Aclaración **siempre visible** como texto de ayuda justo debajo del campo: «Es un estimado: al pagar se ajusta al total del pedido y a tus millas.» (12 px `#767676`; puede ocupar dos renglones). Va visible y no en un tooltip: es lo que evita la sorpresa al pagar, y en mobile un tooltip pide un toque que casi nadie da. Queda inmediatamente antes de «Agregar al Carrito».
 - **«Agregar al Carrito»** solo sube el contador del ícono; el carrito lateral se abre tocando el ícono.
 - Lo elegido se guarda en el producto y se suma en el checkout.
 - Menú de usuario del encabezado (desktop), como en el sitio: etiqueta «Personal» (fondo `#000D3C`, texto blanco 9 px), nombre (14/300) y saldo «100.000 millas» (12/600 `#FF6200`) alineados a la derecha. El cliente común no lleva la etiqueta «Personal»; en mobile, tampoco el ícono PB.
@@ -88,7 +89,7 @@ Con envío a domicilio el envío siempre se paga con tarjeta: **no se saltea**.
 - Tarjeta **«Tus millas»** después del tipo de entrega y la sucursal o dirección (ahí el monto a pagar ya es definitivo) y **antes de «Tu pedido»**.
   - Mismo lenguaje que «Tu pedido»: fondo blanco, radio 15, sombra `0 0 2px #CCCCCC`, banda `#3E3F40` (35 px desktop, 46 px mobile) con el título en 16/700 blanco.
   - Pregunta «¿Cuántas millas querés usar?» (18 px `#464646`) y «Millas disponibles: **100.000**» (14 px).
-  - Control (desktop 470 px, mobile 305 px) con escala «0 … Máximo para este pedido: N» (12 px `#828282`).
+  - Control (desktop 470 px, mobile 305 px) con escala «0 … Máximo para este pedido: N» (12 px `#767676`).
   - Campo (166 × 34 desktop, 154 × 34 mobile; borde `#CCCCCC`, radio 4, valor 16/400 alineado a la derecha + «millas»).
   - «Usar el máximo»: el mismo componente de la ficha, alto 34 y radio 4.
   - Etiqueta **«Ahorrás $ X»** arriba a la derecha (alto 26, radio 4, ícono Lucide `piggy-bank` 16 px; monto con `font-weight: 600`). Se muestra **una sola vez**.
@@ -127,6 +128,7 @@ Regla: en Personal Bank el azul marino es para el precio con millas, el control 
 
 - El control es `role="slider"` con `aria-valuemin/max/now` y `aria-valuetext` («N millas»), y se opera con teclado.
 - «Usar el máximo» es un botón con `aria-pressed`.
+- Textos grises chicos del selector (escala, saldo de la ficha, aclaración): `#767676`, que da 4,54:1 sobre blanco y cumple WCAG AA. El `#828282` anterior daba 3,84:1.
 - El campo acepta solo dígitos (`inputmode="numeric"`), no deja superar el máximo y al salir muestra el valor con separador de miles.
 
 ## 6. A confirmar

@@ -189,14 +189,14 @@
     precio.appendChild(pesos); precio.appendChild(mil); g.appendChild(precio);
     // Título: semibold, más oscuro y con aire entre letras; subtítulo: texto gris con el número destacado
     g.appendChild(texto('ELEGÍ LAS MILLAS A USAR', '', P2.x, P2.rotuloY, 'font-size:12px;font-weight:600;color:#464646;letter-spacing:.04em'));
-    var disponibles = texto('', '', P2.x, P2.dispY, 'font-size:12px;color:#828282');
+    var disponibles = texto('', '', P2.x, P2.dispY, 'font-size:12px;color:#767676');
     disponibles.innerHTML = 'Tus millas disponibles: <b style="font-weight:600;color:#464646">' + R.miles(R.saldo()) + '</b>';
     g.appendChild(disponibles);
     var obj = estado.ficha, max = R.FICHA.maximo;
     var control = crearControl({ x: P2.x, y: P2.controlY, ancho: P2.ancho, etiqueta: 'Millas para este producto',
       alCambiar: function (v) { cambiarMillas(obj, v, max); repintarTodo(); } });
     g.appendChild(control.nodo);
-    var escala = pos(el('div', { class: 'txt', style: 'display:flex;justify-content:space-between;font-size:14px;color:#828282' }), P2.x, P2.escalaY, P2.ancho);
+    var escala = pos(el('div', { class: 'txt', style: 'display:flex;justify-content:space-between;font-size:14px;color:#767676' }), P2.x, P2.escalaY, P2.ancho);
     escala.appendChild(el('span', null, '0')); escala.appendChild(el('span', null, 'Máximo para este producto: ' + R.miles(max)));
     g.appendChild(escala);
     var campo = crearCampo({ x: P2.campo[0], y: P2.campo[1], w: P2.campo[2], h: P2.campo[3], borde: '#C8CFE1', radio: 5,
@@ -204,7 +204,7 @@
     var boton = crearBotonMax({ x: P2.boton[0], y: P2.boton[1], w: P2.boton[2], h: P2.boton[3], radio: 5,
       alTocar: function () { alternarMaximo(obj, max); repintarTodo(); } });
     g.appendChild(campo.nodo); g.appendChild(boton.nodo);
-    var aclaracion = texto('Es un estimado: al pagar se ajusta al total del pedido y a tus millas.', '', P2.x, P2.ajusY, 'font-size:12px;color:#828282;white-space:normal');
+    var aclaracion = texto('Es un estimado: al pagar se ajusta al total del pedido y a tus millas.', '', P2.x, P2.ajusY, 'font-size:12px;color:#767676;white-space:normal');
     aclaracion.style.width = P2.ancho + 'px';
     g.appendChild(aclaracion);
     return {
@@ -335,7 +335,7 @@
     ficha: [
       { d: [893, 300], m: [8, 535], t: 'La ficha es un <b>semi-simulador</b>: en la ficha no se conocen los descuentos, así que el máximo se calcula sobre el precio sin promoción ($ 417 × 1,92 = 801). El ajuste fino se hace al pagar, y por eso la aclaración visible: «Es un estimado: al pagar se ajusta al total del pedido y a tus millas.» (siempre visible, sin tooltip), como texto de ayuda justo debajo del campo. El saldo va arriba del control, como en la tarjeta de Entrega. Lo elegido se guarda en el producto y se suma en el checkout.' },
       { d: [893, 352], m: [8, 586], t: 'Precio = precio sin promoción − millas ÷ 1,92, redondeado y nunca menor a $ 0. Valor por defecto: la mitad del máximo (sin cambios respecto de hoy). Rótulos fijos: solo cambian los valores. Colores del precio: Personal Bank todo en azul marino <code>#000D3C</code>; cliente común pesos en naranja <code>#FF6200</code> y millas en gris <code>#5F6062</code>, como hoy para quien no es Personal Bank.' },
-      { d: [1234, 472], m: [376, 707], t: '<b>«Usar el máximo»</b> funciona como interruptor. Activo: fondo <code>#FEEEE3</code>, borde 2 px <code>#DE5500</code> y texto engrosado <b>sin cambiar el ancho de la frase</b> (<code>-webkit-text-stroke: .5px currentColor</code>; <code>font-weight: 600</code> la ensancha un 3,7 %). Al desactivarlo vuelve al valor anterior. Si se mueve el control o se edita el campo, se desactiva.' },
+      { d: [1234, 472], m: [376, 707], t: '<b>«Usar el máximo»</b> funciona como interruptor. Activo: fondo <code>#FEEEE3</code>, borde 2 px <code>#DE5500</code> y texto en semibold, como hoy. Para que la frase <b>no cambie de ancho</b> al activarse, el estado normal lleva <code>letter-spacing: .017em</code> (Myriad Pro 14 px: semibold 93 px, normal 89,7 px). Al desactivarlo vuelve al valor anterior. Si se mueve el control o se edita el campo, se desactiva.' },
       { d: [893, 568], m: [8, 803], t: '«Agregar al carrito» solo sube el contador del ícono; el carrito lateral se abre tocando el ícono. <b>En este prototipo el aceite no aparece en la lista del carrito</b> (simplificación: el carrito del diseño tiene 3 productos).' },
       { d: [950, 30], m: [290, 30], t: 'Menú de usuario como en el sitio: etiqueta «Personal», nombre y saldo de millas. El cliente común no lleva la etiqueta «Personal» (en mobile, el ícono PB).' }
     ],

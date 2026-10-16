@@ -16,7 +16,7 @@
   --naranja-suave-activo: #FEEEE3;
   --gris-titulo: #464646;
   --gris-texto: #5F6062;
-  --gris-ayuda: #828282;
+  --gris-ayuda: #767676; /* 4,54:1 sobre blanco (WCAG AA para texto chico) */
   --borde-campo: #CCCCCC;
   --azul-acento: #223F83;
   --azul-pb: #000D3C;
@@ -184,8 +184,10 @@ body.barra-plegada #solapa { display: inline-flex; }
   background: #fff; border: 1px solid #FF6200; color: var(--naranja-oscuro);
   font: 400 14px var(--fuente-sitio); cursor: pointer; padding: 0;
 }
-/* Activo: el texto se engrosa con un trazo y no con font-weight 600, que ensancha la frase (~3,7 %) */
-.boton-max[aria-pressed="true"] { background: var(--naranja-suave-activo); border: 2px solid #DE5500; -webkit-text-stroke: .5px currentColor; }
+/* Activo en semibold, como en el sitio. Para que la frase no cambie de ancho al activarse, el estado
+   normal lleva un espaciado de .017em: en Myriad Pro 14 px la semibold mide 93 px y la normal 89,7 px. */
+.boton-max { letter-spacing: .017em; }
+.boton-max[aria-pressed="true"] { background: var(--naranja-suave-activo); border: 2px solid #DE5500; font-weight: 600; letter-spacing: 0; }
 
 /* Tarjeta "Tus millas" (mismo lenguaje que "Tu pedido") */
 .tarjeta-millas { position: absolute; background: #fff; border-radius: 15px; box-shadow: 0 0 2px #CCCCCC; overflow: hidden; }
