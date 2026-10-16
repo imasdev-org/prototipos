@@ -112,16 +112,17 @@ body.barra-plegada #solapa { display: inline-flex; }
 .total-cajon .importe { font: 400 18px/1.44 var(--fuente-sitio); }
 .total-cajon .unidad { font: italic 400 15px/1.4 var(--fuente-sitio); }
 .zona:focus-visible { outline: 3px solid #223F83; outline-offset: 2px; }
-/* Pista de zonas interactivas: aparece un momento al tocar un lugar que no hace nada */
+/* Pista de zonas interactivas: al tocar un lugar que no hace nada, las zonas que responden se marcan
+   un momento con un recuadro azul claro (como las "hotspot hints" de Figma) y se apagan solas */
 .ver-zonas .zona, .ver-zonas .boton-continuar, .ver-zonas .boton-max, .ver-zonas .campo, .ver-zonas .control {
-  animation: pista-zona 1.2s ease-out;
+  animation: pista-zona .9s ease-out;
 }
 @keyframes pista-zona {
-  0%, 55% { outline: 2px solid rgba(34, 63, 131, .75); outline-offset: 2px; background-color: rgba(34, 63, 131, .10); }
-  100% { outline: 2px solid rgba(34, 63, 131, 0); outline-offset: 2px; }
+  0%, 40% { outline: 1px solid rgba(13, 153, 255, .55); outline-offset: 0; background-color: rgba(13, 153, 255, .08); }
+  100% { outline: 1px solid rgba(13, 153, 255, 0); outline-offset: 0; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .ver-zonas .zona, .ver-zonas .boton-continuar, .ver-zonas .boton-max, .ver-zonas .campo, .ver-zonas .control { animation-duration: .01s; outline: 2px solid rgba(34, 63, 131, .75); }
+  .ver-zonas .zona, .ver-zonas .boton-continuar, .ver-zonas .boton-max, .ver-zonas .campo, .ver-zonas .control { animation-duration: .01s; outline: 1px solid rgba(13, 153, 255, .55); }
 }
 
 /* ---------- Teléfono (mobile) ---------- */
