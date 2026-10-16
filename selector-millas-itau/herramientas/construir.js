@@ -40,11 +40,11 @@ const PANTALLAS = {
   },
   'entrega-desktop': { // envío a domicilio
     omitir: ['fef93d', 'feb921', '00be9b'],
-    marcar: { feb919: 'tab-pago', feb91d: 'tab-confirmacion', feb8ff: 'ancla-izquierda' }
+    marcar: { feb919: 'tab-pago', feb91d: 'tab-confirmacion', feb8ff: 'ancla-izquierda', '006e82': 'rut', '52ab42': 'casilla-rut' }
   },
   'entrega-mobile': {
     omitir: ['c9a5ef'],
-    marcar: {}
+    marcar: { ffc169: 'rut', '65c8ad': 'casilla-rut' }
   }
 };
 

@@ -73,7 +73,8 @@
       segmento: previo ? previo.segmento : 'pb',
       notas: previo ? previo.notas : false,
       ficha: { millas: R.FICHA.porDefecto, previo: null, maxActivo: false, agregado: false },
-      pedido: { millas: null, previo: null, maxActivo: false }
+      pedido: { millas: null, previo: null, maxActivo: false },
+      facturaRut: false
     };
   }
   function maximoPedido() { return R.maximoPedido(estado.segmento); }
@@ -396,6 +397,20 @@
   }
   function irA(p) { estado.pantalla = p; estado.cajon = false; render(true); }
 
+  // «Necesito factura con RUT»: la etiqueta generada pasa a ser un <label> y el dibujo de Penpot se cambia
+  // por el checkbox nativo del navegador en el mismo lugar (en el sitio es el nativo, sin estilo propio).
+  function casillaRut(raiz) {
+    var etiqueta = marca(raiz, 'rut'), dibujo = marca(raiz, 'casilla-rut');
+    if (!etiqueta || !dibujo) return;
+    var lbl = el('label', { class: 'b etiqueta-rut', style: etiqueta.getAttribute('style') });
+    while (etiqueta.firstChild) lbl.appendChild(etiqueta.firstChild);
+    etiqueta.parentNode.replaceChild(lbl, etiqueta);
+    var check = pos(el('input', { type: 'checkbox' }), parseFloat(dibujo.style.left), parseFloat(dibujo.style.top));
+    check.checked = estado.facturaRut;
+    check.addEventListener('change', function () { estado.facturaRut = check.checked; });
+    lbl.replaceChild(check, dibujo);
+  }
+
   function construirPantalla() {
     var v = estado.vista, d = v === 'desktop', p = estado.pantalla;
     var s = pantallaGenerada(p + '-' + v);
@@ -435,6 +450,7 @@
 
     if (p === 'entrega') {
       var tj = crearTarjeta(v, repintarTodo); s.appendChild(tj.nodo); actualizadores.push(tj.actualizar);
+      casillaRut(s);
       if (d) {
         var col = columnaResumen(alto); s.appendChild(col.nodo);
         actualizadores.push(function () { pintarResumen(col.caja, resumenActual()); });

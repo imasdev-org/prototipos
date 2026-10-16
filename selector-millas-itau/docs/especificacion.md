@@ -56,7 +56,7 @@ Con envío a domicilio el envío siempre se paga con tarjeta: **no se saltea**.
 
 **Tipografía:** todos los textos del sitio van en **Myriad Pro**, como hoy (`MyriadPro-Regular`, `-Light`, `-Semibold` y `-Bold`, declaradas con `@font-face` en `webapp/Itau/static/hanoi.sass`). En Penpot los textos están en Source Sans 3 porque Penpot no tiene Myriad Pro; el prototipo usa Myriad Pro si está instalada en el equipo y, si no, Source Sans 3.
 
-**Campo de millas en foco** (ficha y Entrega): solo una aureola de 3 px en el naranja de los botones con transparencia, `box-shadow: 0 0 0 3px rgba(255, 98, 0, .2)`. El borde no cambia.
+**Campo de millas en foco** (ficha y Entrega): el borde y una aureola difuminada toman el mismo color, el naranja de los botones con transparencia: `border-color: rgba(255, 98, 0, .2); box-shadow: 0 0 6px 3px rgba(255, 98, 0, .2)`.
 
 ### Ficha de producto
 
@@ -143,7 +143,7 @@ Regla: en Personal Bank el azul marino es para el precio con millas, el control 
 ## 7. Simplificaciones del prototipo
 
 - Las pantallas son HTML generado desde el diseño en Penpot (`herramientas/`): textos, cajas y vectores reales en posición absoluta, como en el diseño. Las fotos y logos son las imágenes del sitio. Lo que cambia con el estado (selector, tarjeta, Resumen, totales, contador, cliente común) son componentes vivos.
-- Desktop y mobile recorren **envío a domicilio** (Gastos de Envío $ 150; dirección de ejemplo «Casa · Bv. Artigas 1234»). Por eso el salteo de Forma de pago no se puede recorrer en el prototipo: necesita una entrega sin costo. En Penpot quedan las pantallas de retiro con ese caso.
+- Desktop y mobile recorren **envío a domicilio** (Gastos de Envío $ 150; dirección de ejemplo «Bv. Artigas 1234»). Por eso el salteo de Forma de pago no se puede recorrer en el prototipo: necesita una entrega sin costo. En Penpot quedan las pantallas de retiro con ese caso.
 - Desktop ocupa todo el ancho de la ventana con el contenido en 1200 px centrados, como el sitio. Con ventanas de menos de 1232 px el prototipo achica la pantalla proporcionalmente en vez de reacomodarla.
 - En el carrito completo, la columna del Resumen llega hasta el pie para que se vea el efecto fijo con solo 3 productos.
 - El aceite agregado desde la ficha **no aparece** en la lista del carrito (el carrito del diseño tiene 3 productos).
