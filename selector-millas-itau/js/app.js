@@ -628,7 +628,7 @@
     esc.addEventListener('click', function (ev) {
       if (ev.target.closest('button, a, input, label, select, textarea, [role="slider"], .cajon-fondo')) return;
       esc.classList.remove('ver-zonas'); void esc.offsetWidth; esc.classList.add('ver-zonas');
-      clearTimeout(pista); pista = setTimeout(function () { esc.classList.remove('ver-zonas'); }, 1000);
+      clearTimeout(pista); pista = setTimeout(function () { esc.classList.remove('ver-zonas'); }, 700);
     });
     render(true);
   }

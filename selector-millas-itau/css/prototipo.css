@@ -112,17 +112,27 @@ body.barra-plegada #solapa { display: inline-flex; }
 .total-cajon .importe { font: 400 18px/1.44 var(--fuente-sitio); }
 .total-cajon .unidad { font: italic 400 15px/1.4 var(--fuente-sitio); }
 .zona:focus-visible { outline: 3px solid #223F83; outline-offset: 2px; }
-/* Pista de zonas interactivas: al tocar un lugar que no hace nada, las zonas que responden se marcan
-   un momento con un recuadro azul claro (como las "hotspot hints" de Figma) y se apagan solas */
-.ver-zonas .zona, .ver-zonas .boton-continuar, .ver-zonas .boton-max, .ver-zonas .campo, .ver-zonas .control {
-  animation: pista-zona .9s ease-out;
+/* Pista de zonas interactivas, igual a las "hotspot hints" de Figma (medidas en prototipos públicos de Figma):
+   al tocar un lugar que no hace nada, cada zona que responde se cubre con un recuadro #30C2FF, borde de 2 px
+   opaco por dentro y relleno al 50 %, encima del contenido y con esquinas rectas. Aparece de golpe, se
+   desvanece y a los 0,7 s se corta con un 14 % de opacidad todavía visible. El borde mide 2 px de pantalla
+   con cualquier zoom. */
+.ver-zonas .zona::after, .ver-zonas .boton-continuar::after, .ver-zonas .boton-max::after,
+.ver-zonas .campo::after, .ver-zonas .control::after {
+  content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  border: calc(2px / var(--z)) solid #30C2FF; background: rgba(48, 194, 255, .5); border-radius: 0;
+  opacity: 0; animation: pista-zona .7s linear;
 }
+/* Que el recuadro cubra también el borde propio del control */
+.ver-zonas .campo::after, .ver-zonas .boton-max::after { inset: -1px; }
+.ver-zonas .boton-max[aria-pressed="true"]::after { inset: -2px; }
 @keyframes pista-zona {
-  0%, 40% { outline: 1px solid rgba(13, 153, 255, .55); outline-offset: 0; background-color: rgba(13, 153, 255, .08); }
-  100% { outline: 1px solid rgba(13, 153, 255, 0); outline-offset: 0; }
+  0% { opacity: 1; } 10% { opacity: .92; } 20% { opacity: .81; } 33% { opacity: .67; } 50% { opacity: .5; }
+  66% { opacity: .37; } 80% { opacity: .25; } 90% { opacity: .19; } 100% { opacity: .14; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .ver-zonas .zona, .ver-zonas .boton-continuar, .ver-zonas .boton-max, .ver-zonas .campo, .ver-zonas .control { animation-duration: .01s; outline: 1px solid rgba(13, 153, 255, .55); }
+  .ver-zonas .zona::after, .ver-zonas .boton-continuar::after, .ver-zonas .boton-max::after,
+  .ver-zonas .campo::after, .ver-zonas .control::after { animation: none; opacity: .6; }
 }
 
 /* ---------- Teléfono (mobile) ---------- */
