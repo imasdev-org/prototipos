@@ -30,17 +30,17 @@
   var FICHA = { precioSinPromo: 417, precioConPromo: 375, porDefecto: 400 };
   FICHA.maximo = Math.round(FICHA.precioSinPromo * TASA); // 801, como hoy en el sitio
 
-  // Suma de lo elegido en las fichas de los productos del carrito.
-  var SUMA_FICHAS = { normal: 2000, tope: 6000 };
+  // Suma de lo elegido en las fichas de los productos del carrito (por ejemplo: leche 100 + cuchillo 100 + sopera 1.800).
+  var SUMA_FICHAS = 2000;
 
   function maximoPedido(segmento) {
     // Nunca más de lo que se paga por los productos (con descuentos) ni más que el saldo.
     return Math.min(SALDO, Math.floor(CARRITO[segmento].final * TASA));
   }
 
-  function valorInicialPedido(segmento, escenario) {
+  function valorInicialPedido(segmento) {
     // El checkout arranca con la suma de lo elegido en las fichas, con tope.
-    return Math.min(SUMA_FICHAS[escenario], maximoPedido(segmento));
+    return Math.min(SUMA_FICHAS, maximoPedido(segmento));
   }
 
   function acotar(valor, maximo) {

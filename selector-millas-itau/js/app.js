@@ -71,14 +71,13 @@
       pantalla: 'ficha',
       cajon: false,
       segmento: previo ? previo.segmento : 'pb',
-      escenario: 'normal',
       notas: previo ? previo.notas : false,
       ficha: { millas: R.FICHA.porDefecto, previo: null, maxActivo: false, agregado: false },
       pedido: { millas: null, previo: null, maxActivo: false }
     };
   }
   function maximoPedido() { return R.maximoPedido(estado.segmento); }
-  function millasIniciales() { return R.valorInicialPedido(estado.segmento, estado.escenario); }
+  function millasIniciales() { return R.valorInicialPedido(estado.segmento); }
   function millasPedido() {
     if (estado.pedido.millas == null) estado.pedido.millas = millasIniciales();
     return estado.pedido.millas;
@@ -340,7 +339,7 @@
       { d: [950, 30], m: [290, 30], t: 'Menú de usuario como en el sitio: etiqueta «Personal», nombre y saldo de millas. El cliente común no lleva la etiqueta «Personal» (en mobile, el ícono PB).' }
     ],
     cajon: [
-      { d: [190, 99], m: [175, 99], t: 'Encabezado «$ X + N millas»: N es el menor entre la suma de lo elegido en las fichas, el saldo y el máximo del pedido (<b>tope</b>). Por eso el carrito puede mostrar <b>menos millas que las elegidas en las fichas</b>: (1) por descuentos: la ficha calcula su máximo sin promociones; el aceite solo, con «Usar el máximo» (801), aplica 720 ($ 375 × 1,92); (2) porque la suma de varias fichas supera el máximo del pedido o el saldo (probalo con «Saldo de millas: 3.000» y «6.000 → 3.000 (tope)»). No hay aviso en el carrito: la ficha ya avisa que es un estimado. Hoy el sitio suma sin tope (caso real: 8.324 millas con saldo 6.058). El tope entra en el alcance. Probalo con «6.000 → 4.861 (tope)» en la barra.' },
+      { d: [190, 99], m: [175, 99], t: 'Encabezado «$ X + N millas»: N es el menor entre la suma de lo elegido en las fichas, el saldo y el máximo del pedido (<b>tope</b>). Por eso el carrito puede mostrar <b>menos millas que las elegidas en las fichas</b>. Casos: (1) <b>descuentos</b>: la ficha calcula su máximo sin promociones; el aceite solo, con «Usar el máximo» (801), aplica 720 ($ 375 × 1,92); con este carrito, «Usar el máximo» en las tres fichas suma 4.880 y el pedido aplica 4.861, por el descuento de Personal Bank del cuchillo ($ 100 → $ 90); (2) <b>saldo</b>: la suma supera el saldo (caso real de producción: 8.324 millas elegidas con saldo 6.058). No hay aviso en el carrito: la ficha ya avisa que es un estimado. Hoy el sitio suma sin tope; el tope entra en el alcance. En el prototipo, las fichas de este carrito suman 2.000.' },
       { d: [10, 420], m: [10, 420], t: 'Sin millas por producto en las líneas del carrito.' }
     ],
     carrito: [
@@ -592,13 +591,7 @@
     marcar('#b-pasos', estado.pantalla);
     marcar('#b-vista', estado.vista);
     marcar('#b-cliente', estado.segmento);
-    marcar('#b-escenario', estado.escenario);
     marcar('#b-saldo', String(R.saldo()));
-    // lo que el pedido aplica de lo elegido en las fichas (depende del cliente y del saldo)
-    document.getElementById('aplicadas-normal').textContent = R.miles(R.valorInicialPedido(estado.segmento, 'normal'));
-    document.getElementById('aplicadas-tope').textContent = R.miles(R.valorInicialPedido(estado.segmento, 'tope'));
-    // «Millas elegidas en las fichas → aplicadas al pedido» solo cambia el carrito y el checkout: en la ficha se muestra solo con el carrito lateral abierto
-    document.getElementById('g-escenario').hidden = estado.pantalla === 'ficha' && !estado.cajon;
     document.getElementById('b-notas').setAttribute('aria-pressed', estado.notas ? 'true' : 'false');
   }
 
@@ -620,10 +613,6 @@
     document.getElementById('b-saldo').addEventListener('click', function (e) {
       var b = e.target.closest('button'); if (!b) return;
       R.fijarSaldo(+b.dataset.valor); reiniciarPedido(); render(false);
-    });
-    document.getElementById('b-escenario').addEventListener('click', function (e) {
-      var b = e.target.closest('button'); if (!b) return;
-      estado.escenario = b.dataset.valor; reiniciarPedido(); render(false);
     });
     document.getElementById('b-notas').addEventListener('click', function () { estado.notas = !estado.notas; render(false); });
     document.getElementById('b-plegar').addEventListener('click', function () { plegar(true); });

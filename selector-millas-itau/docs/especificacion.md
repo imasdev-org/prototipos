@@ -25,7 +25,7 @@ Referencia ejecutable: [`js/reglas.js`](../js/reglas.js) (el prototipo calcula t
 | Valor por defecto en la ficha | La mitad del máximo (sin cambios respecto de hoy) | 400 |
 | Precio en la ficha | `max(0, round(precio sin promoción − millas ÷ 1,92))` | 400 millas → **$ 209** |
 | Máximo del **pedido** | `min(saldo, floor(total de productos con descuentos × 1,92))` | $ 2.532 → **4.861** (cliente común $ 2.542 → 4.880) |
-| Valor inicial en el checkout | `min(suma de lo elegido en las fichas, máximo del pedido)` | 2.000 → 2.000 · 6.000 → **4.861** |
+| Valor inicial en el checkout | `min(suma de lo elegido en las fichas, máximo del pedido)` | 2.000 → 2.000 · «Usar el máximo» en las tres fichas: 4.880 → **4.861** |
 | Orden | Las millas se aplican **después** de los descuentos (no pagan promociones y así no se usan de más) | — |
 | Envío / preparación | **No** se paga con millas (por ahora) | — |
 | Ahorro | `round(millas ÷ 1,92)` | 2.000 → **$ 1.042** |
@@ -75,8 +75,8 @@ Con envío a domicilio el envío siempre se paga con tarjeta: **no se saltea**.
 
 - Encabezado «$ X + N millas»: N = valor inicial del checkout (suma de las fichas **con tope**). Hoy el sitio suma sin tope (caso real: 8.324 millas con saldo 6.058).
 - Por el tope, el carrito puede mostrar **menos millas que las elegidas en las fichas**. Pasa en dos casos:
-  - **Descuentos**: la ficha calcula su máximo sin promociones. El aceite solo, con «Usar el máximo» en la ficha (801), aplica 720 en el carrito ($ 375 × 1,92).
-  - **Varios productos o saldo insuficiente**: la suma de lo elegido en las fichas supera el máximo del pedido o el saldo. En el prototipo, control «Millas elegidas en las fichas → aplicadas al pedido»: «6.000 → 4.861 (tope)» se recorta al máximo del pedido; con «Saldo de millas: 3.000» pasa a «6.000 → 3.000 (tope)», recortado al saldo.
+  - **Descuentos** (tope por el máximo del pedido): la ficha calcula su máximo sin descuentos y el pedido, con descuentos. El aceite solo, con «Usar el máximo» en la ficha (801), aplica 720 en el carrito ($ 375 × 1,92). Con el carrito del prototipo, «Usar el máximo» en las tres fichas suma 4.880 (157 + 192 + 4.531) y el pedido aplica 4.861, por el descuento de Personal Bank del cuchillo ($ 100 → $ 90). Con cliente común no hay descuento y entran las 4.880.
+  - **Saldo insuficiente**: la suma de lo elegido en las fichas supera el saldo. Caso real de producción: 8.324 millas elegidas con un saldo de 6.058.
   - El carrito no muestra un aviso: la aclaración de la ficha ya anticipa que es un estimado.
 - Sin millas por producto en las líneas.
 - El Resumen del carrito completo usa el mismo cálculo que el checkout.
@@ -146,3 +146,4 @@ Regla: en Personal Bank el azul marino es para el precio con millas, el control 
 - En el carrito completo, la columna del Resumen llega hasta el pie para que se vea el efecto fijo con solo 3 productos.
 - El aceite agregado desde la ficha **no aparece** en la lista del carrito (el carrito del diseño tiene 3 productos).
 - El recorrido termina en Entrega.
+- Las fichas de los productos del carrito suman 2.000 millas. El tope del carrito no se puede recorrer en el prototipo (con este carrito, el tope por descuentos es de 19 millas); queda descrito arriba. El control «Saldo de millas: 3.000» muestra en Entrega el máximo limitado por el saldo.
