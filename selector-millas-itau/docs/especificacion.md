@@ -59,7 +59,8 @@ Con envío a domicilio el envío siempre se paga con tarjeta: **no se saltea**.
 - **«Usar el máximo»** es un interruptor: al activarlo guarda el valor anterior y pone el máximo; al desactivarlo vuelve al valor anterior. Si se mueve el control o se edita el campo, se desactiva.
   - Normal: fondo blanco, borde 1 px `#FF6200`, texto `#DE5500`.
   - Activo: fondo `#FEEEE3`, borde 2 px `#DE5500`, texto semibold. `aria-pressed="true"`.
-- Debajo: «Tus millas disponibles: 100.000» y la aclaración **siempre visible** «Es un estimado: al pagar se ajusta al total del pedido y a tus millas.» (12 px `#828282`; puede ocupar dos renglones). Va visible y no en un tooltip: es lo que evita la sorpresa al pagar, y en mobile un tooltip pide un toque que casi nadie da.
+- Orden del selector: «ELEGÍ LAS MILLAS A USAR» → «Tus millas disponibles: N» → control con su escala → campo y «Usar el máximo» → aclaración. El saldo va arriba del control porque es un dato para decidir, igual que en la tarjeta de Entrega (pregunta → saldo → control).
+- Aclaración **siempre visible** como texto de ayuda justo debajo del campo: «Es un estimado: al pagar se ajusta al total del pedido y a tus millas.» (12 px `#828282`; puede ocupar dos renglones). Va visible y no en un tooltip: es lo que evita la sorpresa al pagar, y en mobile un tooltip pide un toque que casi nadie da. Queda inmediatamente antes de «Agregar al Carrito».
 - **«Agregar al Carrito»** solo sube el contador del ícono; el carrito lateral se abre tocando el ícono.
 - Lo elegido se guarda en el producto y se suma en el checkout.
 - Menú de usuario del encabezado (desktop), como en el sitio: etiqueta «Personal» (fondo `#000D3C`, texto blanco 9 px), nombre (14/300) y saldo «100.000 millas» (12/600 `#FF6200`) alineados a la derecha. El cliente común no lleva la etiqueta «Personal»; en mobile, tampoco el ícono PB.
@@ -69,7 +70,7 @@ Con envío a domicilio el envío siempre se paga con tarjeta: **no se saltea**.
 - Encabezado «$ X + N millas»: N = valor inicial del checkout (suma de las fichas **con tope**). Hoy el sitio suma sin tope (caso real: 8.324 millas con saldo 6.058).
 - Por el tope, el carrito puede mostrar **menos millas que las elegidas en las fichas**. Pasa en dos casos:
   - **Descuentos**: la ficha calcula su máximo sin promociones. El aceite solo, con «Usar el máximo» en la ficha (801), aplica 720 en el carrito ($ 375 × 1,92).
-  - **Varios productos**: la suma de lo elegido en las fichas supera el máximo del pedido o el saldo (en el prototipo, «Fichas: 6.000»).
+  - **Varios productos o saldo insuficiente**: la suma de lo elegido en las fichas supera el máximo del pedido o el saldo. En el prototipo: «Fichas: 6.000» topea en el máximo del pedido (4.861); con «Saldo: 3.000», topea en el saldo (3.000).
   - El carrito no muestra un aviso: la aclaración de la ficha ya anticipa que es un estimado.
 - Sin millas por producto en las líneas.
 - El Resumen del carrito completo usa el mismo cálculo que el checkout.

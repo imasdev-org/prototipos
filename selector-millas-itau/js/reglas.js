@@ -8,7 +8,10 @@
 
   // 1,92 millas por peso (medido en la ficha: $ 50 = 96 millas).
   var TASA = 1.92;
+  // Saldo de millas del cliente. El prototipo permite bajarlo para ver el tope por saldo.
   var SALDO = 100000;
+  function saldo() { return SALDO; }
+  function fijarSaldo(n) { SALDO = n; }
 
   // Envío: el recorrido desktop es con retiro (sin costo) y el mobile con envío a domicilio.
   var COSTO_ENTREGA = { desktop: 0, mobile: 150 };
@@ -96,7 +99,7 @@
   }
 
   window.Reglas = {
-    TASA: TASA, SALDO: SALDO, FICHA: FICHA, SUMA_FICHAS: SUMA_FICHAS, CARRITO: CARRITO, PRECIO_CUCHILLO: { pb: 90, comun: 100 },
+    TASA: TASA, saldo: saldo, fijarSaldo: fijarSaldo, FICHA: FICHA, SUMA_FICHAS: SUMA_FICHAS, CARRITO: CARRITO, PRECIO_CUCHILLO: { pb: 90, comun: 100 },
     maximoPedido: maximoPedido, valorInicialPedido: valorInicialPedido, acotar: acotar,
     ahorro: ahorro, precioFicha: precioFicha, resumen: resumen, resumenCarrito: resumenCarrito, miles: miles, pesos: pesos
   };

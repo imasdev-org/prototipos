@@ -60,6 +60,15 @@ html, body {
 #solapa:hover, #solapa:focus-visible { opacity: 1; color: #fff; }
 body.barra-plegada #barra { display: none; }
 body.barra-plegada #solapa { display: inline-flex; }
+/* En pantallas medianas la barra se compacta para entrar en una fila */
+@media (max-width: 1599px) {
+  #barra .titulo { display: none; }
+}
+@media (max-width: 1439px) {
+  #barra { column-gap: 14px; }
+  #barra .grupo + .grupo { padding-left: 14px; }
+  #barra button { padding: 6px 8px; }
+}
 /* En el celular la barra es una sola fila que se desliza de costado */
 @media (max-width: 700px) {
   #barra { flex-wrap: nowrap; overflow-x: auto; padding: 8px 10px; gap: 10px; scrollbar-width: none; }

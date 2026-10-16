@@ -176,7 +176,7 @@
     if (estado.segmento === 'pb') g.appendChild(pos(el('span', { class: 'chip-personal' }, 'Personal'), 960, 36, 35, 12));
     var datos = el('div', { class: 'datos-usuario' });
     datos.appendChild(el('div', { class: 'nombre-usuario' }, 'ITALO PEREZ'));
-    datos.appendChild(el('div', { class: 'saldo-usuario' }, R.miles(R.SALDO) + ' millas'));
+    datos.appendChild(el('div', { class: 'saldo-usuario' }, R.miles(R.saldo()) + ' millas'));
     g.appendChild(datos);
     return g;
   }
@@ -184,12 +184,14 @@
   // Selector de la ficha (semi-simulador).
   function crearSelectorFicha(vista, repintarTodo) {
     var d = vista === 'desktop', g = el('div', { class: 'capa', style: 'left:0;top:0' });
-    var P2 = d ? { x: 913, precioY: 283, rotuloY: 341, controlY: 367, ancho: 370, escalaY: 408, campo: [913, 438, 150, 36], boton: [1070, 438, 150, 36], dispY: 484, ajusY: 506 }
-               : { x: 15, precioY: 518, rotuloY: 576, controlY: 602, ancho: 360, escalaY: 643, campo: [15, 673, 176, 36], boton: [198, 673, 176, 36], dispY: 719, ajusY: 741 };
+    // Orden: rótulo → saldo (dato para decidir) → control → escala → campo y botón → aclaración como texto de ayuda
+    var P2 = d ? { x: 913, precioY: 283, rotuloY: 341, dispY: 361, controlY: 383, ancho: 370, escalaY: 424, campo: [913, 454, 150, 36], boton: [1070, 454, 150, 36], ajusY: 498 }
+               : { x: 15, precioY: 518, rotuloY: 576, dispY: 596, controlY: 618, ancho: 360, escalaY: 659, campo: [15, 689, 176, 36], boton: [198, 689, 176, 36], ajusY: 733 };
     var precio = pos(el('div', { class: 'txt', style: 'display:flex;align-items:baseline;gap:11px' }), P2.x, P2.precioY);
     var pesos = el('span', { style: 'font-size:26px;font-weight:700;line-height:37px' }), mil = el('span', { style: 'font-size:17px;font-weight:600' });
     precio.appendChild(pesos); precio.appendChild(mil); g.appendChild(precio);
     g.appendChild(texto('ELEGÍ LAS MILLAS A USAR', '', P2.x, P2.rotuloY, 'font-size:12px;color:#5F6062'));
+    g.appendChild(texto('Tus millas disponibles: ' + R.miles(R.saldo()), '', P2.x, P2.dispY, 'font-size:12px;color:#828282'));
     var obj = estado.ficha, max = R.FICHA.maximo;
     var control = crearControl({ x: P2.x, y: P2.controlY, ancho: P2.ancho, etiqueta: 'Millas para este producto',
       alCambiar: function (v) { cambiarMillas(obj, v, max); repintarTodo(); } });
@@ -202,7 +204,6 @@
     var boton = crearBotonMax({ x: P2.boton[0], y: P2.boton[1], w: P2.boton[2], h: P2.boton[3], radio: 5,
       alTocar: function () { alternarMaximo(obj, max); repintarTodo(); } });
     g.appendChild(campo.nodo); g.appendChild(boton.nodo);
-    g.appendChild(texto('Tus millas disponibles: ' + R.miles(R.SALDO), '', P2.x, P2.dispY, 'font-size:12px;color:#828282'));
     var aclaracion = texto('Es un estimado: al pagar se ajusta al total del pedido y a tus millas.', '', P2.x, P2.ajusY, 'font-size:12px;color:#828282;white-space:normal');
     aclaracion.style.width = P2.ancho + 'px';
     g.appendChild(aclaracion);
@@ -226,7 +227,7 @@
     var banda = el('div', { class: 'banda' }, 'Tus millas'); banda.style.height = (d ? 35 : 46) + 'px';
     t.appendChild(banda);
     t.appendChild(texto('¿Cuántas millas querés usar?', 'pregunta', 15, d ? 55 : 62));
-    var saldo = texto('', 'saldo', 15, d ? 89 : 94); saldo.innerHTML = 'Millas disponibles: <b>' + R.miles(R.SALDO) + '</b>';
+    var saldo = texto('', 'saldo', 15, d ? 89 : 94); saldo.innerHTML = 'Millas disponibles: <b>' + R.miles(R.saldo()) + '</b>';
     t.appendChild(saldo);
     var cajaEtiqueta = el('div', { class: 'capa', style: 'right:15px;top:' + (d ? 55 : 92) + 'px' });
     t.appendChild(cajaEtiqueta);
@@ -332,14 +333,14 @@
   // ---------------------------------------------------------------- notas para desarrollo
   var NOTAS = {
     ficha: [
-      { d: [893, 300], m: [8, 535], t: 'La ficha es un <b>semi-simulador</b>: en la ficha no se conocen los descuentos, así que el máximo se calcula sobre el precio sin promoción ($ 417 × 1,92 = 801). El ajuste fino se hace al pagar, y por eso la aclaración visible: «Es un estimado: al pagar se ajusta al total del pedido y a tus millas.» (siempre visible, sin tooltip). Lo elegido se guarda en el producto y se suma en el checkout.' },
+      { d: [893, 300], m: [8, 535], t: 'La ficha es un <b>semi-simulador</b>: en la ficha no se conocen los descuentos, así que el máximo se calcula sobre el precio sin promoción ($ 417 × 1,92 = 801). El ajuste fino se hace al pagar, y por eso la aclaración visible: «Es un estimado: al pagar se ajusta al total del pedido y a tus millas.» (siempre visible, sin tooltip), como texto de ayuda justo debajo del campo. El saldo va arriba del control, como en la tarjeta de Entrega. Lo elegido se guarda en el producto y se suma en el checkout.' },
       { d: [893, 352], m: [8, 586], t: 'Precio = precio sin promoción − millas ÷ 1,92, redondeado y nunca menor a $ 0. Valor por defecto: la mitad del máximo (sin cambios respecto de hoy). Rótulos fijos: solo cambian los valores. Colores del precio: Personal Bank todo en azul marino <code>#000D3C</code>; cliente común pesos en naranja <code>#FF6200</code> y millas en gris <code>#5F6062</code>, como hoy para quien no es Personal Bank.' },
-      { d: [1234, 456], m: [376, 691], t: '<b>«Usar el máximo»</b> funciona como interruptor. Activo: fondo <code>#FEEEE3</code>, borde 2 px <code>#DE5500</code>, texto semibold. Al desactivarlo vuelve al valor anterior. Si se mueve el control o se edita el campo, se desactiva.' },
+      { d: [1234, 472], m: [376, 707], t: '<b>«Usar el máximo»</b> funciona como interruptor. Activo: fondo <code>#FEEEE3</code>, borde 2 px <code>#DE5500</code>, texto semibold. Al desactivarlo vuelve al valor anterior. Si se mueve el control o se edita el campo, se desactiva.' },
       { d: [893, 568], m: [8, 803], t: '«Agregar al carrito» solo sube el contador del ícono; el carrito lateral se abre tocando el ícono. <b>En este prototipo el aceite no aparece en la lista del carrito</b> (simplificación: el carrito del diseño tiene 3 productos).' },
       { d: [950, 30], m: [290, 30], t: 'Menú de usuario como en el sitio: etiqueta «Personal», nombre y saldo de millas. El cliente común no lleva la etiqueta «Personal» (en mobile, el ícono PB).' }
     ],
     cajon: [
-      { d: [190, 99], m: [175, 99], t: 'Encabezado «$ X + N millas»: N es el menor entre la suma de lo elegido en las fichas, el saldo y el máximo del pedido (<b>tope</b>). Por eso el carrito puede mostrar <b>menos millas que las elegidas en las fichas</b>: (1) por descuentos: la ficha calcula su máximo sin promociones; el aceite solo, con «Usar el máximo» (801), aplica 720 ($ 375 × 1,92); (2) porque la suma de varias fichas supera el máximo del pedido o el saldo. No hay aviso en el carrito: la ficha ya avisa que es un estimado. Hoy el sitio suma sin tope (caso real: 8.324 millas con saldo 6.058). El tope entra en el alcance. Probalo con «Fichas: 6.000 (supera el máximo)» en la barra.' },
+      { d: [190, 99], m: [175, 99], t: 'Encabezado «$ X + N millas»: N es el menor entre la suma de lo elegido en las fichas, el saldo y el máximo del pedido (<b>tope</b>). Por eso el carrito puede mostrar <b>menos millas que las elegidas en las fichas</b>: (1) por descuentos: la ficha calcula su máximo sin promociones; el aceite solo, con «Usar el máximo» (801), aplica 720 ($ 375 × 1,92); (2) porque la suma de varias fichas supera el máximo del pedido o el saldo (probalo con «Saldo: 3.000»). No hay aviso en el carrito: la ficha ya avisa que es un estimado. Hoy el sitio suma sin tope (caso real: 8.324 millas con saldo 6.058). El tope entra en el alcance. Probalo con «Fichas: 6.000 (supera el máximo)» en la barra.' },
       { d: [10, 420], m: [10, 420], t: 'Sin millas por producto en las líneas del carrito.' }
     ],
     carrito: [
@@ -592,6 +593,7 @@
     marcar('#b-vista', estado.vista);
     marcar('#b-cliente', estado.segmento);
     marcar('#b-escenario', estado.escenario);
+    marcar('#b-saldo', String(R.saldo()));
     // «Fichas» solo cambia el carrito y el checkout: en la ficha se muestra solo con el carrito lateral abierto
     document.getElementById('g-escenario').hidden = estado.pantalla === 'ficha' && !estado.cajon;
     document.getElementById('b-notas').setAttribute('aria-pressed', estado.notas ? 'true' : 'false');
@@ -611,6 +613,10 @@
     document.getElementById('b-cliente').addEventListener('click', function (e) {
       var b = e.target.closest('button'); if (!b) return;
       estado.segmento = b.dataset.valor; reiniciarPedido(); render(false);
+    });
+    document.getElementById('b-saldo').addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (!b) return;
+      R.fijarSaldo(+b.dataset.valor); reiniciarPedido(); render(false);
     });
     document.getElementById('b-escenario').addEventListener('click', function (e) {
       var b = e.target.closest('button'); if (!b) return;
