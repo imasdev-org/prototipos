@@ -46,7 +46,9 @@
     for (; n && n !== raiz; n = n.parentElement) x += parseFloat(n.style.left) || 0;
     return x;
   }
-  function mostrar(raiz, clave, visible) { var n = marca(raiz, clave); if (n) n.style.visibility = visible ? '' : 'hidden'; }
+  function mostrar(raiz, clave, visible) {
+    Array.prototype.forEach.call(raiz.querySelectorAll('[data-k="' + clave + '"]'), function (n) { n.style.visibility = visible ? '' : 'hidden'; });
+  }
 
   var ICONO_CHANCHITO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 17h3v2a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-3a3.16 3.16 0 0 0 2-2h1a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1h-1a5 5 0 0 0-2-4V3a4 4 0 0 0-3.2 1.6l-.3.4H11a6 6 0 0 0-6 6v1a5 5 0 0 0 2 4v3a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1z"/><circle cx="16" cy="10" r="1" fill="currentColor" stroke="none"/><path d="M2 8v1a2 2 0 0 0 2 2h1"/></svg>';
   var CHEVRON = '<svg class="chevron" viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="#9AA3B8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -170,15 +172,10 @@
     return e;
   }
 
-  // Menú de usuario del encabezado desktop (como en el sitio): «Personal» solo para Personal Bank.
-  function menuUsuario() {
-    var g = el('div', { class: 'capa', style: 'inset:0;pointer-events:none' });
-    if (estado.segmento === 'pb') g.appendChild(pos(el('span', { class: 'chip-personal' }, 'Personal'), 960, 36, 35, 12));
-    var datos = el('div', { class: 'datos-usuario' });
-    datos.appendChild(el('div', { class: 'nombre-usuario' }, 'ITALO PEREZ'));
-    datos.appendChild(el('div', { class: 'saldo-usuario' }, R.miles(R.saldo()) + ' millas'));
-    g.appendChild(datos);
-    return g;
+  // Encabezado desktop (menú de usuario del diseño): «Personal» solo para Personal Bank y el saldo vigente.
+  function aplicarEncabezado(raiz) {
+    mostrar(raiz, 'pb-chip', estado.segmento === 'pb');
+    ponerTexto(raiz, 'saldo-encabezado', R.miles(R.saldo()) + ' millas');
   }
 
   // Selector de la ficha (semi-simulador).
@@ -401,7 +398,7 @@
 
     if (p === 'ficha') {
       var sel = crearSelectorFicha(v, repintarTodo); s.appendChild(sel.nodo); actualizadores.push(sel.actualizar);
-      if (d) s.appendChild(menuUsuario());
+      aplicarEncabezado(s);
       mostrar(s, 'pb-icono', estado.segmento === 'pb');
       actualizadores.push(function () { ponerTexto(s, 'contador', estado.ficha.agregado ? '4' : '3'); });
       s.appendChild(zona(P(d, [913, 551, 370, 34], [15, 786, 360, 34]), 'Agregar al Carrito', function () { estado.ficha.agregado = true; repintarTodo(); }));
@@ -413,7 +410,7 @@
       aplicarCliente(s);
       var proceder = function () { irA('entrega'); };
       if (d) {
-        s.appendChild(menuUsuario());
+        aplicarEncabezado(s);
         s.appendChild(zona(1243, 17.5, 70, 34, 'Pagar', proceder));
         // Resumen fijo al hacer scroll: la caja del diseño pasa a una columna con position: sticky
         var caja = marca(s, 'resumen-carrito');

@@ -95,13 +95,6 @@ body.barra-plegada #solapa { display: inline-flex; }
 .pv .g { position: absolute; left: 0; top: 0; }
 .pv .v svg { position: absolute; display: block; overflow: visible; }
 
-/* Menú de usuario del encabezado desktop */
-.chip-personal { position: absolute; background: #000D3C; color: #fff; border-radius: 3px;
-  font: 400 9px/12px 'Source Sans 3', sans-serif; text-align: center; }
-.datos-usuario { position: absolute; right: 337px; top: 15px; text-align: right; white-space: nowrap; }
-.nombre-usuario { font: 300 14px/18px 'Source Sans 3', sans-serif; color: #464646; }
-.saldo-usuario { font: 600 12px/16px 'Source Sans 3', sans-serif; color: #FF6200; margin-top: 2px; }
-
 /* Encabezado del carrito lateral: «$ X + N millas» */
 .total-cajon { position: absolute; display: flex; align-items: baseline; gap: 5px; color: #464646; white-space: nowrap; }
 .total-cajon .importe { font: 400 18px/1.44 'Source Sans 3', sans-serif; }

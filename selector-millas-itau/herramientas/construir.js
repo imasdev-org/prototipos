@@ -10,8 +10,9 @@ const fs = require('fs'), path = require('path'), gen = require('./gen');
 
 const PANTALLAS = {
   'ficha-desktop': {
-    omitir: ['dd7caa', 'dd7cab', 'dd7caf', 'dd7c6f', 'dd7c47'],
-    marcar: { dd7c86: 'contador' }
+    omitir: ['dd7caa', 'dd7cab', 'dd7caf', 'dd7c47'],
+    marcar: { dd7c86: 'contador', '83526c': 'pb-chip', e01037: 'pb-chip', aa568e: 'saldo-encabezado' },
+    derecha: ['aa568e']
   },
   'ficha-mobile': {
     omitir: ['682520', '682521', '682525', '67c5e1'],
@@ -28,16 +29,14 @@ const PANTALLAS = {
     derecha: ['9a9b2f']
   },
   'carrito-desktop': {
-    omitir: ['dad877', 'db0883', 'dad867', 'dad868', 'dad869', 'dad86a', 'dad86b'],
-    marcar: { dad83e: 'pb-etiqueta', dad838: 'cuchillo-unidad', dad83c: 'cuchillo-total', dad85f: 'resumen-carrito' },
-    derecha: ['dad83c'],
-    mover: { dad875: [0, -15] }
+    omitir: ['dad877', 'dad867', 'dad868', 'dad869', 'dad86a', 'dad86b'],
+    marcar: { dad83e: 'pb-etiqueta', dad838: 'cuchillo-unidad', dad83c: 'cuchillo-total', dad85f: 'resumen-carrito', '0e70fc': 'pb-chip', '848718': 'pb-chip', '4e6230': 'saldo-encabezado' },
+    derecha: ['dad83c', '4e6230']
   },
   'carrito-mobile': {
     omitir: ['1e7708', '1e773b', '1e773c', '1e773d', '1e773e', '1e773f'],
     marcar: { '1e76d7': 'pb-etiqueta', '1e76d1': 'cuchillo-unidad', '1e76d5': 'cuchillo-total', '1e7774': 'pb-icono' },
-    derecha: ['1e76d5'],
-    mover: { '1e7706': [0, -14.5] }
+    derecha: ['1e76d5']
   },
   'entrega-desktop': {
     omitir: ['09b4cc', 'bc9304', 'bc9359'],
