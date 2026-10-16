@@ -54,7 +54,7 @@ Con envío a domicilio el envío siempre se paga con tarjeta: **no se saltea**.
 
 **Tipografía:** todos los textos del sitio van en **Myriad Pro**, como hoy (`MyriadPro-Regular`, `-Light`, `-Semibold` y `-Bold`, declaradas con `@font-face` en `webapp/Itau/static/hanoi.sass`). En Penpot los textos están en Source Sans 3 porque Penpot no tiene Myriad Pro; el prototipo usa Myriad Pro si está instalada en el equipo y, si no, Source Sans 3.
 
-**Campo de millas en foco** (ficha y Entrega): borde `#FE9A5A` y aureola de 3 px `#FDD4B9`, el color durazno de la pista del control.
+**Campo de millas en foco** (ficha y Entrega): borde `#FE9A5A` y aureola suave de 3 px `rgba(253, 212, 185, .45)` (el durazno de la pista del control, al 45 %).
 
 ### Ficha de producto
 
@@ -62,7 +62,7 @@ Con envío a domicilio el envío siempre se paga con tarjeta: **no se saltea**.
 - Control, campo y botón **sincronizados**; el valor se acota entre 0 y 801.
 - **«Usar el máximo»** es un interruptor: al activarlo guarda el valor anterior y pone el máximo; al desactivarlo vuelve al valor anterior. Si se mueve el control o se edita el campo, se desactiva.
   - Normal: fondo blanco, borde 1 px `#FF6200`, texto `#DE5500`.
-  - Activo: fondo `#FEEEE3`, borde 2 px `#DE5500`, texto semibold. `aria-pressed="true"`.
+  - Activo: fondo `#FEEEE3`, borde 2 px `#DE5500` y texto engrosado **sin cambiar el ancho de la frase**: `-webkit-text-stroke: .5px currentColor` sobre el peso normal (con `font-weight: 600` la frase se ensancha un 3,7 % y se mueve). `aria-pressed="true"`.
 - Título «ELEGÍ LAS MILLAS A USAR»: 12 px, `font-weight: 600`, `#464646`, `letter-spacing: .04em`. Subtítulo «Tus millas disponibles: **N**»: 12 px `#828282` con el número en 600 `#464646` (mismo criterio que «Millas disponibles» en Entrega).
 - Orden del selector: «ELEGÍ LAS MILLAS A USAR» → «Tus millas disponibles: N» → control con su escala → campo y «Usar el máximo» → aclaración. El saldo va arriba del control porque es un dato para decidir, igual que en la tarjeta de Entrega (pregunta → saldo → control).
 - Aclaración **siempre visible** como texto de ayuda justo debajo del campo: «Es un estimado: al pagar se ajusta al total del pedido y a tus millas.» (12 px `#828282`; puede ocupar dos renglones). Va visible y no en un tooltip: es lo que evita la sorpresa al pagar, y en mobile un tooltip pide un toque que casi nadie da. Queda inmediatamente antes de «Agregar al Carrito».

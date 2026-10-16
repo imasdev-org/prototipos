@@ -137,7 +137,7 @@
 
   function crearCampo(o) {
     var c = pos(el('label', { class: 'campo' }), o.x, o.y, o.w, o.h);
-    if (o.borde) c.style.borderColor = o.borde;
+    if (o.borde) c.style.setProperty('--borde', o.borde); // como variable, para que el foco pueda cambiarlo
     if (o.radio != null) c.style.borderRadius = o.radio + 'px';
     var input = el('input', { type: 'text', inputmode: 'numeric', autocomplete: 'off', 'aria-label': 'Millas a usar' });
     c.appendChild(input); c.appendChild(el('span', null, 'millas'));
@@ -335,7 +335,7 @@
     ficha: [
       { d: [893, 300], m: [8, 535], t: 'La ficha es un <b>semi-simulador</b>: en la ficha no se conocen los descuentos, así que el máximo se calcula sobre el precio sin promoción ($ 417 × 1,92 = 801). El ajuste fino se hace al pagar, y por eso la aclaración visible: «Es un estimado: al pagar se ajusta al total del pedido y a tus millas.» (siempre visible, sin tooltip), como texto de ayuda justo debajo del campo. El saldo va arriba del control, como en la tarjeta de Entrega. Lo elegido se guarda en el producto y se suma en el checkout.' },
       { d: [893, 352], m: [8, 586], t: 'Precio = precio sin promoción − millas ÷ 1,92, redondeado y nunca menor a $ 0. Valor por defecto: la mitad del máximo (sin cambios respecto de hoy). Rótulos fijos: solo cambian los valores. Colores del precio: Personal Bank todo en azul marino <code>#000D3C</code>; cliente común pesos en naranja <code>#FF6200</code> y millas en gris <code>#5F6062</code>, como hoy para quien no es Personal Bank.' },
-      { d: [1234, 472], m: [376, 707], t: '<b>«Usar el máximo»</b> funciona como interruptor. Activo: fondo <code>#FEEEE3</code>, borde 2 px <code>#DE5500</code>, texto semibold. Al desactivarlo vuelve al valor anterior. Si se mueve el control o se edita el campo, se desactiva.' },
+      { d: [1234, 472], m: [376, 707], t: '<b>«Usar el máximo»</b> funciona como interruptor. Activo: fondo <code>#FEEEE3</code>, borde 2 px <code>#DE5500</code> y texto engrosado <b>sin cambiar el ancho de la frase</b> (<code>-webkit-text-stroke: .5px currentColor</code>; <code>font-weight: 600</code> la ensancha un 3,7 %). Al desactivarlo vuelve al valor anterior. Si se mueve el control o se edita el campo, se desactiva.' },
       { d: [893, 568], m: [8, 803], t: '«Agregar al carrito» solo sube el contador del ícono; el carrito lateral se abre tocando el ícono. <b>En este prototipo el aceite no aparece en la lista del carrito</b> (simplificación: el carrito del diseño tiene 3 productos).' },
       { d: [950, 30], m: [290, 30], t: 'Menú de usuario como en el sitio: etiqueta «Personal», nombre y saldo de millas. El cliente común no lleva la etiqueta «Personal» (en mobile, el ícono PB).' }
     ],

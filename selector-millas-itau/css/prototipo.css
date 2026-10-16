@@ -169,14 +169,14 @@ body.barra-plegada #solapa { display: inline-flex; }
 /* Campo de millas */
 .campo {
   position: absolute; display: flex; align-items: center; justify-content: flex-end; gap: 6px;
-  padding: 0 10px; background: #fff; border: 1px solid var(--borde-campo); border-radius: 4px;
+  padding: 0 10px; background: #fff; border: 1px solid var(--borde, var(--borde-campo)); border-radius: 4px;
 }
 .campo input {
   border: 0; outline: 0; background: transparent; padding: 0; margin: 0; min-width: 0; width: 100%;
   text-align: right; font: 400 16px var(--fuente-sitio); color: #000;
 }
 .campo span { font-size: 13px; color: #636363; }
-.campo:focus-within { border-color: #FE9A5A; box-shadow: 0 0 0 3px #FDD4B9; }
+.campo:focus-within { border-color: #FE9A5A; box-shadow: 0 0 0 3px rgba(253, 212, 185, .45); }
 
 /* "Usar el máximo" (botón de la ficha, funciona como interruptor) */
 .boton-max {
@@ -184,7 +184,8 @@ body.barra-plegada #solapa { display: inline-flex; }
   background: #fff; border: 1px solid #FF6200; color: var(--naranja-oscuro);
   font: 400 14px var(--fuente-sitio); cursor: pointer; padding: 0;
 }
-.boton-max[aria-pressed="true"] { background: var(--naranja-suave-activo); border: 2px solid #DE5500; font-weight: 600; }
+/* Activo: el texto se engrosa con un trazo y no con font-weight 600, que ensancha la frase (~3,7 %) */
+.boton-max[aria-pressed="true"] { background: var(--naranja-suave-activo); border: 2px solid #DE5500; -webkit-text-stroke: .5px currentColor; }
 
 /* Tarjeta "Tus millas" (mismo lenguaje que "Tu pedido") */
 .tarjeta-millas { position: absolute; background: #fff; border-radius: 15px; box-shadow: 0 0 2px #CCCCCC; overflow: hidden; }
