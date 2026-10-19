@@ -12,7 +12,7 @@ La barra de arriba controla el prototipo. Con la flecha de la derecha se pliega 
 
 | Control | Qué hace |
 |---|---|
-| **Paso** | Salta a Ficha, Carrito o Entrega. También se puede recorrer tocando la pantalla (Agregar al Carrito, ícono del carrito, Pagar, Ver Carrito Completo, Proceder al Pago, Continuar) |
+| **Paso** | Salta a Ficha, Carrito o Entrega. También se puede recorrer tocando la pantalla (Agregar al Carrito, ícono del carrito, Pagar, Ver Carrito Completo, Proceder al Pago, Continuar). **Entrega arranca solo con la consulta de dirección**: al elegir una dirección en el selector aparecen el envío, «Tus millas», «Tu pedido» y el resto, como en el sitio |
 | **Vista** | Desktop o Mobile (las dos con envío a domicilio) |
 | **Cliente** | Personal Bank o cliente común |
 | **Saldo de millas** | Millas disponibles del cliente: 100.000, o 3.000 para ver en Entrega el máximo limitado por el saldo |

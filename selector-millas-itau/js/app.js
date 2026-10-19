@@ -74,7 +74,8 @@
       notas: previo ? previo.notas : false,
       ficha: { millas: R.FICHA.porDefecto, previo: null, maxActivo: false, agregado: false },
       pedido: { millas: null, previo: null, maxActivo: false },
-      facturaRut: false
+      facturaRut: false,
+      direccion: '' // Entrega: dirección elegida (vacío = todavía no eligió; las secciones de abajo están ocultas)
     };
   }
   function maximoPedido() { return R.maximoPedido(estado.segmento); }
@@ -83,7 +84,16 @@
     if (estado.pedido.millas == null) estado.pedido.millas = millasIniciales();
     return estado.pedido.millas;
   }
-  function resumenActual() { return R.resumen(estado.segmento, estado.vista, millasPedido()); }
+  function resumenActual() {
+    var r = R.resumen(estado.segmento, estado.vista, millasPedido());
+    if (estado.pantalla === 'entrega' && !estado.direccion) {
+      // Sin dirección elegida todavía no hay envío en el Resumen: ni fila de envío ni «más el envío es gratis».
+      var c = {}; Object.keys(r).forEach(function (k) { c[k] = r[k]; });
+      c.entrega = 0; c.rotuloEntrega = null; c.total = r.subtotal - r.descuento; c.salteaPago = false;
+      return c;
+    }
+    return r;
+  }
 
   // Lógica compartida del selector (ficha y checkout): campo, control y botón sincronizados.
   function cambiarMillas(obj, valor, maximo) {
@@ -319,7 +329,7 @@
   function pintarResumen(caja, r) {
     var filas = [{ t: 'SubTotal', v: R.pesos(r.subtotal), c: '#5F6062' }];
     if (r.mostrarDescuento) filas.push({ t: 'Descuentos', v: R.pesos(-r.descuento), c: '#223F83', chevron: true });
-    filas.push({ t: r.rotuloEntrega, v: R.pesos(r.entrega), c: '#5F6062' });
+    if (r.rotuloEntrega) filas.push({ t: r.rotuloEntrega, v: R.pesos(r.entrega), c: '#5F6062' });
     filas.push({ t: 'Millas aplicadas', v: R.miles(r.millas), c: '#223F83' });
     // Título centrado en la franja de 38 px que cierra la línea gris. Con envío a domicilio, el sitio muestra
     // cuánto falta para el envío gratis en lugar de «RESUMEN».
@@ -399,6 +409,7 @@
       { d: [1030, 605], m: [12, 1533], t: 'Resumen del carrito completo: mismo cálculo que el checkout (fila «Millas aplicadas» con la cantidad, SubTotal ya descontadas las millas, con tope). En desktop queda <b>fijo al hacer scroll</b>, como en el checkout: <b>hoy no lo está</b> (<code>wCartFull</code>, <code>wCartFullWC</code> y <code>wCartSummary</code> no tienen ninguna regla sticky). Título «RESUMEN» centrado en su franja.' }
     ],
     entrega: [
+      { d: [1015, 258], m: [372, 266], t: '<b>El paso se muestra por etapas</b>, como en el sitio. Al entrar solo están el tipo de entrega y la consulta de <b>dirección</b> (en retiro, la sucursal); lo de abajo está oculto. En <code>wCheckoutStart2</code>, con la dirección sin elegir <code>HIDETABLES</code> oculta «Tu pedido», las alternativas y las acciones; al elegirla se refrescan los envíos y <code>SHOWTABLES</code> los muestra. Acá, además, aparecen «Tus millas», la fecha, la factura y «Continuar», y el Resumen suma el envío. Así el selector de millas nunca aparece antes de conocer el envío. <i>Qué muestra el Resumen antes de elegir la dirección es un supuesto (no verificado).</i> Probalo: elegí una dirección en el selector.' },
       { d: [125, 321], m: [20, 330], t: 'Tarjeta <b>«Tus millas»</b> antes de «Tu pedido», con el mismo estilo de tarjeta (banda <code>#3E3F40</code>, radio 15, sombra <code>#CCCCCC</code> 2 px). Se elige después del tipo de entrega y la sucursal o dirección: ahí el monto con tarjeta ya es definitivo.' },
       { d: [125, 446], m: [22, 457], t: 'Valor inicial = suma de lo elegido en las fichas, con tope. Máximo del pedido = piso(total de productos con descuentos × 1,92), nunca más que el saldo. Las millas se aplican después de los descuentos (así no se usan de más) y <b>no cubren el envío</b> (por ahora).' },
       { d: [1008, 447], m: [372, 530], t: 'Control, campo y «Usar el máximo» sincronizados; el valor se acota entre 0 y el máximo. «Usar el máximo» es el mismo componente de la ficha. Teclado: flechas ±10, Shift+flechas ±100, Inicio/Fin.' },
@@ -419,6 +430,7 @@
     lista.forEach(function (n, i) {
       var p = n[estado.vista === 'desktop' ? 'd' : 'm'];
       var pin = pos(el('button', { class: 'pin', type: 'button', 'aria-expanded': 'false', 'aria-label': 'Nota ' + (i + 1) }, String(i + 1)), p[0], p[1]);
+      if (clave === 'entrega' && p[1] >= (estado.vista === 'desktop' ? 285 : 295)) pin.classList.add('tras-direccion'); // se ocultan con las secciones de abajo
       var li = el('li', { html: '<b class="n">' + (i + 1) + '</b><div>' + n.t + '</div>' });
       pin.addEventListener('click', function () {
         Array.prototype.forEach.call(ol.children, function (x) { x.classList.remove('resaltada'); });
@@ -442,7 +454,33 @@
     s.innerHTML = p.html;
     return s;
   }
-  function irA(p) { estado.pantalla = p; estado.cajon = false; render(true); }
+  function irA(p) { estado.pantalla = p; estado.cajon = false; if (p === 'entrega') estado.direccion = ''; render(true); }
+
+  // Entrega por etapas, como en el sitio (wCheckoutStart2): al entrar solo están el tipo de entrega y la consulta de
+  // dirección. Con la dirección sin elegir (id ≤ 0) la subrutina HIDETABLES oculta «Tu pedido», las alternativas y las
+  // acciones; al elegirla se refrescan los envíos y SHOWTABLES los muestra. Acá, además, aparecen «Tus millas», la fecha y
+  // la factura, y el Resumen suma el envío. Todo lo que está debajo del selector (corte) se oculta por su posición.
+  var DIRECCIONES = [['', 'Seleccioná una dirección'], ['artigas', 'Bv. Artigas 1234'], ['italia', 'Av. Italia 5821']];
+  function etapasEntrega(raiz, d, tarjeta, continuar, repintar) {
+    var corte = d ? 285 : 295;
+    function topEnPantalla(n) { var y = 0; for (; n && n !== raiz; n = n.parentElement) y += parseFloat(n.style.top) || 0; return y; }
+    Array.prototype.forEach.call(raiz.querySelectorAll('.b, .t, .v'), function (n) { if (topEnPantalla(n) >= corte) n.classList.add('tras-direccion'); });
+    tarjeta.classList.add('tras-direccion'); continuar.classList.add('tras-direccion');
+    var valor = marca(raiz, 'valor-direccion'), colorOriginal = valor ? valor.style.color : '';
+    var sel = el('select', { 'aria-label': 'Dirección de entrega' });
+    DIRECCIONES.forEach(function (o) { sel.appendChild(el('option', { value: o[0] }, o[1])); });
+    sel.value = estado.direccion;
+    var caja = d ? [125, 241, 883, 34] : [20, 249, 350, 34];
+    var zonaSel = pos(el('div', { class: 'zona sel-direccion' }), caja[0], caja[1], caja[2], caja[3]);
+    zonaSel.appendChild(sel); raiz.appendChild(zonaSel);
+    function aplicar() {
+      var v = estado.direccion, o = DIRECCIONES.filter(function (x) { return x[0] === v; })[0] || DIRECCIONES[0];
+      raiz.classList.toggle('sin-direccion', !v);
+      if (valor) { valor.querySelector('span').textContent = o[1]; valor.style.color = v ? colorOriginal : '#767676'; }
+    }
+    sel.addEventListener('change', function () { estado.direccion = sel.value; aplicar(); repintar(); });
+    aplicar();
+  }
 
   // «Necesito factura con RUT»: la etiqueta generada pasa a ser un <label> y el dibujo de Penpot se cambia
   // por el checkbox nativo del navegador en el mismo lugar (en el sitio es el nativo, sin estilo propio).
@@ -515,8 +553,10 @@
           btn.textContent = r.salteaPago ? 'Continuar a Confirmación' : 'Continuar';
         });
       } else {
-        s.appendChild(zona(23, 1088, 345, 34, 'Continuar', finDelRecorrido));
+        var contMovil = zona(23, 1088, 345, 34, 'Continuar', finDelRecorrido);
+        s.appendChild(contMovil);
       }
+      etapasEntrega(s, d, tj.nodo, d ? btn : contMovil, repintarTodo);
     }
 
     repintarTodo();

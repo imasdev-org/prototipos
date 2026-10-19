@@ -212,6 +212,13 @@ body.barra-plegada #solapa { display: inline-flex; }
 .tarjeta-millas .total { font-size: 14px; font-weight: 700; color: var(--gris-titulo); }
 .tarjeta-millas .total-monto { font-size: 16px; }
 
+/* Entrega por etapas: lo que está debajo de la consulta de dirección aparece al elegirla */
+.tras-direccion { transition: opacity .35s ease, transform .35s ease; }
+.sin-direccion .tras-direccion { opacity: 0; transform: translateY(-10px); visibility: hidden; transition: none; pointer-events: none; }
+.sel-direccion { border-radius: 4px; }
+.sel-direccion select { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; font: 400 14px var(--fuente-sitio); }
+.sel-direccion:focus-within { outline: 3px solid #223F83; outline-offset: 2px; }
+
 /* Etiqueta de ahorro */
 .etiqueta-ahorro {
   position: absolute; display: inline-flex; align-items: center; gap: 6px; height: 26px;

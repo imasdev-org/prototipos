@@ -40,11 +40,11 @@ const PANTALLAS = {
   },
   'entrega-desktop': { // envío a domicilio
     omitir: ['fef93d', 'feb921', '00be9b'],
-    marcar: { feb919: 'tab-pago', feb91d: 'tab-confirmacion', feb8ff: 'ancla-izquierda', '006e82': 'rut', '52ab42': 'casilla-rut' }
+    marcar: { feb919: 'tab-pago', feb91d: 'tab-confirmacion', feb8ff: 'ancla-izquierda', '006e82': 'rut', '52ab42': 'casilla-rut', fef94f: 'valor-direccion' }
   },
   'entrega-mobile': {
     omitir: ['c9a5ef'],
-    marcar: { ffc169: 'rut', '65c8ad': 'casilla-rut' }
+    marcar: { ffc169: 'rut', '65c8ad': 'casilla-rut', ffc140: 'valor-direccion' }
   }
 };
 

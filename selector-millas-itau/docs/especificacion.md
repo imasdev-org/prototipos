@@ -88,6 +88,12 @@ Con envío a domicilio el envío siempre se paga con tarjeta: **no se saltea**.
 
 ### Checkout · Entrega
 
+- **El paso se muestra por etapas, como en el sitio actual.** Al entrar solo están el tipo de entrega (retiro o domicilio) y la consulta de **dirección** (en retiro, de **sucursal**); lo de abajo está oculto. En `wCheckoutStart2` *(verificado en la KB trunk, evento `Comboaddressid.ControlValueChanged`)*, con la dirección sin elegir (id ≤ 0) la subrutina `HIDETABLES` oculta «Tu pedido», las alternativas y las acciones; al elegir una dirección se refrescan los envíos y `SHOWTABLES` los muestra (en retiro, al cambiar el departamento «Tu pedido» se oculta hasta elegir la sucursal). Con el rediseño, al elegir la dirección aparecen además la tarjeta **«Tus millas»**, la fecha, la factura y «Continuar», y el Resumen suma el costo de envío. Así el selector de millas **nunca se ve antes de conocer el envío**, que es lo que el pedido original resolvía poniendo el selector en el Resumen. El Resumen existe desde el inicio (`Componentoverview`, sin control de visibilidad).
+  - **Estado inicial (supuesto, sin verificar):** el Resumen muestra SubTotal, Descuentos, «Millas aplicadas» (la suma de lo elegido en las fichas, con tope) y Total **sin** fila de envío y con el título «RESUMEN». Falta una captura de producción del estado inicial para confirmarlo.
+  - **Al elegir la dirección:** se agrega «Gastos de Envío», el Total suma el envío y, con domicilio, el título pasa a «Con $ X más el envío es gratis».
+  - **Transición:** las secciones aparecen con un fundido corto (≈ 350 ms), sin depender del ajuste de animaciones del sistema.
+  - **En el prototipo:** la dirección se elige en el selector (hay dos de ejemplo, con el mismo envío de $ 150); volver a Entrega desde la barra reinicia el paso.
+
 - Tarjeta **«Tus millas»** después del tipo de entrega y la sucursal o dirección (ahí el monto a pagar ya es definitivo) y **antes de «Tu pedido»**.
   - Mismo lenguaje que «Tu pedido»: fondo blanco, radio 15, sombra `0 0 2px #CCCCCC`, banda `#3E3F40` (35 px desktop, 46 px mobile) con el título en 16/700 blanco.
   - Pregunta «¿Cuántas millas querés usar?» (18 px `#464646`) y «Millas disponibles: **100.000**» (14 px).
@@ -137,6 +143,7 @@ Regla: en Personal Bank el azul marino es para el precio con millas, el control 
 
 ## 6. A confirmar
 
+- **Resumen antes de elegir la dirección** *(supuesto)*: el prototipo lo muestra sin fila de envío, con «Millas aplicadas» ya cargadas y título «RESUMEN». Falta una captura del sitio en ese estado.
 - **Retiro en Pickup Itaú con costo** *(hipótesis)*: en producción se vio un retiro con $ 189. Si el Pickup Itaú es una «Agencia» con costo de envío, el salteo de Forma de pago solo aplicaría a retiros sin costo.
 - **Confirmación sin forma de pago**: cómo se muestra el bloque de pago cuando se salteó Forma de pago.
 - **Cliente común en el encabezado** *(supuesto)*: que no lleve la etiqueta «Personal» ni el ícono PB se dedujo de cómo se ve un cliente Personal Bank; falta una captura del sitio con un cliente común.
@@ -150,4 +157,5 @@ Regla: en Personal Bank el azul marino es para el precio con millas, el control 
 - En el carrito completo, la columna del Resumen llega hasta el pie para que se vea el efecto fijo con solo 3 productos.
 - El aceite agregado desde la ficha **no aparece** en la lista del carrito (el carrito del diseño tiene 3 productos).
 - El recorrido termina en Entrega.
+- Las direcciones del selector de Entrega son de ejemplo y las dos dan el mismo envío ($ 150).
 - Las fichas de los productos del carrito suman 2.000 millas. El tope del carrito no se puede recorrer en el prototipo (con este carrito, el tope por descuentos es de 19 millas); queda descrito arriba. El control «Saldo de millas: 3.000» muestra en Entrega el máximo limitado por el saldo.
