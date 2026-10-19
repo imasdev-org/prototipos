@@ -221,13 +221,14 @@ body.barra-plegada #solapa { display: inline-flex; }
 .etiqueta-ahorro .ico { display: flex; }
 .etiqueta-ahorro .monto { font-weight: 600; }
 /* Cada cifra (y el punto de los miles) es un compartimento que entra o sale animando su ancho (0fr ↔ 1fr, sin medir
-   nada con JS) y su opacidad; la etiqueta, anclada a la derecha, se ensancha o se angosta sin saltos */
+   nada con JS) y su opacidad; la etiqueta, anclada a la derecha, se ensancha o se angosta sin saltos.
+   El prototipo la anima SIEMPRE, también con «reducir movimiento» (Windows lo activa solo en sesiones de Escritorio
+   Remoto y la regla la apagaba): es para poder evaluarla. En el desarrollo real sí debe respetarse (ver especificación). */
 .etiqueta-ahorro .cifras { display: inline-flex; }
 .etiqueta-ahorro .dig { display: inline-grid; grid-template-columns: 0fr; opacity: 0; transition: grid-template-columns .25s cubic-bezier(.3,.7,.3,1), opacity .25s ease; }
 .etiqueta-ahorro .dig > span { min-width: 0; overflow: hidden; white-space: pre; }
 .etiqueta-ahorro .dig.on { grid-template-columns: 1fr; opacity: 1; }
 .etiqueta-ahorro .dig.sin-transicion { transition: none; }
-@media (prefers-reduced-motion: reduce) { .etiqueta-ahorro .dig { transition: none; } }
 .solo-lectores { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 /* Resumen (desktop): caja fija al hacer scroll */
