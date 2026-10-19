@@ -192,11 +192,18 @@ body.barra-plegada #solapa { display: inline-flex; }
 /* "Usar el máximo" (ficha y Entrega, funciona como interruptor). Los colores vienen del segmento (COLORES en app.js):
    Personal Bank azul, cliente común naranja. Activo: fondo suave, borde de 2 px, semibold y una tilde antes del texto. */
 .boton-max {
-  position: absolute; display: flex; align-items: center; justify-content: center; gap: 5px;
+  position: absolute; display: flex; align-items: center; justify-content: center;
   background: #fff; border: 1px solid var(--bm-borde, #FF6200); color: var(--bm-texto, var(--naranja-oscuro));
   font: 400 14px var(--fuente-sitio); cursor: pointer; padding: 0;
 }
-.boton-max .tilde { display: none; width: 16px; height: 16px; flex: none; }
+/* Animación al activar (como el botón segmentado de Material 3): la ranura de la tilde se abre de 0 a 21 px
+   (tilde de 16 + 5 de separación) en 200 ms, así el texto se desliza 10,5 px y tilde y texto quedan centrados juntos;
+   la tilde entra con fundido y escala desde 0, anclada abajo a la izquierda. Al desactivar, la tilde se va sin
+   animación y la ranura se cierra (el texto vuelve deslizándose). Misma técnica que la etiqueta de ahorro
+   (grid-template-columns 0fr ↔ 1fr, sin medir con JS). Se anima siempre: no depende de «reducir movimiento». */
+.boton-max .ranura { display: inline-grid; grid-template-columns: 0fr; transition: grid-template-columns .2s cubic-bezier(.3,.7,.3,1); }
+.boton-max .ranura > span { min-width: 0; overflow: hidden; display: flex; }
+.boton-max .tilde { width: 16px; height: 16px; flex: none; margin-right: 5px; opacity: 0; transform: scale(0); transform-origin: 0 100%; }
 /* Para que la frase no cambie de ancho al activarse, el estado normal lleva un espaciado de .017em:
    en Myriad Pro 14 px la semibold mide 93 px y la normal 89,7 px. */
 .boton-max { letter-spacing: .017em; }
@@ -204,7 +211,8 @@ body.barra-plegada #solapa { display: inline-flex; }
   background: var(--bm-activo-fondo, #FFE0CC); border: 2px solid var(--bm-activo-borde, #DE5500);
   color: var(--bm-activo-texto, #A84300); font-weight: 600; letter-spacing: 0;
 }
-.boton-max[aria-pressed="true"] .tilde { display: block; }
+.boton-max[aria-pressed="true"] .ranura { grid-template-columns: 1fr; }
+.boton-max[aria-pressed="true"] .tilde { opacity: 1; transform: scale(1); transition: opacity .2s ease, transform .2s cubic-bezier(.3,.7,.3,1); }
 
 /* Panel de millas de Entrega: la pregunta es la cabecera, adentro y sin banda. Fondo y borde según el segmento;
    el borde es interior (como el trazo de Penpot), así no corre el contenido. */
