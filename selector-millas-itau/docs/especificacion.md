@@ -106,6 +106,7 @@ Con envío a domicilio el envío siempre se paga con tarjeta: **no se saltea**.
 - «Continuar» pasa a Forma de pago, o a Confirmación si se salteó el pago. En el prototipo, ahí termina el recorrido.
 - Mobile: debajo del campo, divisoria y **«Total a pagar con tarjeta $ X»** = total + envío (rótulo 14/700 `#464646`, monto 16/700) (en mobile el Resumen no está en este paso: su columna es `hidden-xs hidden-sm`).
 - Teclado en el control: flechas ±10, Shift + flechas ±100, RePág/AvPág ±10 %, Inicio/Fin.
+- **El tirador (30 × 30 px) queda siempre dentro del track**, en la ficha y en Entrega: con el valor mínimo su borde izquierdo coincide con el inicio del track y con el máximo su borde derecho coincide con el final; nunca sobresale. Por eso el **centro** del tirador no coincide con los extremos: recorre solo el tramo útil (ancho del track − 30 px) y la posición del centro es `inicio + 15 + (valor ÷ máximo) × (ancho − 30)`. Lo mismo vale para el arrastre: el valor sale de la posición del puntero menos 15 px, dividida por el tramo útil. El relleno llega hasta el centro del tirador. Costo: el tramo útil es 30 px más corto, así que cada píxel equivale a un poco más de millas (en Entrega desktop, de 10,3 a 11,0 millas por píxel con un máximo de 4.861). Con esto el tirador no choca contra el borde de la tarjeta ni contra el campo vecino, y el track ya no hace falta acortarlo para evitarlo.
 
 ### Checkout · Resumen fijo (desktop)
 

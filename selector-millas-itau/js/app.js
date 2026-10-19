@@ -111,17 +111,21 @@
     var pista = el('div', { class: 'pista' }), relleno = el('div', { class: 'relleno' });
     var tirador = el('div', { class: 'tirador', html: '<img src="assets/icons/volar.svg" alt="">' });
     pista.appendChild(relleno); c.appendChild(pista); c.appendChild(tirador);
+    // El tirador (30 px) queda SIEMPRE dentro del track: con el valor mínimo su borde izquierdo coincide con el inicio del
+    // track y con el máximo su borde derecho coincide con el final. Su centro recorre solo el tramo útil (ancho − 30 px),
+    // así que el mínimo y el máximo no coinciden con los extremos del track.
+    var TIRADOR = 30, MITAD = TIRADOR / 2, UTIL = o.ancho - TIRADOR;
     var st = { valor: 0, maximo: 1 };
     function pintar() {
-      var px = st.maximo ? (st.valor / st.maximo) * o.ancho : 0;
-      relleno.style.width = px + 'px';
-      tirador.style.left = (px - 15) + 'px'; // el tirador se centra en el valor (al máximo sobresale medio tirador)
+      var fraccion = st.maximo ? st.valor / st.maximo : 0;
+      relleno.style.width = (MITAD + fraccion * UTIL) + 'px'; // el relleno llega hasta el centro del tirador
+      tirador.style.left = (fraccion * UTIL) + 'px';
       c.setAttribute('aria-valuemax', st.maximo); c.setAttribute('aria-valuenow', st.valor);
       c.setAttribute('aria-valuetext', R.miles(st.valor) + ' millas');
     }
     function desdeEvento(ev) {
-      var r = c.getBoundingClientRect();
-      return R.acotar(((ev.clientX - r.left) / r.width) * st.maximo, st.maximo);
+      var r = c.getBoundingClientRect(), z = r.width / o.ancho; // z: zoom con el que se achica la pantalla en desktop
+      return R.acotar(((ev.clientX - r.left) / z - MITAD) / UTIL * st.maximo, st.maximo);
     }
     c.addEventListener('pointerdown', function (ev) {
       ev.preventDefault(); c.setPointerCapture(ev.pointerId); c.classList.add('arrastrando'); c.focus({ preventScroll: true });
