@@ -59,17 +59,21 @@
   // Colores por segmento (Personal Bank = azul marino; cliente común = naranja).
   // panel*: fondo y borde del panel de millas de Entrega; divisoria = color de la pista.
   // boton*: «Usar el máximo» (inactivo: borde y texto; activo: fondo, borde de 2 px y texto, con tilde).
+  // botonHover*: con el mouse encima, fondo = color del texto al 8 % sobre el fondo del estado (capa de Material 3);
+  // en cliente común el texto se oscurece para no bajar de 4,5:1.
   var COLORES = {
     pb: { pista: '#B8BDC9', relleno: 'linear-gradient(90deg,#5A6380,#000C39)', tirador: '#000D3A',
       etiquetaFondo: 'rgba(34,63,131,.10)', etiquetaTexto: '#223F83', etiquetaMonto: '#000D3C', icono: '#223F83',
       precioPesos: '#000D3C', precioMillas: '#000D3C',
       panelFondo: '#F4F5F9', panelBorde: '#DEE2EC', divisoria: '#B8BDC9',
-      botonBorde: '#223F83', botonTexto: '#223F83', botonActivoFondo: '#D3D9E6', botonActivoBorde: '#223F83', botonActivoTexto: '#223F83' },
+      botonBorde: '#223F83', botonTexto: '#223F83', botonActivoFondo: '#D3D9E6', botonActivoBorde: '#223F83', botonActivoTexto: '#223F83',
+      botonHoverFondo: '#EDF0F5', botonHoverTexto: '#223F83', botonHoverActivoFondo: '#C5CDDE', botonHoverActivoTexto: '#223F83' },
     comun: { pista: '#FDD4B9', relleno: 'linear-gradient(90deg,#FE9A5A,#F95E00)', tirador: '#FE6002',
       etiquetaFondo: 'rgba(255,98,0,.10)', etiquetaTexto: '#464646', etiquetaMonto: '#464646', icono: '#C75000',
       precioPesos: '#FF6200', precioMillas: '#5F6062',
       panelFondo: '#FFF7F2', panelBorde: '#FFE7D9', divisoria: '#FDD4B9',
-      botonBorde: '#FF6200', botonTexto: '#DE5500', botonActivoFondo: '#FFE0CC', botonActivoBorde: '#DE5500', botonActivoTexto: '#A84300' }
+      botonBorde: '#FF6200', botonTexto: '#DE5500', botonActivoFondo: '#FFE0CC', botonActivoBorde: '#DE5500', botonActivoTexto: '#A84300',
+      botonHoverFondo: '#FCF1EB', botonHoverTexto: '#9A3D00', botonHoverActivoFondo: '#F8D3BC', botonHoverActivoTexto: '#9A3D00' }
   };
 
   // ---------------------------------------------------------------- estado
@@ -196,6 +200,8 @@
         b.style.setProperty('--bm-borde', c.botonBorde); b.style.setProperty('--bm-texto', c.botonTexto);
         b.style.setProperty('--bm-activo-fondo', c.botonActivoFondo); b.style.setProperty('--bm-activo-borde', c.botonActivoBorde);
         b.style.setProperty('--bm-activo-texto', c.botonActivoTexto);
+        b.style.setProperty('--bm-hover-fondo', c.botonHoverFondo); b.style.setProperty('--bm-hover-texto', c.botonHoverTexto);
+        b.style.setProperty('--bm-hover-activo-fondo', c.botonHoverActivoFondo); b.style.setProperty('--bm-hover-activo-texto', c.botonHoverActivoTexto);
       }
     };
   }
@@ -419,7 +425,7 @@
     ficha: [
       { d: [893, 300], m: [8, 535], t: 'La ficha es un <b>semi-simulador</b>: en la ficha no se conocen los descuentos, así que el máximo se calcula sobre el precio sin promoción ($ 417 × 1,92 = 801). El ajuste fino se hace al pagar, y por eso la aclaración visible: «Es un estimado: al pagar se ajusta al total del pedido y a tus millas.» (siempre visible, sin tooltip), como texto de ayuda justo debajo del campo. El saldo va arriba del control, como en la tarjeta de Entrega. Lo elegido se guarda en el producto y se suma en el checkout.' },
       { d: [893, 352], m: [8, 586], t: 'Precio = precio sin promoción − millas ÷ 1,92, redondeado y nunca menor a $ 0. Valor por defecto: la mitad del máximo (sin cambios respecto de hoy). Rótulos fijos: solo cambian los valores. Colores del precio: Personal Bank todo en azul marino <code>#000D3C</code>; cliente común pesos en naranja <code>#FF6200</code> y millas en gris <code>#5F6062</code>, como hoy para quien no es Personal Bank.' },
-      { d: [1234, 472], m: [376, 707], t: '<b>«Usar el máximo»</b> funciona como interruptor, con el color del segmento. <b>Personal Bank (azul):</b> normal, borde 1 px y texto <code>#223F83</code>; activo, fondo <code>#D3D9E6</code>, borde 2 px y texto semibold <code>#223F83</code>. <b>Cliente común (naranja):</b> normal, borde 1 px <code>#FF6200</code> y texto <code>#DE5500</code>, como hoy; activo, fondo <code>#FFE0CC</code>, borde 2 px <code>#DE5500</code> y texto semibold <code>#A84300</code>. Activo lleva una <b>tilde</b> (Lucide check, ISC, 16 px) 5 px antes del texto, con el contenido centrado. <b>Al activarse se anima</b> (200 ms): la tilde entra con fundido y escala y el texto se desliza 10,5 px a la derecha para hacerle lugar, como el botón segmentado de Material 3; al desactivarse la tilde se va sin animación y el texto vuelve. Se anima siempre (no depende de «reducir movimiento»). Así el estado no depende solo del color, y el texto activo pasa 4,5:1 (azul 7,0:1; naranja 4,8:1). El botón no cambia de tamaño. Para que la frase no cambie de ancho, el estado normal lleva <code>letter-spacing: .017em</code> (Myriad Pro 14 px: semibold 93 px, normal 89,7 px). Al desactivarlo vuelve al valor anterior. Si se mueve el control o se edita el campo, se desactiva.' },
+      { d: [1234, 472], m: [376, 707], t: '<b>«Usar el máximo»</b> funciona como interruptor, con el color del segmento. <b>Personal Bank (azul):</b> normal, borde 1 px y texto <code>#223F83</code>; activo, fondo <code>#D3D9E6</code>, borde 2 px y texto semibold <code>#223F83</code>. <b>Cliente común (naranja):</b> normal, borde 1 px <code>#FF6200</code> y texto <code>#DE5500</code>, como hoy; activo, fondo <code>#FFE0CC</code>, borde 2 px <code>#DE5500</code> y texto semibold <code>#A84300</code>. Activo lleva una <b>tilde</b> (Lucide check, ISC, 16 px) 5 px antes del texto, con el contenido centrado. <b>Al activarse se anima</b> (200 ms): la tilde entra con fundido y escala y el texto se desliza 10,5 px a la derecha para hacerle lugar, como el botón segmentado de Material 3; al desactivarse la tilde se va sin animación y el texto vuelve. Se anima siempre (no depende de «reducir movimiento»). Así el estado no depende solo del color, y el texto activo pasa 4,5:1 (azul 7,0:1; naranja 4,8:1). El botón no cambia de tamaño. Para que la frase no cambie de ancho, el estado normal lleva <code>letter-spacing: .017em</code> (Myriad Pro 14 px: semibold 93 px, normal 89,7 px). Al desactivarlo vuelve al valor anterior. Si se mueve el control o se edita el campo, se desactiva. <b>Hover</b> (solo con mouse, <code>@media (hover: hover)</code>): el fondo toma el color del texto al 8 % (Personal Bank <code>#EDF0F5</code>, activo <code>#C5CDDE</code>; cliente común <code>#FCF1EB</code>, activo <code>#F8D3BC</code>) y, en cliente común, el texto y la tilde pasan a <code>#9A3D00</code> para no bajar de 4,5:1. <b>Foco con teclado</b>: contorno 3 px <code>#223F83</code> separado 2 px.' },
       { d: [893, 568], m: [8, 803], t: '«Agregar al carrito» solo sube el contador del ícono; el carrito lateral se abre tocando el ícono. <b>En este prototipo el aceite no aparece en la lista del carrito</b> (simplificación: el carrito del diseño tiene 3 productos).' },
       { d: [950, 30], m: [290, 30], t: 'Menú de usuario como en el sitio: etiqueta «Personal», nombre y saldo de millas. El cliente común no lleva la etiqueta «Personal» (en mobile, el ícono PB).' }
     ],

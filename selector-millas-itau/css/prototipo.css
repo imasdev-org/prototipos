@@ -211,6 +211,14 @@ body.barra-plegada #solapa { display: inline-flex; }
   background: var(--bm-activo-fondo, #FFE0CC); border: 2px solid var(--bm-activo-borde, #DE5500);
   color: var(--bm-activo-texto, #A84300); font-weight: 600; letter-spacing: 0;
 }
+/* Hover (solo con mouse, así no queda «pegado» en pantallas táctiles): el fondo toma el color del texto al 8 % sobre el
+   fondo del estado (capa de estado de Material 3). En cliente común el texto se oscurece a #9A3D00 para no bajar de 4,5:1. */
+@media (hover: hover) {
+  .boton-max:hover { background: var(--bm-hover-fondo, #FCF1EB); color: var(--bm-hover-texto, #9A3D00); }
+  .boton-max[aria-pressed="true"]:hover { background: var(--bm-hover-activo-fondo, #F8D3BC); color: var(--bm-hover-activo-texto, #9A3D00); }
+}
+/* Foco con teclado: el mismo contorno que el resto del prototipo (zonas tocables y tirador del control) */
+.boton-max:focus-visible { outline: 3px solid #223F83; outline-offset: 2px; }
 .boton-max[aria-pressed="true"] .ranura { grid-template-columns: 1fr; }
 .boton-max[aria-pressed="true"] .tilde { opacity: 1; transform: scale(1); transition: opacity .2s ease, transform .2s cubic-bezier(.3,.7,.3,1); }
 

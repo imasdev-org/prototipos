@@ -69,6 +69,8 @@ Con envío a domicilio el envío siempre se paga con tarjeta: **no se saltea**.
   |---|---|---|
   | Normal | fondo blanco, borde 1 px `#223F83`, texto `#223F83` | fondo blanco, borde 1 px `#FF6200`, texto `#DE5500` (como hoy) |
   | Activo | fondo `#D3D9E6` (`#223F83` al 20 %), borde 2 px `#223F83`, texto semibold `#223F83` | fondo `#FFE0CC` (`#FF6200` al 20 %), borde 2 px `#DE5500`, texto semibold `#A84300` |
+  | Normal con el mouse encima | fondo `#EDF0F5`; borde y texto como en normal | fondo `#FCF1EB`; borde `#FF6200`; texto y tilde `#9A3D00` |
+  | Activo con el mouse encima | fondo `#C5CDDE`; borde y texto como en activo | fondo `#F8D3BC`; borde 2 px `#DE5500`; texto y tilde `#9A3D00` |
 
   - Activo lleva una **tilde** (ícono Lucide `check`, ISC, 16 × 16 px, trazo del color del texto) 5 px antes de la frase, con tilde y frase centradas juntas en el botón. Así el estado no depende solo del color, y el fondo activo se distingue también sobre el panel de Entrega. `aria-pressed="true"`.
   - **Animación al activar (200 ms):** el lugar de la tilde se abre de 0 a 21 px (16 de la tilde + 5 de separación), así la frase **se desliza 10,5 px a la derecha** y tilde y frase quedan siempre centradas juntas; al mismo tiempo la tilde entra con fundido (`opacity` 0 → 1, `ease`) y escala desde 0 anclada abajo a la izquierda (`transform-origin: 0 100%`). Curva del desplazamiento y la escala: `cubic-bezier(.3,.7,.3,1)`, la misma de la etiqueta de ahorro. En el prototipo el ancho se anima con `grid-template-columns: 0fr ↔ 1fr`, sin medir con JS.
@@ -76,6 +78,9 @@ Con envío a domicilio el envío siempre se paga con tarjeta: **no se saltea**.
   - Es el patrón del **botón segmentado de Material 3**: en su implementación de Compose la tilde entra con `fadeIn` + `scaleIn` (escala desde 0, anclada abajo a la izquierda), sale sin animación (`ExitTransition.None`) y el contenido se corre la mitad de ícono + separación para quedar centrado. Se eligió en lugar de dejar la frase fija y agrandar el botón: con la frase fija, la tilde quedaría a 7,5 px del borde en la ficha desktop (150 px) y a 9,5 en Entrega mobile (154 px), donde no hay lugar para agrandarlo (campo y botón ya ocupan los 320 px del panel), y el contenido quedaría descentrado al activarse.
   - **Se anima siempre**, también con `prefers-reduced-motion: reduce`, con el mismo criterio que la etiqueta de ahorro: el movimiento es mínimo (10,5 px en 200 ms).
   - El cambio a semibold es instantáneo (las fuentes no variables no interpolan el peso); la compensación de `letter-spacing` de abajo mantiene el ancho de la frase.
+  - **Hover, solo con mouse** (`@media (hover: hover)`, así no queda «pegado» después de un toque en pantallas táctiles): el fondo toma el color del texto al 8 % sobre el fondo del estado, la capa de estado de Material 3 (`HoverStateLayerOpacity = 0.08` en sus tokens). En cliente común el texto y la tilde pasan a `#9A3D00`: con el tinte, el texto original bajaba a 3,50:1 (normal) y 4,34:1 (activo); con `#9A3D00` queda en 6,22:1 y 4,94:1. Personal Bank conserva su texto (8,73:1 y 6,25:1). El cambio es inmediato, sin transición. Hoy el botón del sitio no tiene hover (`.useAvailableBtn` en `idslider.sass`).
+  - Se descartó como hover la sombra que usa el sitio en «Agregar al carrito» (`1px 1px 5px` al 15 %): sobre los paneles casi no se ve (a 1 px del botón el panel pasa de `#F4F5F9` a `#E7E9F2`, 1,11:1).
+  - **Foco con teclado** (`:focus-visible`): contorno 3 px `#223F83` separado 2 px, el mismo de las zonas tocables y del tirador del control. Hoy el sitio no le da foco propio a este botón.
   - El botón **no cambia de tamaño** al activarse (ficha 150 × 36 desktop y 176 × 36 mobile, radio 5; Entrega 166 × 34 desktop y 154 × 34 mobile, radio 4).
   - La frase **no cambia de ancho** al activarse: el estado normal lleva `letter-spacing: .017em`, que en Myriad Pro 14 px la lleva de 89,7 a 93 px, lo mismo que mide en semibold. Sin esa compensación, la frase se ensancha un 3,7 % y se mueve.
   - Por qué cambió el activo: el anterior (fondo `#FEEEE3`, texto `#DE5500`) casi no se distinguía sobre el panel durazno de cliente común (1,07:1 contra el panel) y su texto daba 3,43:1, por debajo de 4,5:1. Los nuevos dan 7,04:1 (azul) y 4,84:1 (naranja).
@@ -166,13 +171,14 @@ No están en el prototipo. Les aplican el Resumen fijo y el salteo de Forma de p
 | Divisoria sobre «Total a pagar» (mobile) | `#B8BDC9` | `#FDD4B9` |
 | «Usar el máximo» normal · borde / texto | `#223F83` / `#223F83` | `#FF6200` / `#DE5500` |
 | «Usar el máximo» activo · fondo / borde 2 px / texto (con tilde) | `#D3D9E6` / `#223F83` / `#223F83` | `#FFE0CC` / `#DE5500` / `#A84300` |
+| «Usar el máximo» con el mouse encima · fondo normal / fondo activo / texto | `#EDF0F5` / `#C5CDDE` / `#223F83` | `#FCF1EB` / `#F8D3BC` / `#9A3D00` |
 
 Regla: todo lo que es **de millas** toma el color del segmento: en Personal Bank, azul marino (precio con millas, control, etiqueta de ahorro, panel y «Usar el máximo»); en cliente común, naranja. El naranja sólido queda para las **acciones de la página** en ambos segmentos («Agregar al Carrito», el tipo de entrega elegido, «Continuar»). En cliente común el texto de la etiqueta es gris por contraste (`#C75000` sobre el tinte da 4,10:1).
 
 ## 5. Accesibilidad
 
 - El control es `role="slider"` con `aria-valuemin/max/now` y `aria-valuetext` («N millas»), y se opera con teclado.
-- «Usar el máximo» es un botón con `aria-pressed`. El estado activo no depende solo del color: lleva tilde, borde de 2 px y semibold. Contraste del texto: activo 7,04:1 (Personal Bank) y 4,84:1 (cliente común); normal en Personal Bank 9,97:1.
+- «Usar el máximo» es un botón con `aria-pressed`. El estado activo no depende solo del color: lleva tilde, borde de 2 px y semibold. Contraste del texto: activo 7,04:1 (Personal Bank) y 4,84:1 (cliente común); normal en Personal Bank 9,97:1. Con el mouse encima, todos los casos quedan por encima de 4,5:1 (el más bajo, activo de cliente común: 4,94:1). Foco visible con teclado: contorno 3 px `#223F83`.
 - El panel de millas de Entrega es una sección con la pregunta como nombre accesible (`aria-labelledby`).
 - Textos grises chicos del selector (escala, saldo de la ficha, aclaración): `#767676`, que da 4,54:1 sobre blanco y cumple WCAG AA. El `#828282` anterior daba 3,84:1.
 - El campo acepta solo dígitos (`inputmode="numeric"`), no deja superar el máximo y al salir muestra el valor con separador de miles.
