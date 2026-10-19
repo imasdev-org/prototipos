@@ -51,4 +51,4 @@ En la vista mobile no hay barra de desplazamiento: se desplaza con el dedo, la r
 
 ## Publicar
 
-GitHub Pages deja los archivos en la caché del navegador hasta 10 minutos. Antes de cada commit que cambie `css/`, `js/` o `pantallas/`, correr `node herramientas/subir-version.js`: le pone una versión nueva (`?v=fecha-hora`) a los archivos que carga `index.html` para que se descarguen de nuevo.
+GitHub Pages deja los archivos en la caché del navegador hasta 10 minutos. Para que cada publicación se descargue de nuevo, `index.html` carga los archivos con una versión (`?v=fecha-hora`). Un hook de git la actualiza solo en cada commit; se activa **una vez por clon** con `git config core.hooksPath .githooks` (también se puede correr a mano: `node herramientas/subir-version.js`). La versión cargada se ve en el título de la pestaña. Si la pestaña muestra una versión vieja, falta la caché del propio `index.html` (hasta 10 minutos): recargar con Ctrl + F5.

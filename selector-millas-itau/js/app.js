@@ -6,6 +6,9 @@
  */
 (function () {
   'use strict';
+  // Versión que se cargó (la pone herramientas/subir-version.js como ?v= en index.html): se ve en el título de la pestaña
+  // para saber a simple vista si el navegador trajo la última publicación o una guardada en caché.
+  var VERSION = (function () { var s = document.currentScript, m = s && /[?&]v=([0-9-]+)/.exec(s.src); return m ? m[1] : 'local'; })();
   var R = window.Reglas;
 
   // ---------------------------------------------------------------- utilidades
@@ -286,7 +289,7 @@
     t.appendChild(cajaEtiqueta);
     var etiqueta = crearEtiquetaAhorro(), etiquetaLista = false;
     etiqueta.nodo.style.position = 'relative'; cajaEtiqueta.appendChild(etiqueta.nodo);
-    var ancho = d ? 470 : 305;
+    var ancho = d ? 470 : 320; // mobile: de margen a margen de la tarjeta (alineado con el campo y «Usar el máximo»)
     var obj = estado.pedido;
     var control = crearControl({ x: 15, y: d ? 120 : 130, ancho: ancho, etiqueta: 'Millas del pedido',
       alCambiar: function (v) { cambiarMillas(obj, v, maximoPedido()); repintarTodo(); } });
@@ -707,6 +710,7 @@
   }
 
   function iniciar() {
+    document.title = 'Selector de millas · prototipo · v' + VERSION;
     barraPlegada = leerPreferencia();
     estado = estadoInicial();
     var reiniciarPedido = function () { estado.pedido = { millas: null, previo: null, maxActivo: false }; };
