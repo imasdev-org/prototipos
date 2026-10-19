@@ -1,0 +1,2 @@
+# Los hooks de git deben quedar con fin de línea LF (un sh con CRLF no arranca)
+.githooks/* text eol=lf
