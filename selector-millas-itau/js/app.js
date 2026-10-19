@@ -164,18 +164,51 @@
     return { nodo: b, set: function (activo) { b.setAttribute('aria-pressed', activo ? 'true' : 'false'); } };
   }
 
-  // Etiqueta «Ahorrás $ X» de ancho fijo: lo fija un texto fantasma con el monto más ancho esperado (cuatro cifras), así
-  // el ícono y «Ahorrás» no se mueven al cambiar la cantidad de cifras y el monto queda alineado a la derecha.
-  // Si el monto tuviera más cifras, la etiqueta crece hacia la izquierda.
-  var MONTO_MAS_ANCHO = '$ 9.999';
-  function etiquetaAhorro(colores, monto) {
+  // Etiqueta «Ahorrás $ X»: se adapta al contenido y, al ganar o perder cifras, cada cifra (y el punto de los miles) entra o
+  // sale animando su ancho y su opacidad (grid-template-columns 0fr ↔ 1fr), así el ícono desliza en lugar de saltar.
+  // El número se compara desde la derecha: las cifras que siguen cambian de valor sin animarse (los dígitos son tabulares).
+  // No se mide nada con JS. Un texto solo para lectores de pantalla evita que se lean las cifras sueltas.
+  function crearEtiquetaAhorro() {
     var e = el('div', { class: 'etiqueta-ahorro', role: 'status' });
-    e.style.background = colores.etiquetaFondo; e.style.color = colores.etiquetaTexto;
-    var negrita = '<b style="font-weight:600;color:' + colores.etiquetaMonto + '">';
-    e.innerHTML = '<span style="color:' + colores.icono + ';display:flex">' + ICONO_CHANCHITO + '</span>' +
-      '<span class="texto"><span class="real"><span>Ahorrás&nbsp;</span>' + negrita + R.pesos(monto) + '</b></span>' +
-      '<span class="fantasma" aria-hidden="true">Ahorrás ' + negrita + MONTO_MAS_ANCHO + '</b></span></span>';
-    return e;
+    var icono = el('span', { class: 'ico' }); icono.innerHTML = ICONO_CHANCHITO;
+    var lector = el('span', { class: 'solo-lectores' });
+    var visual = el('span', { 'aria-hidden': 'true' }, 'Ahorrás ');
+    var monto = el('b', { class: 'monto' }, '$ '), cifras = el('span', { class: 'cifras' });
+    monto.appendChild(cifras); visual.appendChild(monto);
+    e.appendChild(icono); e.appendChild(lector); e.appendChild(visual);
+    var slots = [];
+    function poner(num, animar) {
+      lector.textContent = 'Ahorrás $ ' + num;
+      var cs = num.split('').reverse(), n = Math.max(cs.length, slots.length);
+      for (var i = 0; i < n; i++) {
+        var s = slots[i];
+        if (i < cs.length) {
+          if (!s) {
+            var d = el('span', { class: 'dig' + (animar ? '' : ' sin-transicion') }), t = el('span', null, cs[i]);
+            d.appendChild(t);
+            s = slots[i] = { el: d, t: t, ch: cs[i], saliendo: false, id: 0 };
+            cifras.insertBefore(d, slots[i - 1] ? slots[i - 1].el : null);
+            void d.offsetWidth; // fija el estado inicial (ancho 0, transparente) antes de animar
+            d.classList.add('on');
+            if (!animar) { void d.offsetWidth; d.classList.remove('sin-transicion'); }
+          } else {
+            if (s.saliendo) { s.saliendo = false; clearTimeout(s.id); s.el.style.transitionDelay = ''; s.el.classList.add('on'); }
+            if (s.ch !== cs[i]) { s.ch = cs[i]; s.t.textContent = cs[i]; }
+          }
+        } else if (s && !s.saliendo) {
+          s.saliendo = true;
+          // la opacidad arranca ya avanzada para que no se vea un instante el número equivocado
+          s.el.style.transitionDelay = '0s, -175ms';
+          s.el.classList.remove('on');
+          (function (s) { s.id = setTimeout(function () { if (s.saliendo) { s.el.remove(); var k = slots.indexOf(s); if (k >= 0) slots.splice(k, 1); } }, 310); })(s);
+        }
+      }
+    }
+    function pintar(colores) {
+      e.style.background = colores.etiquetaFondo; e.style.color = colores.etiquetaTexto;
+      icono.style.color = colores.icono; monto.style.color = colores.etiquetaMonto;
+    }
+    return { nodo: e, poner: poner, pintar: pintar };
   }
 
   // Encabezado desktop (menú de usuario del diseño): «Personal» solo para Personal Bank y el saldo vigente.
@@ -237,6 +270,8 @@
     t.appendChild(saldo);
     var cajaEtiqueta = el('div', { class: 'capa', style: 'right:15px;top:' + (d ? 55 : 92) + 'px' });
     t.appendChild(cajaEtiqueta);
+    var etiqueta = crearEtiquetaAhorro(), etiquetaLista = false;
+    etiqueta.nodo.style.position = 'relative'; cajaEtiqueta.appendChild(etiqueta.nodo);
     var ancho = d ? 470 : 305;
     var obj = estado.pedido;
     var control = crearControl({ x: 15, y: d ? 120 : 130, ancho: ancho, etiqueta: 'Millas del pedido',
@@ -268,7 +303,7 @@
         campo.set(m);
         boton.set(obj.maxActivo);
         escalaMax.textContent = 'Máximo para este pedido: ' + R.miles(max);
-        cajaEtiqueta.innerHTML = ''; var e = etiquetaAhorro(c, R.ahorro(m)); e.style.position = 'relative'; cajaEtiqueta.appendChild(e);
+        etiqueta.pintar(c); etiqueta.poner(R.miles(R.ahorro(m)), etiquetaLista); etiquetaLista = true;
         if (totalValor) totalValor.textContent = R.pesos(r.total);
       }
     };
@@ -361,7 +396,7 @@
       { d: [125, 321], m: [20, 330], t: 'Tarjeta <b>«Tus millas»</b> antes de «Tu pedido», con el mismo estilo de tarjeta (banda <code>#3E3F40</code>, radio 15, sombra <code>#CCCCCC</code> 2 px). Se elige después del tipo de entrega y la sucursal o dirección: ahí el monto con tarjeta ya es definitivo.' },
       { d: [125, 446], m: [22, 457], t: 'Valor inicial = suma de lo elegido en las fichas, con tope. Máximo del pedido = piso(total de productos con descuentos × 1,92), nunca más que el saldo. Las millas se aplican después de los descuentos (así no se usan de más) y <b>no cubren el envío</b> (por ahora).' },
       { d: [1008, 447], m: [372, 530], t: 'Control, campo y «Usar el máximo» sincronizados; el valor se acota entre 0 y el máximo. «Usar el máximo» es el mismo componente de la ficha. Teclado: flechas ±10, Shift+flechas ±100, Inicio/Fin.' },
-      { d: [846, 373], m: [372, 420], t: 'Ahorro = millas ÷ 1,92, redondeado. Se muestra una sola vez. Etiqueta: azul en Personal Bank (fondo <code>#223F83</code> al 10 %), naranja suave en cliente común (fondo <code>#FF6200</code> al 10 %, texto gris por contraste). Monto en <code>font-weight: 600</code>. Ícono: Lucide piggy-bank (ISC). <b>Ancho fijo</b> (el de «Ahorrás $ 9.999», unos 132 px, a la derecha de la tarjeta): el ícono y «Ahorrás» no se mueven al cambiar la cantidad de cifras y el monto va alineado a la derecha.' },
+      { d: [846, 373], m: [372, 420], t: 'Ahorro = millas ÷ 1,92, redondeado. Se muestra una sola vez. Etiqueta: azul en Personal Bank (fondo <code>#223F83</code> al 10 %), naranja suave en cliente común (fondo <code>#FF6200</code> al 10 %, texto gris por contraste). Monto en <code>font-weight: 600</code>. Ícono: Lucide piggy-bank (ISC). <b>Se adapta al contenido</b> (anclada a la derecha de la tarjeta): al ganar o perder cifras, cada cifra y el punto de los miles entran o salen animando su ancho y su opacidad (~250 ms), así el ícono desliza en lugar de saltar. Respeta «reducir movimiento».' },
       { d: [1043, 110], m: null, t: '<b>Resumen fijo al hacer scroll</b> (<code>position: sticky</code>) en los pasos del checkout, desktop. Título «RESUMEN» centrado en su franja. SubTotal en pesos ya descontadas las millas; fila «Millas aplicadas» con la cantidad (hoy dice «millas»); Total = SubTotal − Descuentos + entrega. Con todo cubierto: SubTotal $ 0 y sin fila de Descuentos. Con envío a domicilio, el título dice «Con $ X más el envío es gratis», como hoy en el sitio (X = $ 3.000 − SubTotal; umbral y cálculo tomados de una captura del sitio, a confirmar).' },
       { d: [792, 40], m: null, t: 'Si las millas cubren todo y la entrega no tiene costo (retiro sin costo o envío gratis), se saltea Forma de pago como hoy: <code>wCheckout</code> pone la clase <code>PaymentTabHidden</code>, la pestaña FORMA DE PAGO se oculta y CONFIRMACIÓN pasa a su lugar, y el botón dice «Continuar a Confirmación». En este recorrido (envío a domicilio con costo) no pasa: el envío siempre va con tarjeta.' },
       { d: null, m: [22, 585], t: 'En mobile el Resumen no está en este paso (la columna es <code>hidden-xs hidden-sm</code>): la tarjeta muestra «Total a pagar con tarjeta» = total + envío (rótulo 14/700, monto 16/700). Con envío a domicilio el envío siempre va con tarjeta: no se saltea Forma de pago.' }

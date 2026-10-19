@@ -218,12 +218,17 @@ body.barra-plegada #solapa { display: inline-flex; }
   padding: 0 10px 0 8px; border-radius: 4px; font-size: 14px; white-space: nowrap;
 }
 .etiqueta-ahorro svg { width: 16px; height: 16px; flex: none; }
-/* Ancho fijo: el texto real y uno fantasma (el monto más ancho esperado) ocupan la misma celda; «Ahorrás» queda a la
-   izquierda y el monto a la derecha */
-.etiqueta-ahorro .texto { display: grid; }
-.etiqueta-ahorro .texto > * { grid-area: 1 / 1; }
-.etiqueta-ahorro .real { display: flex; justify-content: space-between; }
-.etiqueta-ahorro .fantasma { visibility: hidden; }
+.etiqueta-ahorro .ico { display: flex; }
+.etiqueta-ahorro .monto { font-weight: 600; }
+/* Cada cifra (y el punto de los miles) es un compartimento que entra o sale animando su ancho (0fr ↔ 1fr, sin medir
+   nada con JS) y su opacidad; la etiqueta, anclada a la derecha, se ensancha o se angosta sin saltos */
+.etiqueta-ahorro .cifras { display: inline-flex; }
+.etiqueta-ahorro .dig { display: inline-grid; grid-template-columns: 0fr; opacity: 0; transition: grid-template-columns .25s cubic-bezier(.3,.7,.3,1), opacity .25s ease; }
+.etiqueta-ahorro .dig > span { min-width: 0; overflow: hidden; white-space: pre; }
+.etiqueta-ahorro .dig.on { grid-template-columns: 1fr; opacity: 1; }
+.etiqueta-ahorro .dig.sin-transicion { transition: none; }
+@media (prefers-reduced-motion: reduce) { .etiqueta-ahorro .dig { transition: none; } }
+.solo-lectores { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 /* Resumen (desktop): caja fija al hacer scroll */
 .columna-resumen { position: absolute; }
