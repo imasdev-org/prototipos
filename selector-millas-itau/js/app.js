@@ -282,9 +282,9 @@
     var banda = el('div', { class: 'banda' }, 'Tus millas'); banda.style.height = (d ? 35 : 46) + 'px';
     t.appendChild(banda);
     t.appendChild(texto('¿Cuántas millas querés usar?', 'pregunta', 15, d ? 55 : 62));
-    var saldo = texto('', 'saldo', 15, d ? 89 : 94); saldo.innerHTML = 'Millas disponibles: <b>' + R.miles(R.saldo()) + '</b>';
+    var saldo = texto('', 'saldo', 15, d ? 89 : 100); saldo.innerHTML = 'Millas disponibles: <b>' + R.miles(R.saldo()) + '</b>';
     t.appendChild(saldo);
-    var cajaEtiqueta = el('div', { class: 'capa', style: 'right:15px;top:' + (d ? 55 : 90) + 'px' });
+    var cajaEtiqueta = el('div', { class: 'capa', style: 'right:15px;top:' + (d ? 55 : 96) + 'px' });
     t.appendChild(cajaEtiqueta);
     var etiqueta = crearEtiquetaAhorro(), etiquetaLista = false;
     etiqueta.nodo.style.position = 'relative'; cajaEtiqueta.appendChild(etiqueta.nodo);
