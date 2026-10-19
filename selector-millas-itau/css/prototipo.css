@@ -13,7 +13,6 @@
   --z: 1;
   --naranja: #FF6200;
   --naranja-oscuro: #DE5500;
-  --naranja-suave-activo: #FEEEE3;
   --gris-titulo: #464646;
   --gris-texto: #5F6062;
   --gris-ayuda: #767676; /* 4,54:1 sobre blanco (WCAG AA para texto chico) */
@@ -190,25 +189,31 @@ body.barra-plegada #solapa { display: inline-flex; }
 /* Foco: borde y aureola difuminada del mismo color, el naranja de los botones (#FF6200) con transparencia */
 .campo:focus-within { border-color: rgba(255, 98, 0, .2); box-shadow: 0 0 6px 3px rgba(255, 98, 0, .2); }
 
-/* "Usar el máximo" (botón de la ficha, funciona como interruptor) */
+/* "Usar el máximo" (ficha y Entrega, funciona como interruptor). Los colores vienen del segmento (COLORES en app.js):
+   Personal Bank azul, cliente común naranja. Activo: fondo suave, borde de 2 px, semibold y una tilde antes del texto. */
 .boton-max {
-  position: absolute; display: flex; align-items: center; justify-content: center;
-  background: #fff; border: 1px solid #FF6200; color: var(--naranja-oscuro);
+  position: absolute; display: flex; align-items: center; justify-content: center; gap: 5px;
+  background: #fff; border: 1px solid var(--bm-borde, #FF6200); color: var(--bm-texto, var(--naranja-oscuro));
   font: 400 14px var(--fuente-sitio); cursor: pointer; padding: 0;
 }
-/* Activo en semibold, como en el sitio. Para que la frase no cambie de ancho al activarse, el estado
-   normal lleva un espaciado de .017em: en Myriad Pro 14 px la semibold mide 93 px y la normal 89,7 px. */
+.boton-max .tilde { display: none; width: 16px; height: 16px; flex: none; }
+/* Para que la frase no cambie de ancho al activarse, el estado normal lleva un espaciado de .017em:
+   en Myriad Pro 14 px la semibold mide 93 px y la normal 89,7 px. */
 .boton-max { letter-spacing: .017em; }
-.boton-max[aria-pressed="true"] { background: var(--naranja-suave-activo); border: 2px solid #DE5500; font-weight: 600; letter-spacing: 0; }
+.boton-max[aria-pressed="true"] {
+  background: var(--bm-activo-fondo, #FFE0CC); border: 2px solid var(--bm-activo-borde, #DE5500);
+  color: var(--bm-activo-texto, #A84300); font-weight: 600; letter-spacing: 0;
+}
+.boton-max[aria-pressed="true"] .tilde { display: block; }
 
-/* Tarjeta "Tus millas" (mismo lenguaje que "Tu pedido") */
-.tarjeta-millas { position: absolute; background: #fff; border-radius: 15px; box-shadow: 0 0 1px 1px #CCCCCC; overflow: hidden; }
-.tarjeta-millas .banda { position: absolute; left: 0; top: 0; right: 0; background: #3E3F40; color: #fff;
-  font-weight: 700; font-size: 16px; display: flex; align-items: center; padding-left: 15px; }
-.tarjeta-millas .pregunta { font-size: 18px; color: var(--gris-titulo); }
+/* Panel de millas de Entrega: la pregunta es la cabecera, adentro y sin banda. Fondo y borde según el segmento;
+   el borde es interior (como el trazo de Penpot), así no corre el contenido. */
+.tarjeta-millas { position: absolute; background: var(--panel-fondo, #F4F5F9); border-radius: 15px;
+  box-shadow: inset 0 0 0 1px var(--panel-borde, #DEE2EC); overflow: hidden; }
+.tarjeta-millas .pregunta { font-size: 18px; font-weight: 600; color: var(--gris-titulo); }
 .tarjeta-millas .saldo { font-size: 14px; color: #000; }
 .tarjeta-millas .escala { font-size: 12px; color: var(--gris-ayuda); }
-.tarjeta-millas .divisoria { position: absolute; height: 1px; background: #DCDCDC; }
+.tarjeta-millas .divisoria { position: absolute; height: 1px; background: var(--panel-divisoria, #B8BDC9); }
 .tarjeta-millas .total { font-size: 14px; font-weight: 700; color: var(--gris-titulo); }
 .tarjeta-millas .total-monto { font-size: 16px; }
 

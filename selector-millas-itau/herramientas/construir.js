@@ -38,13 +38,13 @@ const PANTALLAS = {
     marcar: { '1e76d7': 'pb-etiqueta', '1e76d1': 'cuchillo-unidad', '1e76d5': 'cuchillo-total', '1e7774': 'pb-icono' },
     derecha: ['1e76d5']
   },
-  'entrega-desktop': { // envío a domicilio
-    omitir: ['fef93d', 'feb921', '00be9b'],
-    marcar: { feb919: 'tab-pago', feb91d: 'tab-confirmacion', feb8ff: 'ancla-izquierda', '006e82': 'rut', '52ab42': 'casilla-rut', fef94f: 'valor-direccion' }
+  'entrega-desktop': { // envío a domicilio (tablero «Alternativa · … · pregunta + panel»)
+    omitir: ['71e113', '71e102', '71e178'],
+    marcar: { '718ee0': 'tab-pago', '71e0fe': 'tab-confirmacion', '718ec6': 'ancla-izquierda', '71e158': 'rut', '71e15a': 'casilla-rut', '71e125': 'valor-direccion' }
   },
   'entrega-mobile': {
-    omitir: ['c9a5ef'],
-    marcar: { ffc169: 'rut', '65c8ad': 'casilla-rut', ffc140: 'valor-direccion' }
+    omitir: ['dd8de2'],
+    marcar: { dde78b: 'rut', dde78d: 'casilla-rut', dde75f: 'valor-direccion' }
   }
 };
 
