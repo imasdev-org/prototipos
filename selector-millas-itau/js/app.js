@@ -164,11 +164,17 @@
     return { nodo: b, set: function (activo) { b.setAttribute('aria-pressed', activo ? 'true' : 'false'); } };
   }
 
+  // Etiqueta «Ahorrás $ X» de ancho fijo: lo fija un texto fantasma con el monto más ancho esperado (cuatro cifras), así
+  // el ícono y «Ahorrás» no se mueven al cambiar la cantidad de cifras y el monto queda alineado a la derecha.
+  // Si el monto tuviera más cifras, la etiqueta crece hacia la izquierda.
+  var MONTO_MAS_ANCHO = '$ 9.999';
   function etiquetaAhorro(colores, monto) {
     var e = el('div', { class: 'etiqueta-ahorro', role: 'status' });
     e.style.background = colores.etiquetaFondo; e.style.color = colores.etiquetaTexto;
+    var negrita = '<b style="font-weight:600;color:' + colores.etiquetaMonto + '">';
     e.innerHTML = '<span style="color:' + colores.icono + ';display:flex">' + ICONO_CHANCHITO + '</span>' +
-      '<span>Ahorrás <b style="font-weight:600;color:' + colores.etiquetaMonto + '">' + R.pesos(monto) + '</b></span>';
+      '<span class="texto"><span class="real"><span>Ahorrás&nbsp;</span>' + negrita + R.pesos(monto) + '</b></span>' +
+      '<span class="fantasma" aria-hidden="true">Ahorrás ' + negrita + MONTO_MAS_ANCHO + '</b></span></span>';
     return e;
   }
 
@@ -355,7 +361,7 @@
       { d: [125, 321], m: [20, 330], t: 'Tarjeta <b>«Tus millas»</b> antes de «Tu pedido», con el mismo estilo de tarjeta (banda <code>#3E3F40</code>, radio 15, sombra <code>#CCCCCC</code> 2 px). Se elige después del tipo de entrega y la sucursal o dirección: ahí el monto con tarjeta ya es definitivo.' },
       { d: [125, 446], m: [22, 457], t: 'Valor inicial = suma de lo elegido en las fichas, con tope. Máximo del pedido = piso(total de productos con descuentos × 1,92), nunca más que el saldo. Las millas se aplican después de los descuentos (así no se usan de más) y <b>no cubren el envío</b> (por ahora).' },
       { d: [1008, 447], m: [372, 530], t: 'Control, campo y «Usar el máximo» sincronizados; el valor se acota entre 0 y el máximo. «Usar el máximo» es el mismo componente de la ficha. Teclado: flechas ±10, Shift+flechas ±100, Inicio/Fin.' },
-      { d: [846, 373], m: [372, 420], t: 'Ahorro = millas ÷ 1,92, redondeado. Se muestra una sola vez. Etiqueta: azul en Personal Bank (fondo <code>#223F83</code> al 10 %), naranja suave en cliente común (fondo <code>#FF6200</code> al 10 %, texto gris por contraste). Monto en <code>font-weight: 600</code>. Ícono: Lucide piggy-bank (ISC).' },
+      { d: [846, 373], m: [372, 420], t: 'Ahorro = millas ÷ 1,92, redondeado. Se muestra una sola vez. Etiqueta: azul en Personal Bank (fondo <code>#223F83</code> al 10 %), naranja suave en cliente común (fondo <code>#FF6200</code> al 10 %, texto gris por contraste). Monto en <code>font-weight: 600</code>. Ícono: Lucide piggy-bank (ISC). <b>Ancho fijo</b> (el de «Ahorrás $ 9.999», unos 132 px, a la derecha de la tarjeta): el ícono y «Ahorrás» no se mueven al cambiar la cantidad de cifras y el monto va alineado a la derecha.' },
       { d: [1043, 110], m: null, t: '<b>Resumen fijo al hacer scroll</b> (<code>position: sticky</code>) en los pasos del checkout, desktop. Título «RESUMEN» centrado en su franja. SubTotal en pesos ya descontadas las millas; fila «Millas aplicadas» con la cantidad (hoy dice «millas»); Total = SubTotal − Descuentos + entrega. Con todo cubierto: SubTotal $ 0 y sin fila de Descuentos. Con envío a domicilio, el título dice «Con $ X más el envío es gratis», como hoy en el sitio (X = $ 3.000 − SubTotal; umbral y cálculo tomados de una captura del sitio, a confirmar).' },
       { d: [792, 40], m: null, t: 'Si las millas cubren todo y la entrega no tiene costo (retiro sin costo o envío gratis), se saltea Forma de pago como hoy: <code>wCheckout</code> pone la clase <code>PaymentTabHidden</code>, la pestaña FORMA DE PAGO se oculta y CONFIRMACIÓN pasa a su lugar, y el botón dice «Continuar a Confirmación». En este recorrido (envío a domicilio con costo) no pasa: el envío siempre va con tarjeta.' },
       { d: null, m: [22, 585], t: 'En mobile el Resumen no está en este paso (la columna es <code>hidden-xs hidden-sm</code>): la tarjeta muestra «Total a pagar con tarjeta» = total + envío (rótulo 14/700, monto 16/700). Con envío a domicilio el envío siempre va con tarjeta: no se saltea Forma de pago.' }

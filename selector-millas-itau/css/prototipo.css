@@ -218,6 +218,12 @@ body.barra-plegada #solapa { display: inline-flex; }
   padding: 0 10px 0 8px; border-radius: 4px; font-size: 14px; white-space: nowrap;
 }
 .etiqueta-ahorro svg { width: 16px; height: 16px; flex: none; }
+/* Ancho fijo: el texto real y uno fantasma (el monto más ancho esperado) ocupan la misma celda; «Ahorrás» queda a la
+   izquierda y el monto a la derecha */
+.etiqueta-ahorro .texto { display: grid; }
+.etiqueta-ahorro .texto > * { grid-area: 1 / 1; }
+.etiqueta-ahorro .real { display: flex; justify-content: space-between; }
+.etiqueta-ahorro .fantasma { visibility: hidden; }
 
 /* Resumen (desktop): caja fija al hacer scroll */
 .columna-resumen { position: absolute; }

@@ -95,6 +95,7 @@ Con envío a domicilio el envío siempre se paga con tarjeta: **no se saltea**.
   - Campo (166 × 34 desktop, 154 × 34 mobile; borde `#CCCCCC`, radio 4, valor 16/400 alineado a la derecha + «millas»).
   - «Usar el máximo»: el mismo componente de la ficha, alto 34 y radio 4.
   - Etiqueta **«Ahorrás $ X»** arriba a la derecha (alto 26, radio 4, ícono Lucide `piggy-bank` 16 px; monto con `font-weight: 600`). Se muestra **una sola vez**.
+  - La etiqueta tiene **ancho fijo**, el de «Ahorrás $ 9.999» (unos 132 px con Myriad Pro 14 px; margen interno 8 px a la izquierda y 10 a la derecha), alineada a la derecha de la tarjeta: el ícono y «Ahorrás» quedan fijos y el monto va **alineado a la derecha** (como las filas del Resumen), así no se mueve al cambiar la cantidad de cifras. Si el monto tuviera más cifras, la etiqueta crece hacia la izquierda. Se implementa con un texto fantasma invisible con el monto más ancho, que fija el ancho.
 - «Continuar» pasa a Forma de pago, o a Confirmación si se salteó el pago. En el prototipo, ahí termina el recorrido.
 - Mobile: debajo del campo, divisoria y **«Total a pagar con tarjeta $ X»** = total + envío (rótulo 14/700 `#464646`, monto 16/700) (en mobile el Resumen no está en este paso: su columna es `hidden-xs hidden-sm`).
 - Teclado en el control: flechas ±10, Shift + flechas ±100, RePág/AvPág ±10 %, Inicio/Fin.
