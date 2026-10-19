@@ -95,7 +95,7 @@ Con envío a domicilio el envío siempre se paga con tarjeta: **no se saltea**.
   - **En el prototipo:** la dirección se elige en el selector (hay dos de ejemplo, con el mismo envío de $ 150); volver a Entrega desde la barra reinicia el paso.
 
 - Tarjeta **«Tus millas»** después del tipo de entrega y la sucursal o dirección (ahí el monto a pagar ya es definitivo) y **antes de «Tu pedido»**.
-  - Mismo lenguaje que «Tu pedido»: fondo blanco, radio 15, sombra `0 0 2px #CCCCCC`, banda `#3E3F40` (35 px desktop, 46 px mobile) con el título en 16/700 blanco.
+  - Mismo lenguaje que «Tu pedido»: fondo blanco, radio 15, sombra `0 0 1px 1px #CCCCCC` (la de `.TableShipment` del tema Itaú: borde visible de 1 a 2 px), banda `#3E3F40` (35 px desktop, 46 px mobile) con el título en 16/700 blanco.
   - Pregunta «¿Cuántas millas querés usar?» (18 px `#464646`) y «Millas disponibles: **100.000**» (14 px).
   - Control (desktop 470 px; mobile 320 px, de margen a margen de la tarjeta y alineado con el campo y «Usar el máximo», así el tirador llega hasta el margen) con escala «0 … Máximo para este pedido: N» (12 px `#767676`).
   - Campo (166 × 34 desktop, 154 × 34 mobile; borde `#CCCCCC`, radio 4, valor 16/400 alineado a la derecha + «millas»).
