@@ -220,6 +220,12 @@ body.barra-plegada #solapa { display: inline-flex; }
 .etiqueta-ahorro svg { width: 16px; height: 16px; flex: none; }
 .etiqueta-ahorro .ico { display: flex; }
 .etiqueta-ahorro .monto { font-weight: 600; }
+/* Híbrida: el texto real y uno fantasma (el monto más ancho esperado, cuatro cifras) ocupan la misma celda, que fija el
+   ancho mínimo; «Ahorrás» queda a la izquierda y el monto a la derecha. Con más cifras la celda, y la etiqueta, crecen. */
+.etiqueta-ahorro .texto { display: grid; }
+.etiqueta-ahorro .texto > * { grid-area: 1 / 1; }
+.etiqueta-ahorro .real { display: flex; justify-content: space-between; }
+.etiqueta-ahorro .fantasma { visibility: hidden; }
 /* Cada cifra (y el punto de los miles) es un compartimento que entra o sale animando su ancho (0fr ↔ 1fr, sin medir
    nada con JS) y su opacidad; la etiqueta, anclada a la derecha, se ensancha o se angosta sin saltos.
    La animación NO depende del ajuste de animaciones del sistema: se anima siempre, también con «reducir movimiento»
