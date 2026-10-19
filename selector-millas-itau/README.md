@@ -48,3 +48,7 @@ En la vista mobile no hay barra de desplazamiento: se desplaza con el dedo, la r
 3. Copiar los `.json` a `herramientas/penpot/` y correr `node herramientas/construir.js <carpeta con las imágenes>`.
 
 `herramientas/construir.js` define, por pantalla, qué partes reemplaza el prototipo por componentes vivos.
+
+## Publicar
+
+GitHub Pages deja los archivos en la caché del navegador hasta 10 minutos. Antes de cada commit que cambie `css/`, `js/` o `pantallas/`, correr `node herramientas/subir-version.js`: le pone una versión nueva (`?v=fecha-hora`) a los archivos que carga `index.html` para que se descarguen de nuevo.
