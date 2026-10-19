@@ -279,7 +279,7 @@
   function crearTarjeta(vista, repintarTodo) {
     var d = vista === 'desktop';
     var t = el('section', { class: 'tarjeta-millas', 'aria-label': 'Tus millas' });
-    if (d) pos(t, 125, 305, 883, 202); else pos(t, 20, 315, 350, 300);
+    if (d) pos(t, 125, 305, 883, 202); else pos(t, 20, 315, 350, 305);
     var banda = el('div', { class: 'banda' }, 'Tus millas'); banda.style.height = (d ? 35 : 46) + 'px';
     t.appendChild(banda);
     t.appendChild(texto('¿Cuántas millas querés usar?', 'pregunta', 15, d ? 55 : 62));
@@ -291,23 +291,23 @@
     etiqueta.nodo.style.position = 'relative'; cajaEtiqueta.appendChild(etiqueta.nodo);
     var ancho = d ? 470 : 320; // mobile: de margen a margen de la tarjeta (alineado con el campo y «Usar el máximo»)
     var obj = estado.pedido;
-    var control = crearControl({ x: 15, y: d ? 120 : 130, ancho: ancho, etiqueta: 'Millas del pedido',
+    var control = crearControl({ x: 15, y: d ? 120 : 135, ancho: ancho, etiqueta: 'Millas del pedido',
       alCambiar: function (v) { cambiarMillas(obj, v, maximoPedido()); repintarTodo(); } });
     t.appendChild(control.nodo);
-    var escala = pos(el('div', { class: 'txt escala', style: 'display:flex;justify-content:space-between' }), 15, d ? 162 : 172, ancho);
+    var escala = pos(el('div', { class: 'txt escala', style: 'display:flex;justify-content:space-between' }), 15, d ? 162 : 177, ancho);
     var escalaMax = el('span');
     escala.appendChild(el('span', null, '0')); escala.appendChild(escalaMax);
     t.appendChild(escala);
-    var campo = crearCampo(Object.assign(d ? { x: 524, y: 125, w: 166, h: 34 } : { x: 15, y: 205, w: 154, h: 34 }, {
+    var campo = crearCampo(Object.assign(d ? { x: 524, y: 125, w: 166, h: 34 } : { x: 15, y: 210, w: 154, h: 34 }, {
       maximo: maximoPedido,
       alCambiar: function (v) { cambiarMillas(obj, v, maximoPedido()); repintarTodo(); } }));
-    var boton = crearBotonMax(Object.assign(d ? { x: 702, y: 125, w: 166, h: 34 } : { x: 181, y: 205, w: 154, h: 34 }, { radio: 4,
+    var boton = crearBotonMax(Object.assign(d ? { x: 702, y: 125, w: 166, h: 34 } : { x: 181, y: 210, w: 154, h: 34 }, { radio: 4,
       alTocar: function () { alternarMaximo(obj, maximoPedido()); repintarTodo(); } }));
     t.appendChild(campo.nodo); t.appendChild(boton.nodo);
     var totalValor;
     if (!d) {
-      t.appendChild(pos(el('div', { class: 'divisoria' }), 15, 255, 320));
-      var fila = pos(el('div', { class: 'txt total', style: 'display:flex;justify-content:space-between;align-items:baseline' }), 15, 265, 320);
+      t.appendChild(pos(el('div', { class: 'divisoria' }), 15, 260, 320));
+      var fila = pos(el('div', { class: 'txt total', style: 'display:flex;justify-content:space-between;align-items:baseline' }), 15, 270, 320);
       totalValor = el('span', { class: 'total-monto' });
       fila.appendChild(el('span', null, 'Total a pagar con tarjeta')); fila.appendChild(totalValor);
       t.appendChild(fila);
@@ -412,12 +412,12 @@
     entrega: [
       { d: [1015, 258], m: [372, 266], t: '<b>El paso se muestra por etapas</b>, como en el sitio. Al entrar solo están el tipo de entrega y la consulta de <b>dirección</b> (en retiro, la sucursal); lo de abajo está oculto. En <code>wCheckoutStart2</code>, con la dirección sin elegir <code>HIDETABLES</code> oculta «Tu pedido», las alternativas y las acciones; al elegirla se refrescan los envíos y <code>SHOWTABLES</code> los muestra. Acá, además, aparecen «Tus millas», la fecha, la factura y «Continuar», y el Resumen suma el envío. Así el selector de millas nunca aparece antes de conocer el envío. <i>Qué muestra el Resumen antes de elegir la dirección es un supuesto (no verificado).</i> Probalo: elegí una dirección en el selector.' },
       { d: [125, 321], m: [20, 330], t: 'Tarjeta <b>«Tus millas»</b> antes de «Tu pedido», con el mismo estilo de tarjeta (banda <code>#3E3F40</code>, radio 15, sombra <code>#CCCCCC</code> 2 px). Se elige después del tipo de entrega y la sucursal o dirección: ahí el monto con tarjeta ya es definitivo.' },
-      { d: [125, 446], m: [22, 457], t: 'Valor inicial = suma de lo elegido en las fichas, con tope. Máximo del pedido = piso(total de productos con descuentos × 1,92), nunca más que el saldo. Las millas se aplican después de los descuentos (así no se usan de más) y <b>no cubren el envío</b> (por ahora).' },
-      { d: [1008, 447], m: [372, 537], t: 'Control, campo y «Usar el máximo» sincronizados; el valor se acota entre 0 y el máximo. «Usar el máximo» es el mismo componente de la ficha. Teclado: flechas ±10, Shift+flechas ±100, Inicio/Fin.' },
+      { d: [125, 446], m: [22, 462], t: 'Valor inicial = suma de lo elegido en las fichas, con tope. Máximo del pedido = piso(total de productos con descuentos × 1,92), nunca más que el saldo. Las millas se aplican después de los descuentos (así no se usan de más) y <b>no cubren el envío</b> (por ahora).' },
+      { d: [1008, 447], m: [372, 542], t: 'Control, campo y «Usar el máximo» sincronizados; el valor se acota entre 0 y el máximo. «Usar el máximo» es el mismo componente de la ficha. Teclado: flechas ±10, Shift+flechas ±100, Inicio/Fin.' },
       { d: [846, 373], m: [372, 420], t: 'Ahorro = millas ÷ 1,92, redondeado. Se muestra una sola vez. Etiqueta: azul en Personal Bank (fondo <code>#223F83</code> al 10 %), naranja suave en cliente común (fondo <code>#FF6200</code> al 10 %, texto gris por contraste). Monto en <code>font-weight: 600</code>. Ícono: Lucide piggy-bank (ISC). <b>Se adapta al contenido</b> (anclada a la derecha de la tarjeta): al ganar o perder cifras, cada cifra y el punto de los miles entran o salen animando su ancho y su opacidad (~250 ms), así el ícono desliza en lugar de saltar. En mobile comparte fila con «Millas disponibles»: si entre ambas quedan menos de 16 px, la etiqueta baja a su propia línea, alineada a la derecha (flex-wrap, column-gap 16 px). Se anima siempre: no depende del ajuste de animaciones del sistema (no condicionarla a «reducir movimiento»).' },
       { d: [1043, 110], m: null, t: '<b>Resumen fijo al hacer scroll</b> (<code>position: sticky</code>) en los pasos del checkout, desktop. Título «RESUMEN» centrado en su franja. SubTotal en pesos ya descontadas las millas; fila «Millas aplicadas» con la cantidad (hoy dice «millas»); Total = SubTotal − Descuentos + entrega. Con todo cubierto: SubTotal $ 0 y sin fila de Descuentos. Con envío a domicilio, el título dice «Con $ X más el envío es gratis», como hoy en el sitio (X = $ 3.000 − SubTotal; umbral y cálculo tomados de una captura del sitio, a confirmar).' },
       { d: [792, 40], m: null, t: 'Si las millas cubren todo y la entrega no tiene costo (retiro sin costo o envío gratis), se saltea Forma de pago como hoy: <code>wCheckout</code> pone la clase <code>PaymentTabHidden</code>, la pestaña FORMA DE PAGO se oculta y CONFIRMACIÓN pasa a su lugar, y el botón dice «Continuar a Confirmación». En este recorrido (envío a domicilio con costo) no pasa: el envío siempre va con tarjeta.' },
-      { d: null, m: [22, 592], t: 'En mobile el Resumen no está en este paso (la columna es <code>hidden-xs hidden-sm</code>): la tarjeta muestra «Total a pagar con tarjeta» = total + envío (rótulo 14/700, monto 16/700). Con envío a domicilio el envío siempre va con tarjeta: no se saltea Forma de pago.' }
+      { d: null, m: [22, 597], t: 'En mobile el Resumen no está en este paso (la columna es <code>hidden-xs hidden-sm</code>): la tarjeta muestra «Total a pagar con tarjeta» = total + envío (rótulo 14/700, monto 16/700). Con envío a domicilio el envío siempre va con tarjeta: no se saltea Forma de pago.' }
     ]
   };
   var NOMBRES = { ficha: 'Ficha de producto', cajon: 'Carrito lateral', carrito: 'Carrito', entrega: 'Entrega' };
@@ -554,7 +554,7 @@
           btn.textContent = r.salteaPago ? 'Continuar a Confirmación' : 'Continuar';
         });
       } else {
-        var contMovil = zona(23, 1095, 345, 34, 'Continuar', finDelRecorrido);
+        var contMovil = zona(23, 1100, 345, 34, 'Continuar', finDelRecorrido);
         s.appendChild(contMovil);
       }
       etapasEntrega(s, d, tj.nodo, d ? btn : contMovil, repintarTodo);
