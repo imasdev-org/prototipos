@@ -58,21 +58,15 @@
     return Math.max(0, Math.round(FICHA.precioSinPromo - millas / TASA));
   }
 
-  // Ficha con promoción (ejemplo del boceto del negocio sobre un producto real de Tienda Volar): Vino Tinto TRUMPETER
-  // Malbec Syrah 750 ml, $ 744, con dos promociones a la vez: 35 % OFF por unidad y «3x2» combinable (lleva 3, paga 2).
-  // Esta ficha sí conoce las promociones del propio producto (no las combinaciones con otros productos): el máximo de
-  // millas se calcula sobre el total con promoción de la cantidad elegida.
-  var PROMO = { precioSinPromo: 744, descuento: 35, lleva: 3, paga: 2, cantidadInicial: 3 };
-  PROMO.precioConPromo = PROMO.precioSinPromo * (1 - PROMO.descuento / 100); // $ 483,60 por unidad
-  function compraPromo(cantidad) {
-    var gratis = Math.floor(cantidad / PROMO.lleva) * (PROMO.lleva - PROMO.paga);
-    var sinPromo = cantidad * PROMO.precioSinPromo;
-    var total = (cantidad - gratis) * PROMO.precioConPromo;
-    var maximo = Math.min(SALDO, Math.floor(total * TASA));
-    return { cantidad: cantidad, gratis: gratis, sinPromo: sinPromo, total: total, ahorro: sinPromo - total, maximo: maximo, porDefecto: Math.floor(maximo / 2) };
-  }
-  function precioPromo(total, millas) {
-    return Math.max(0, Math.round(total - millas / TASA));
+  // Ficha con dos promociones (el caso del mail de Rodrigo, sobre un producto real de Tienda Volar): Vino Tinto TRUMPETER
+  // Malbec Syrah 750 ml, $ 744, con 35 % OFF por unidad y además un «3x2». La ficha muestra el precio con el 35 % OFF
+  // ($ 483,60 → $ 484) y «Ahorrás $ 260»; el máximo de millas sale del precio con promoción (⌊483,60 × 1,92⌋ = 928).
+  var PROMO = { precioSinPromo: 744, descuento: 35 };
+  PROMO.precioConPromo = PROMO.precioSinPromo * (1 - PROMO.descuento / 100);
+  PROMO.maximo = Math.floor(PROMO.precioConPromo * TASA);
+  PROMO.porDefecto = Math.floor(PROMO.maximo / 2);
+  function precioPromo(millas) {
+    return Math.max(0, Math.round(PROMO.precioConPromo - millas / TASA));
   }
 
   // Resumen del pedido con las millas elegidas (mismo cálculo que hoy):
@@ -120,6 +114,6 @@
   window.Reglas = {
     TASA: TASA, ENVIO_GRATIS_DESDE: ENVIO_GRATIS_DESDE, saldo: saldo, fijarSaldo: fijarSaldo, FICHA: FICHA, SUMA_FICHAS: SUMA_FICHAS, CARRITO: CARRITO, PRECIO_CUCHILLO: { pb: 90, comun: 100 },
     maximoPedido: maximoPedido, valorInicialPedido: valorInicialPedido, acotar: acotar,
-    ahorro: ahorro, precioFicha: precioFicha, PROMO: PROMO, compraPromo: compraPromo, precioPromo: precioPromo, resumen: resumen, resumenCarrito: resumenCarrito, miles: miles, pesos: pesos
+    ahorro: ahorro, precioFicha: precioFicha, PROMO: PROMO, precioPromo: precioPromo, resumen: resumen, resumenCarrito: resumenCarrito, miles: miles, pesos: pesos
   };
 })();

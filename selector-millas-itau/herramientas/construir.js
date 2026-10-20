@@ -18,15 +18,14 @@ const PANTALLAS = {
     omitir: ['682520', '682521', '682525', '67c5e1'],
     marcar: { '68261e': 'contador', '6825fc': 'pb-icono' }
   },
-  'promo-desktop': { // ficha con promoción: 35 % OFF + «3x2» (tablero «Propuesta · 01f …»)
-    omitir: ['fe7dab', 'fe7dac', 'fea040', 'fe7d43'],
-    marcar: { fe7d83: 'contador', fe7d86: 'pb-chip', fe7d87: 'pb-chip', fe7d89: 'saldo-encabezado', ce0117: 'cocarda', c1f719: 'cocarda', '13c6c1': 'cantidad', b6cae9: 'promo-rotulo', dc18aa: 'promo-sin-promo', '40a82d': 'promo-total', '718375': 'promo-ahorro', '996691': 'promo-detalle' },
-    derecha: ['fe7d89', 'dc18aa', '40a82d']
+  'promo-desktop': { // ficha con dos promociones (tablero «Propuesta · 01f …»): la 01b con el precio con promoción y «Ahorrás»
+    omitir: ['6e7235', '6e7236', '6e723a', '6e12cb'],
+    marcar: { '6e130b': 'contador', '6e130e': 'pb-chip', '6e130f': 'pb-chip', '6e1311': 'saldo-encabezado', '86b6ea': 'cocarda', '41ce98': 'cocarda' },
+    derecha: ['6e1311']
   },
   'promo-mobile': {
-    omitir: ['79a629', '79a62a', '79a62e', '79a601'],
-    marcar: { '7a3ef9': 'contador', '7a3ed7': 'pb-icono', '9a2f09': 'cocarda', '1745d5': 'cocarda', fc6c8f: 'cantidad', '3a9383': 'promo-rotulo', '6780ac': 'promo-sin-promo', e018df: 'promo-total', '25d0b4': 'promo-ahorro', '5a9ddf': 'promo-detalle' },
-    derecha: ['6780ac', 'e018df']
+    omitir: ['289984', '289985', '289989', '28995c'],
+    marcar: { '292b52': 'contador', '28f647': 'pb-icono', '21e55f': 'cocarda', eb0d51: 'cocarda' }
   },
   'cajon-desktop': {
     omitir: ['d1353b', 'd1353c'],
