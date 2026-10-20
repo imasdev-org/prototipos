@@ -13,9 +13,9 @@
   function saldo() { return SALDO; }
   function fijarSaldo(n) { SALDO = n; }
 
-  // Envío: el recorrido es con envío a domicilio en desktop y en mobile.
-  var COSTO_ENTREGA = { desktop: 150, mobile: 150 };
-  var ROTULO_ENTREGA = { desktop: 'Gastos de Envío', mobile: 'Gastos de Envío' };
+  // Entrega: envío a domicilio (con costo) o retiro en sucursal (sin costo: «Gastos de Preparación $ 0», como en el sitio).
+  var COSTO_ENTREGA = { domicilio: 150, retiro: 0 };
+  var ROTULO_ENTREGA = { domicilio: 'Gastos de Envío', retiro: 'Gastos de Preparación' };
   // Con envío a domicilio, el Resumen avisa cuánto falta para el envío gratis (umbral de la captura del sitio).
   var ENVIO_GRATIS_DESDE = 3000;
 
@@ -61,8 +61,8 @@
   // Resumen del pedido con las millas elegidas (mismo cálculo que hoy):
   // SubTotal en pesos ya descontadas las millas, fila "millas" con la cantidad,
   // Total = SubTotal − Descuentos + entrega. Con todo cubierto: SubTotal $ 0 y sin fila de Descuentos.
-  function resumen(segmento, vista, millas) {
-    return calcular(segmento, millas, COSTO_ENTREGA[vista], ROTULO_ENTREGA[vista]);
+  function resumen(segmento, tipoEntrega, millas) {
+    return calcular(segmento, millas, COSTO_ENTREGA[tipoEntrega], ROTULO_ENTREGA[tipoEntrega]);
   }
 
   // Resumen del carrito: mismo cálculo, todavía sin costo de entrega.

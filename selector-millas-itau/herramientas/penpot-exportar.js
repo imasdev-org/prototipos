@@ -16,7 +16,9 @@ const TABLEROS = {
   'carrito-desktop': 'Propuesta · 03 Carrito completo · Desktop 1440',
   'carrito-mobile': 'Propuesta · 03 Carrito completo · Mobile 390',
   'entrega-desktop': 'Alternativa · 04 Checkout · Entrega (domicilio) · millas parcial · pregunta + panel · Desktop 1440',
-  'entrega-mobile': 'Alternativa · 04 Checkout · Entrega (domicilio) · millas parcial · pregunta + panel · Mobile 390'
+  'entrega-mobile': 'Alternativa · 04 Checkout · Entrega (domicilio) · millas parcial · pregunta + panel · Mobile 390',
+  'entrega-retiro-desktop': 'Alternativa · 04 Checkout · Entrega (retiro) · millas parcial · pregunta + panel · Desktop 1440',
+  'entrega-retiro-mobile': 'Alternativa · 04 Checkout · Entrega (retiro) · millas parcial · pregunta + panel · Mobile 390'
 };
 
 function serializar(raiz) {

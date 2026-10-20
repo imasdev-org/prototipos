@@ -88,6 +88,7 @@
       ficha: { millas: R.FICHA.porDefecto, previo: null, maxActivo: false, agregado: false },
       pedido: { millas: null, previo: null, maxActivo: false },
       facturaRut: false,
+      entrega: previo ? previo.entrega : 'domicilio', // Entrega: 'domicilio' o 'retiro' (se elige con los botones de la pantalla)
       direccion: '' // Entrega: dirección elegida (vacío = todavía no eligió; las secciones de abajo están ocultas)
     };
   }
@@ -98,7 +99,7 @@
     return estado.pedido.millas;
   }
   function resumenActual() {
-    var r = R.resumen(estado.segmento, estado.vista, millasPedido());
+    var r = R.resumen(estado.segmento, estado.entrega, millasPedido());
     if (estado.pantalla === 'entrega' && !estado.direccion) {
       // Sin dirección elegida todavía no hay envío en el Resumen: ni fila de envío ni «más el envío es gratis».
       var c = {}; Object.keys(r).forEach(function (k) { c[k] = r[k]; });
@@ -311,10 +312,10 @@
 
   // Panel de millas del checkout (Entrega): la pregunta es la cabecera, adentro y sin banda; fondo y borde según el
   // segmento. Desktop: pregunta y etiqueta en la primera fila, «Millas disponibles» 8 px debajo y 20 px hasta el control.
-  function crearTarjeta(vista, repintarTodo) {
+  function crearTarjeta(vista, repintarTodo, y) {
     var d = vista === 'desktop';
     var t = el('section', { class: 'tarjeta-millas', 'aria-labelledby': 'pregunta-millas' });
-    if (d) pos(t, 125, 305, 883, 162); else pos(t, 20, 315, 350, 265);
+    if (d) pos(t, 125, y, 883, 162); else pos(t, 20, y, 350, 265);
     var pregunta = texto('¿Cuántas millas querés usar?', 'pregunta', 15, 16); pregunta.id = 'pregunta-millas';
     t.appendChild(pregunta);
     var saldo = texto('', 'saldo', 15, d ? 50 : 60); saldo.innerHTML = 'Millas disponibles: <b>' + R.miles(R.saldo()) + '</b>';
@@ -446,14 +447,14 @@
       { d: [1030, 605], m: [12, 1533], t: 'Resumen del carrito completo: mismo cálculo que el checkout (fila «Millas aplicadas» con la cantidad, SubTotal ya descontadas las millas, con tope). En desktop queda <b>fijo al hacer scroll</b>, como en el checkout: <b>hoy no lo está</b> (<code>wCartFull</code>, <code>wCartFullWC</code> y <code>wCartSummary</code> no tienen ninguna regla sticky). Título «RESUMEN» centrado en su franja.' }
     ],
     entrega: [
-      { d: [1015, 258], m: [372, 266], t: '<b>El paso se muestra por etapas</b>, como en el sitio. Al entrar solo están el tipo de entrega y la consulta de <b>dirección</b> (en retiro, la sucursal); lo de abajo está oculto. En <code>wCheckoutStart2</code>, con la dirección sin elegir <code>HIDETABLES</code> oculta «Tu pedido», las alternativas y las acciones; al elegirla se refrescan los envíos y <code>SHOWTABLES</code> los muestra. Acá, además, aparecen el panel de millas, la fecha, la factura y «Continuar», y el Resumen suma el envío. Así el selector de millas nunca aparece antes de conocer el envío. <i>Qué muestra el Resumen antes de elegir la dirección es un supuesto (no verificado).</i> Probalo: elegí una dirección en el selector.' },
+      { d: [1015, 258], m: [372, 266], t: '<b>El paso se muestra por etapas</b>, como en el sitio. Al entrar solo están el tipo de entrega y la consulta de <b>dirección</b> (en retiro, la sucursal); lo de abajo está oculto. En <code>wCheckoutStart2</code>, con la dirección sin elegir <code>HIDETABLES</code> oculta «Tu pedido», las alternativas y las acciones; al elegirla se refrescan los envíos y <code>SHOWTABLES</code> los muestra. Acá, además, aparecen el panel de millas, la fecha, la factura y «Continuar», y el Resumen suma el envío. Así el selector de millas nunca aparece antes de conocer el envío. <i>Qué muestra el Resumen antes de elegir la dirección es un supuesto (no verificado).</i> Probalo: elegí una dirección en el selector (o tocá «Retiro» y elegí la sucursal).' },
       { d: [125, 321], m: [20, 330], t: 'Panel <b>«¿Cuántas millas querés usar?»</b> antes de «Tu pedido». La pregunta es la cabecera, <b>adentro del panel y sin banda</b> (18 px, semibold, <code>#464646</code>), así no se lee como otra tarjeta de envío. Fondo y borde (1 px, interior) según el segmento: Personal Bank <code>#F4F5F9</code> / <code>#DEE2EC</code>; cliente común <code>#FFF7F2</code> / <code>#FFE7D9</code>. Radio 15, sin sombra. Desktop: pregunta y etiqueta en la primera fila, «Millas disponibles» 8 px debajo (se lee como subtítulo) y 20 px hasta el control. 30 px hasta el selector de dirección y hasta «Tu pedido» (32 en mobile). Se elige después del tipo de entrega y la sucursal o dirección: ahí el monto con tarjeta ya es definitivo.' },
       { d: [125, 410], m: [22, 422], t: 'Valor inicial = suma de lo elegido en las fichas, con tope. Máximo del pedido = piso(total de productos con descuentos × 1,92), nunca más que el saldo. Las millas se aplican después de los descuentos (así no se usan de más) y <b>no cubren el envío</b> (por ahora).' },
       { d: [1008, 411], m: [372, 502], t: 'Control, campo y «Usar el máximo» sincronizados; el valor se acota entre 0 y el máximo. «Usar el máximo» es el mismo componente de la ficha. Teclado: flechas ±10, Shift+flechas ±100, Inicio/Fin.' },
       { d: [846, 334], m: [372, 380], t: 'Ahorro = millas ÷ 1,92, redondeado. Se muestra una sola vez. Etiqueta: azul en Personal Bank (fondo <code>#223F83</code> al 10 %), naranja suave en cliente común (fondo <code>#FF6200</code> al 10 %, texto gris por contraste). Monto en <code>font-weight: 600</code>. Ícono: Lucide piggy-bank (ISC). <b>Se adapta al contenido</b> (anclada a la derecha del panel): al ganar o perder cifras, cada cifra y el punto de los miles entran o salen animando su ancho y su opacidad (~250 ms), así el ícono desliza en lugar de saltar. En mobile comparte fila con «Millas disponibles»: si entre ambas quedan menos de 16 px, la etiqueta baja a su propia línea, alineada a la derecha (flex-wrap, column-gap 16 px). Se anima siempre: no depende del ajuste de animaciones del sistema (no condicionarla a «reducir movimiento»).' },
       { d: [1043, 110], m: null, t: '<b>Resumen fijo al hacer scroll</b> (<code>position: sticky</code>) en los pasos del checkout, desktop. Título «RESUMEN» centrado en su franja. SubTotal en pesos ya descontadas las millas; fila «Millas aplicadas» con la cantidad (hoy dice «millas»); Total = SubTotal − Descuentos + entrega. Con todo cubierto: SubTotal $ 0 y sin fila de Descuentos. Con envío a domicilio, el título dice «Con $ X más el envío es gratis», como hoy en el sitio (X = $ 3.000 − SubTotal; umbral y cálculo tomados de una captura del sitio, a confirmar).' },
-      { d: [792, 40], m: null, t: 'Si las millas cubren todo y la entrega no tiene costo (retiro sin costo o envío gratis), se saltea Forma de pago como hoy: <code>wCheckout</code> pone la clase <code>PaymentTabHidden</code>, la pestaña FORMA DE PAGO se oculta y CONFIRMACIÓN pasa a su lugar, y el botón dice «Continuar a Confirmación». En este recorrido (envío a domicilio con costo) no pasa: el envío siempre va con tarjeta.' },
-      { d: null, m: [22, 557], t: 'En mobile el Resumen no está en este paso (la columna es <code>hidden-xs hidden-sm</code>): el panel muestra «Total a pagar» = total + envío (rótulo 14/700, monto 16/700). La divisoria de arriba toma el color de la pista del slider del segmento (Personal Bank <code>#B8BDC9</code>, cliente común <code>#FDD4B9</code>). Con envío a domicilio el envío siempre va con tarjeta: no se saltea Forma de pago.' }
+      { d: [792, 40], m: null, t: 'Si las millas cubren todo y la entrega no tiene costo (retiro sin costo o envío gratis), se saltea Forma de pago como hoy: <code>wCheckout</code> pone la clase <code>PaymentTabHidden</code>, la pestaña FORMA DE PAGO se oculta y CONFIRMACIÓN pasa a su lugar, y el botón dice «Continuar a Confirmación». Con envío a domicilio no pasa: el envío siempre va con tarjeta. <b>Probalo:</b> tocá «Retiro», elegí la sucursal y tocá «Usar el máximo».' },
+      { d: null, m: [22, 557], t: 'En mobile el Resumen no está en este paso (la columna es <code>hidden-xs hidden-sm</code>): el panel muestra «Total a pagar» = total + envío (rótulo 14/700, monto 16/700). La divisoria de arriba toma el color de la pista del slider del segmento (Personal Bank <code>#B8BDC9</code>, cliente común <code>#FDD4B9</code>). Con envío a domicilio el envío siempre va con tarjeta: no se saltea Forma de pago. Con retiro sin costo y las millas cubriendo todo, «Total a pagar» queda en $ 0 y el botón pasa a «Continuar a Confirmación» (probalo: «Retiro», sucursal y «Usar el máximo»).' }
     ]
   };
   var NOMBRES = { ficha: 'Ficha de producto', cajon: 'Carrito lateral', carrito: 'Carrito', entrega: 'Entrega' };
@@ -466,8 +467,9 @@
     var ol = el('ol');
     lista.forEach(function (n, i) {
       var p = n[estado.vista === 'desktop' ? 'd' : 'm'];
-      var pin = pos(el('button', { class: 'pin', type: 'button', 'aria-expanded': 'false', 'aria-label': 'Nota ' + (i + 1) }, String(i + 1)), p[0], p[1]);
-      if (clave === 'entrega' && p[1] >= (estado.vista === 'desktop' ? 285 : 295)) pin.classList.add('tras-direccion'); // se ocultan con las secciones de abajo
+      var g = clave === 'entrega' ? geoEntrega() : null, py = p[1] + (g && p[1] >= 240 ? g.bajar : 0);
+      var pin = pos(el('button', { class: 'pin', type: 'button', 'aria-expanded': 'false', 'aria-label': 'Nota ' + (i + 1) }, String(i + 1)), p[0], py);
+      if (g && py >= g.corte) pin.classList.add('tras-direccion'); // se ocultan con las secciones de abajo
       var li = el('li', { html: '<b class="n">' + (i + 1) + '</b><div>' + n.t + '</div>' });
       pin.addEventListener('click', function () {
         Array.prototype.forEach.call(ol.children, function (x) { x.classList.remove('resaltada'); });
@@ -484,6 +486,11 @@
   }
 
   // ---------------------------------------------------------------- pantallas
+  // Pantalla generada que corresponde al estado: la Entrega tiene una por tipo (envío a domicilio o retiro).
+  function nombrePantalla() {
+    var p = estado.pantalla, v = estado.vista;
+    return p === 'entrega' && estado.entrega === 'retiro' ? 'entrega-retiro-' + v : p + '-' + v;
+  }
   function pantallaGenerada(nombre) {
     var p = window.PANTALLAS[nombre];
     var s = el('div', { class: 'pantalla pv' });
@@ -498,20 +505,31 @@
   // acciones; al elegirla se refrescan los envíos y SHOWTABLES los muestra. Acá, además, aparecen el panel de millas, la fecha y
   // la factura, y el Resumen suma el envío. Todo lo que está debajo del selector (corte) se oculta por su posición.
   var DIRECCIONES = [['', 'Seleccioná una dirección'], ['artigas', 'Bv. Artigas 1234'], ['italia', 'Av. Italia 5821']];
+  var SUCURSALES = [['', 'Seleccioná una sucursal'], ['italia', 'Pickup Itau - Avenida Italia 5821']];
+  // Medidas de la pantalla de Entrega según el tipo (tableros «Alternativa · … pregunta + panel» de Penpot). En retiro, lo que
+  // está debajo de la consulta baja 67 px (desktop) o 66 px (mobile): recuadro «Retira en Pick Up Center» y «Sucursal *».
+  function geoEntrega() {
+    var d = estado.vista === 'desktop', r = estado.entrega === 'retiro';
+    return d
+      ? { panelY: r ? 372 : 305, select: r ? [125, 307.7, 883, 34] : [125, 241, 883, 34], corte: r ? 352 : 285, continuar: r ? [735, 1005, 278, 34] : [735, 958, 278, 34], bajar: r ? 67 : 0,
+          retiro: [125, 116, 426, 40], domicilio: [581.3, 116, 426, 40] }
+      : { panelY: r ? 381 : 315, select: r ? [20, 314.7, 350, 34] : [20, 249, 350, 34], corte: r ? 361 : 295, continuar: r ? [22.5, 1179.4, 345, 34] : [22.5, 1067.7, 345, 34], bajar: r ? 66 : 0,
+          retiro: [20, 80, 350, 40], domicilio: [20, 130, 350, 40] };
+  }
   function etapasEntrega(raiz, d, tarjeta, continuar, repintar) {
-    var corte = d ? 285 : 295;
+    var g = geoEntrega(), corte = g.corte, retiro = estado.entrega === 'retiro', OPCIONES = retiro ? SUCURSALES : DIRECCIONES;
     function topEnPantalla(n) { var y = 0; for (; n && n !== raiz; n = n.parentElement) y += parseFloat(n.style.top) || 0; return y; }
     Array.prototype.forEach.call(raiz.querySelectorAll('.b, .t, .v'), function (n) { if (topEnPantalla(n) >= corte) n.classList.add('tras-direccion'); });
     tarjeta.classList.add('tras-direccion'); continuar.classList.add('tras-direccion');
     var valor = marca(raiz, 'valor-direccion'), colorOriginal = valor ? valor.style.color : '';
-    var sel = el('select', { 'aria-label': 'Dirección de entrega' });
-    DIRECCIONES.forEach(function (o) { sel.appendChild(el('option', { value: o[0] }, o[1])); });
+    var sel = el('select', { 'aria-label': retiro ? 'Sucursal de retiro' : 'Dirección de entrega' });
+    OPCIONES.forEach(function (o) { sel.appendChild(el('option', { value: o[0] }, o[1])); });
     sel.value = estado.direccion;
-    var caja = d ? [125, 241, 883, 34] : [20, 249, 350, 34];
+    var caja = g.select;
     var zonaSel = pos(el('div', { class: 'zona sel-direccion' }), caja[0], caja[1], caja[2], caja[3]);
     zonaSel.appendChild(sel); raiz.appendChild(zonaSel);
     function aplicar() {
-      var v = estado.direccion, o = DIRECCIONES.filter(function (x) { return x[0] === v; })[0] || DIRECCIONES[0];
+      var v = estado.direccion, o = OPCIONES.filter(function (x) { return x[0] === v; })[0] || OPCIONES[0];
       raiz.classList.toggle('sin-direccion', !v);
       if (valor) { valor.querySelector('span').textContent = o[1]; valor.style.color = v ? colorOriginal : '#767676'; }
     }
@@ -535,8 +553,9 @@
 
   function construirPantalla() {
     var v = estado.vista, d = v === 'desktop', p = estado.pantalla;
-    var s = pantallaGenerada(p + '-' + v);
-    var alto = window.PANTALLAS[p + '-' + v].h;
+    var nombre = nombrePantalla();
+    var s = pantallaGenerada(nombre);
+    var alto = window.PANTALLAS[nombre].h;
     var actualizadores = [];
     function repintarTodo() { actualizadores.forEach(function (f) { f(); }); }
 
@@ -571,7 +590,13 @@
     }
 
     if (p === 'entrega') {
-      var tj = crearTarjeta(v, repintarTodo); s.appendChild(tj.nodo); actualizadores.push(tj.actualizar);
+      var ge = geoEntrega();
+      var tj = crearTarjeta(v, repintarTodo, ge.panelY); s.appendChild(tj.nodo); actualizadores.push(tj.actualizar);
+      // Retiro / Envío a domicilio: tocar el otro tipo cambia la pantalla (la consulta vuelve a empezar; las millas se conservan)
+      [['retiro', 'Retiro'], ['domicilio', 'Envío a domicilio']].forEach(function (t) {
+        if (estado.entrega === t[0]) return;
+        s.appendChild(zona(ge[t[0]], t[1], function () { estado.entrega = t[0]; estado.direccion = ''; render(false); }));
+      });
       casillaRut(s);
       if (d) {
         var col = columnaResumen(alto); s.appendChild(col.nodo);
@@ -580,20 +605,18 @@
         // al ocultar FORMA DE PAGO, CONFIRMACIÓN pasa a su lugar (como en el sitio)
         var centro = function (n) { return izquierdaEnPantalla(n, s) + parseFloat(n.style.width) / 2; };
         var corrimiento = centro(tabPago) - centro(tabConf);
-        var btn = pos(el('button', { class: 'boton-continuar', type: 'button' }), 735, 958, 278, 34);
-        btn.addEventListener('click', finDelRecorrido);
-        s.appendChild(btn);
         actualizadores.push(function () {
           var r = resumenActual();
           tabPago.style.display = r.salteaPago ? 'none' : '';
           tabConf.style.transform = r.salteaPago ? 'translateX(' + corrimiento + 'px)' : '';
-          btn.textContent = r.salteaPago ? 'Continuar a Confirmación' : 'Continuar';
         });
-      } else {
-        var contMovil = zona(23, 1068, 345, 34, 'Continuar', finDelRecorrido);
-        s.appendChild(contMovil);
       }
-      etapasEntrega(s, d, tj.nodo, d ? btn : contMovil, repintarTodo);
+      // «Continuar» vivo en desktop y mobile: pasa a «Continuar a Confirmación» cuando se saltea Forma de pago
+      var btn = pos(el('button', { class: 'boton-continuar', type: 'button' }), ge.continuar[0], ge.continuar[1], ge.continuar[2], ge.continuar[3]);
+      btn.addEventListener('click', finDelRecorrido);
+      s.appendChild(btn);
+      actualizadores.push(function () { btn.textContent = resumenActual().salteaPago ? 'Continuar a Confirmación' : 'Continuar'; });
+      etapasEntrega(s, d, tj.nodo, btn, repintarTodo);
     }
 
     repintarTodo();
@@ -688,7 +711,7 @@
     var scrollPrevio = irArriba ? 0 : (estado.vista === 'desktop' ? window.scrollY : (esc.querySelector('.scroll') || {}).scrollTop || 0);
     esc.innerHTML = ''; document.getElementById('notas-capa').innerHTML = '';
     esc.className = estado.vista;
-    var p = estado.pantalla, m = window.PANTALLAS[p + '-' + estado.vista], ancho = anchoVentana();
+    var p = estado.pantalla, m = window.PANTALLAS[nombrePantalla()], ancho = anchoVentana();
     var conPanel = estado.notas && ancho > 900; // en pantallas angostas el panel de notas va abajo
     if (estado.vista === 'desktop') {
       // La página ocupa todo el ancho: las franjas de fondo llegan a los bordes y el contenido

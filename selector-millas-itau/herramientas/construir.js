@@ -43,8 +43,16 @@ const PANTALLAS = {
     marcar: { '718ee0': 'tab-pago', '71e0fe': 'tab-confirmacion', '718ec6': 'ancla-izquierda', '71e158': 'rut', '71e15a': 'casilla-rut', '71e125': 'valor-direccion' }
   },
   'entrega-mobile': {
-    omitir: ['dd8de2'],
+    omitir: ['dd8de2', 'dde78e'],
     marcar: { dde78b: 'rut', dde78d: 'casilla-rut', dde75f: 'valor-direccion' }
+  },
+  'entrega-retiro-desktop': { // retiro en sucursal (tablero «Alternativa · … Entrega (retiro) …»)
+    omitir: ['ca95de', 'ca95cd', 'cae73f'],
+    marcar: { ca95c5: 'tab-pago', ca95c9: 'tab-confirmacion', ca95ab: 'ancla-izquierda', cae71f: 'rut', cae721: 'casilla-rut', ca95f0: 'valor-direccion' }
+  },
+  'entrega-retiro-mobile': {
+    omitir: ['875da7', '87b27b'],
+    marcar: { '87b278': 'rut', '87b27a': 'casilla-rut', ae1e20: 'valor-direccion' }
   }
 };
 

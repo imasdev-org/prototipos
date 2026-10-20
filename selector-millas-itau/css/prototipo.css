@@ -284,11 +284,11 @@ body.barra-plegada #solapa { display: inline-flex; }
 .etiqueta-rut { cursor: pointer; }
 .etiqueta-rut input { position: absolute; margin: 0; width: 13px; height: 13px; cursor: pointer; }
 
-/* Botón Continuar (cambia de texto al saltear el pago) */
+/* Botón Continuar de Entrega, desktop y mobile (cambia de texto al saltear el pago); sombra como en el diseño */
 .boton-continuar {
   position: absolute; display: flex; align-items: center; justify-content: center; border: 0; cursor: pointer;
   background: #FF6200; color: #fff; border-radius: 17px; font: 400 14px var(--fuente-sitio);
-  box-shadow: 0 2px 4px rgba(0,0,0,.25);
+  box-shadow: 1px 1px 5px rgba(62,63,64,.25);
 }
 
 /* Contador del carrito */
