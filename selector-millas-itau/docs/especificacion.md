@@ -9,6 +9,7 @@ Este documento acompaña al prototipo. El prototipo muestra **cómo se ve y se c
 | Lugar | Hoy | Propuesta |
 |---|---|---|
 | Ficha de producto | Control de millas con «Usar disponibles» | Mismo control, botón **«Usar el máximo»** que funciona como interruptor y escala «0 … Máximo para este producto: N». Sigue siendo un **semi-simulador** |
+| Ficha con promoción (descuento % + «n x m») | Cocardas y precio «sin promo» | Las mismas cocardas y, nuevos, recuadro verde de la promoción, selector de cantidad y desglose con «ahorrás» en verde; el máximo de millas sale del total con promoción de la cantidad |
 | Carrito lateral y carrito completo | Suma lo elegido en las fichas **sin tope** | Misma suma, **con tope** (saldo y máximo del pedido) |
 | Checkout · Entrega | — | Panel nuevo **«¿Cuántas millas querés usar?»** antes de «Tu pedido»: control, campo, «Usar el máximo» y etiqueta «Ahorrás $ X» |
 | «Usar el máximo» (ficha y Entrega) | Naranja; activo con fondo durazno claro | Color del segmento (azul en Personal Bank, naranja en cliente común); activo con **tilde** y fondo más marcado |
@@ -92,6 +93,27 @@ En el prototipo se recorre así: Entrega → «Retiro» → elegir la sucursal �
 - **«Agregar al Carrito»** solo sube el contador del ícono; el carrito lateral se abre tocando el ícono.
 - Lo elegido se guarda en el producto y se suma en el checkout.
 - Menú de usuario del encabezado (desktop), como en el sitio: etiqueta «Personal» (fondo `#000D3C`, texto blanco 9 px), nombre (14/300) y saldo «100.000 millas» (12/600 `#FF6200`) alineados a la derecha. El cliente común no lleva la etiqueta «Personal»; en mobile, tampoco el ícono PB.
+
+### Ficha con promoción (descuento % + «n x m»)
+
+Pedido del negocio para las promociones «n x m» (mail «Promociones MxN Tienda Volar», con un boceto): un diseño realista de la ficha con dos promociones a la vez, usando lo que el sitio ya tiene y los colores del boceto para lo que no existe (como el «ahorrás» en verde). Se agrega **solo lo que piden por escrito y lo que muestra el boceto**; el control de millas de la ficha se mantiene. Tableros «Propuesta · 01f Producto · con sesión · promoción descuento + 3x2» (desktop y mobile) y paso «Ficha con promo» del prototipo.
+
+- **Producto del ejemplo:** el mismo del boceto, real en Tienda Volar: «Vino Tinto TRUMPETER Malbec Syrah 750 ml», $ 744, código de caja 264341 (foto, precio y breadcrumb tomados de su ficha en producción el 20/10). Las promociones son las del boceto: **35 % OFF** por unidad (queda en $ 483,60, se muestra $ 484) y **«3x2» combinable**. En la base de trunk de Itaú no hay ningún producto con un «n x m» activo, así que el caso es de ejemplo.
+- **Cocardas: como hoy, sin cambios** (las mismas de la tarjeta del listado). Una por cada promoción activa, con el texto de `GetPromoBadgeCaption` según el tipo de oferta («35% OFF», «3x2»); Personal Bank `#000D3C`, cliente común `#FF6200`; texto blanco 14 px (10 px en mobile), alto 30 (24 en mobile), bordes derechos redondeados 10 y sombra `0 0 5px 2px rgba(0,0,0,.09)` *(medido con el CSS de producción)*. La de envío gratis es la imagen de la promoción «Envío Gratis» (tipo «Destacado»), de 26 px de alto.
+- **Recuadro de la promoción** (nuevo), debajo del precio: fondo `#EAF7EF`, radio 8, sin ícono; título «¡Llevando 3, pagás 2!» (15/700 `#1A8A42`) armado con el tipo de oferta, y «Podés combinarlo con otros productos participantes» (13 `#1FAA4B`) **solo si la promoción es combinable** (tipo 6, «Combinable»; un «MultiBuy n x m», tipo 2, no lo lleva). Cada promoción ya tiene hoy un «Mensaje en producto» (`PromotionProductInfo`) que `wProduct` muestra en la ficha (label `PROMOTIONPRODUCTINFO`): puede ser la fuente del texto.
+- **Cantidad** (nuevo en la ficha): el mismo control «− N +» del carrito lateral (extremos `#FF6200` de 44 × 34, centro `#FAFAFA`), a todo el ancho de la columna. Mínimo 1. Al cambiar la cantidad se recalculan el desglose y las millas.
+- **Desglose de la compra** (nuevo), con una divisoria `#EEEEEE` arriba:
+
+  | Fila | Cálculo | Ejemplo (3 unidades) |
+  |---|---|---|
+  | «Precio sin promo (N unidades)», tachado | N × $ 744 | $ 2.232 |
+  | «Total con promo» (18/600; monto 20/700) | (N − unidades gratis) × $ 483,60; unidades gratis = ⌊N ÷ 3⌋ | $ 967 |
+  | «Ahorrás $ X en esta compra» (14/700 `#1FAA4B`) | sin promo − total con promo | $ 1.265 |
+  | Detalle (12, gris de ayuda `#767676`) | «35% OFF» + «+ G unidad(es) gratis» si G > 0 | 35% OFF + 1 unidad gratis |
+
+  **No considera combinaciones con otros productos** (las informa el carrito): el ahorro puede variar en el carrito.
+- **Millas:** el mismo bloque de la ficha, con dos cambios. El máximo se calcula sobre el **total con promoción de la cantidad**: ⌊total × 1,92⌋, nunca más que el saldo (con 3 unidades, 1.857), y el rótulo dice «Máximo para esta compra». Arriba de la línea de precio va «Con tus millas, pagás» (14 `#5F6062`, la frase del boceto), para que «$ X + N millas» se lea como el total de la compra: con 3 unidades la mitad da $ 484, igual que el precio de una unidad. Valor por defecto: la mitad del máximo (928). Al cambiar la cantidad: con «Usar el máximo» activo sigue al máximo; si el cliente todavía no movió el control ni editó el campo, sigue a la mitad; si ya eligió un valor, se conserva, acotado al nuevo máximo.
+- **La tarjeta del listado no cambia:** ya muestra una cocarda por promoción, la de envío gratis, el precio «Antes» o «Sin Promo» y el precio con millas, y no tiene lugar para el «ahorrás» (en Itaú su zona de precio puede apilar hasta cuatro renglones). *(Verificado en el código: plantilla `idCardProduct` y `ProductItemToProductUIAnonymous`.)*
 
 ### Carrito lateral y carrito completo
 
@@ -193,6 +215,8 @@ Regla: todo lo que es **de millas** toma el color del segmento: en Personal Bank
 - **Confirmación sin forma de pago**: cómo se muestra el bloque de pago cuando se salteó Forma de pago.
 - **Cliente común en el encabezado** *(supuesto)*: que no lleve la etiqueta «Personal» ni el ícono PB se dedujo de cómo se ve un cliente Personal Bank; falta una captura del sitio con un cliente común.
 - **«Usar el máximo» con el valor inicial en el máximo**: cuando la suma de las fichas supera el máximo, el checkout arranca en el máximo con el botón **sin** activar (en el prototipo el botón solo se activa al tocarlo).
+- **Verdes del boceto (ficha con promoción)**: no llegan a 4,5:1. Título del recuadro `#1A8A42` sobre `#EAF7EF`: 4,00; texto `#1FAA4B` sobre `#EAF7EF`: 2,76; «ahorrás» `#1FAA4B` sobre blanco: 3,04. Se respetaron porque el negocio pidió esos colores; si se quiere cumplir, `#167A3B` da 4,91 y 5,41.
+- **Imagen de envío gratis**: la del prototipo es la de la promoción «Envío Gratis» de la base de trunk de Itaú (camión verde de 25 × 25). Falta ver la de producción.
 - **Texto de «Usar el máximo» normal en cliente común**: `#DE5500` sobre blanco da 3,89:1, por debajo de 4,5:1. Es el color de hoy y no se cambió; si se quiere cumplir, `#B34700` da 5,50:1.
 
 ## 7. Simplificaciones del prototipo
@@ -203,5 +227,6 @@ Regla: todo lo que es **de millas** toma el color del segmento: en Personal Bank
 - En el carrito completo, la columna del Resumen llega hasta el pie para que se vea el efecto fijo con solo 3 productos.
 - El aceite agregado desde la ficha **no aparece** en la lista del carrito (el carrito del diseño tiene 3 productos).
 - El recorrido termina en Entrega.
+- La ficha con promoción es un ejemplo: el vino agregado no aparece en el carrito y la promoción (35 % OFF + «3x2») es la del boceto, no una configurada en el sitio.
 - Las direcciones del selector de Entrega son de ejemplo y las dos dan el mismo envío ($ 150). En retiro hay una sola sucursal, sin costo.
 - Las fichas de los productos del carrito suman 2.000 millas. El tope del carrito no se puede recorrer en el prototipo (con este carrito, el tope por descuentos es de 19 millas); queda descrito arriba. El control «Saldo de millas: 3.000» muestra en Entrega el máximo limitado por el saldo.

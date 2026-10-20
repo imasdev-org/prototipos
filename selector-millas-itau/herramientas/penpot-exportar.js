@@ -11,6 +11,8 @@ const RECEPTOR = 'http://127.0.0.1:8766/save?f=';
 const TABLEROS = {
   'ficha-desktop': 'Propuesta · 01b Producto · con sesión · Desktop 1440',
   'ficha-mobile': 'Propuesta · 01b Producto · con sesión · Mobile 390',
+  'promo-desktop': 'Propuesta · 01f Producto · con sesión · promoción descuento + 3x2 · Desktop 1440',
+  'promo-mobile': 'Propuesta · 01f Producto · con sesión · promoción descuento + 3x2 · Mobile 390',
   'cajon-desktop': 'Propuesta · 02 Carrito lateral · Desktop (panel 400)',
   'cajon-mobile': 'Propuesta · 02 Carrito lateral · Mobile 390 (panel 351)',
   'carrito-desktop': 'Propuesta · 03 Carrito completo · Desktop 1440',

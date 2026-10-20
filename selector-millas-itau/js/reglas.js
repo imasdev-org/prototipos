@@ -58,6 +58,23 @@
     return Math.max(0, Math.round(FICHA.precioSinPromo - millas / TASA));
   }
 
+  // Ficha con promoción (ejemplo del boceto del negocio sobre un producto real de Tienda Volar): Vino Tinto TRUMPETER
+  // Malbec Syrah 750 ml, $ 744, con dos promociones a la vez: 35 % OFF por unidad y «3x2» combinable (lleva 3, paga 2).
+  // Esta ficha sí conoce las promociones del propio producto (no las combinaciones con otros productos): el máximo de
+  // millas se calcula sobre el total con promoción de la cantidad elegida.
+  var PROMO = { precioSinPromo: 744, descuento: 35, lleva: 3, paga: 2, cantidadInicial: 3 };
+  PROMO.precioConPromo = PROMO.precioSinPromo * (1 - PROMO.descuento / 100); // $ 483,60 por unidad
+  function compraPromo(cantidad) {
+    var gratis = Math.floor(cantidad / PROMO.lleva) * (PROMO.lleva - PROMO.paga);
+    var sinPromo = cantidad * PROMO.precioSinPromo;
+    var total = (cantidad - gratis) * PROMO.precioConPromo;
+    var maximo = Math.min(SALDO, Math.floor(total * TASA));
+    return { cantidad: cantidad, gratis: gratis, sinPromo: sinPromo, total: total, ahorro: sinPromo - total, maximo: maximo, porDefecto: Math.floor(maximo / 2) };
+  }
+  function precioPromo(total, millas) {
+    return Math.max(0, Math.round(total - millas / TASA));
+  }
+
   // Resumen del pedido con las millas elegidas (mismo cálculo que hoy):
   // SubTotal en pesos ya descontadas las millas, fila "millas" con la cantidad,
   // Total = SubTotal − Descuentos + entrega. Con todo cubierto: SubTotal $ 0 y sin fila de Descuentos.
@@ -103,6 +120,6 @@
   window.Reglas = {
     TASA: TASA, ENVIO_GRATIS_DESDE: ENVIO_GRATIS_DESDE, saldo: saldo, fijarSaldo: fijarSaldo, FICHA: FICHA, SUMA_FICHAS: SUMA_FICHAS, CARRITO: CARRITO, PRECIO_CUCHILLO: { pb: 90, comun: 100 },
     maximoPedido: maximoPedido, valorInicialPedido: valorInicialPedido, acotar: acotar,
-    ahorro: ahorro, precioFicha: precioFicha, resumen: resumen, resumenCarrito: resumenCarrito, miles: miles, pesos: pesos
+    ahorro: ahorro, precioFicha: precioFicha, PROMO: PROMO, compraPromo: compraPromo, precioPromo: precioPromo, resumen: resumen, resumenCarrito: resumenCarrito, miles: miles, pesos: pesos
   };
 })();

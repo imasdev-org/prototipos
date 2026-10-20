@@ -86,6 +86,7 @@
       segmento: previo ? previo.segmento : 'pb',
       notas: previo ? previo.notas : false,
       ficha: { millas: R.FICHA.porDefecto, previo: null, maxActivo: false, agregado: false },
+      promo: { cantidad: R.PROMO.cantidadInicial, millas: R.compraPromo(R.PROMO.cantidadInicial).porDefecto, previo: null, maxActivo: false, tocado: false, agregado: false },
       pedido: { millas: null, previo: null, maxActivo: false },
       facturaRut: false,
       entrega: previo ? previo.entrega : 'domicilio', // Entrega: 'domicilio' o 'retiro' (se elige con los botones de la pantalla)
@@ -269,12 +270,15 @@
     ponerTexto(raiz, 'saldo-encabezado', R.miles(R.saldo()) + ' millas');
   }
 
-  // Selector de la ficha (semi-simulador).
-  function crearSelectorFicha(vista, repintarTodo) {
+  // Selector de la ficha (semi-simulador). «conf» lo reutiliza en la ficha con promoción: dy (corrimiento vertical), obj, maximo(),
+  // precio(millas), rotuloMax, etiqueta y alInteractuar (avisa que el cliente eligió un valor con el control o el campo).
+  function crearSelectorFicha(vista, repintarTodo, conf) {
+    conf = conf || {};
     var d = vista === 'desktop', g = el('div', { class: 'capa', style: 'left:0;top:0' });
     // Orden: rótulo → saldo (dato para decidir) → control → escala → campo y botón → aclaración como texto de ayuda
     var P2 = d ? { x: 913, precioY: 283, rotuloY: 341, dispY: 361, controlY: 383, ancho: 370, escalaY: 424, campo: [913, 454, 150, 36], boton: [1070, 454, 150, 36], ajusY: 498 }
                : { x: 15, precioY: 518, rotuloY: 576, dispY: 596, controlY: 618, ancho: 360, escalaY: 659, campo: [15, 689, 176, 36], boton: [198, 689, 176, 36], ajusY: 733 };
+    if (conf.dy) { ['precioY', 'rotuloY', 'dispY', 'controlY', 'escalaY', 'ajusY'].forEach(function (k) { P2[k] += conf.dy; }); P2.campo[1] += conf.dy; P2.boton[1] += conf.dy; }
     var precio = pos(el('div', { class: 'txt', style: 'display:flex;align-items:baseline;gap:11px' }), P2.x, P2.precioY);
     var pesos = el('span', { style: 'font-size:26px;font-weight:700;line-height:37px' }), mil = el('span', { style: 'font-size:17px;font-weight:600' });
     precio.appendChild(pesos); precio.appendChild(mil); g.appendChild(precio);
@@ -283,17 +287,19 @@
     var disponibles = texto('', '', P2.x, P2.dispY, 'font-size:12px;color:#767676');
     disponibles.innerHTML = 'Tus millas disponibles: <b style="font-weight:600;color:#464646">' + R.miles(R.saldo()) + '</b>';
     g.appendChild(disponibles);
-    var obj = estado.ficha, max = R.FICHA.maximo;
-    var control = crearControl({ x: P2.x, y: P2.controlY, ancho: P2.ancho, etiqueta: 'Millas para este producto',
-      alCambiar: function (v) { cambiarMillas(obj, v, max); repintarTodo(); } });
+    var obj = conf.obj || estado.ficha, maximo = conf.maximo || function () { return R.FICHA.maximo; };
+    var precioCon = conf.precio || R.precioFicha, tocar = conf.alInteractuar || function () {};
+    var control = crearControl({ x: P2.x, y: P2.controlY, ancho: P2.ancho, etiqueta: conf.etiqueta || 'Millas para este producto',
+      alCambiar: function (v) { tocar(); cambiarMillas(obj, v, maximo()); repintarTodo(); } });
     g.appendChild(control.nodo);
     var escala = pos(el('div', { class: 'txt', style: 'display:flex;justify-content:space-between;font-size:14px;color:#767676' }), P2.x, P2.escalaY, P2.ancho);
-    escala.appendChild(el('span', null, '0')); escala.appendChild(el('span', null, 'Máximo para este producto: ' + R.miles(max)));
+    var escalaMax = el('span');
+    escala.appendChild(el('span', null, '0')); escala.appendChild(escalaMax);
     g.appendChild(escala);
     var campo = crearCampo({ x: P2.campo[0], y: P2.campo[1], w: P2.campo[2], h: P2.campo[3], borde: '#C8CFE1', radio: 5,
-      maximo: function () { return max; }, alCambiar: function (v) { cambiarMillas(obj, v, max); repintarTodo(); } });
+      maximo: maximo, alCambiar: function (v) { tocar(); cambiarMillas(obj, v, maximo()); repintarTodo(); } });
     var boton = crearBotonMax({ x: P2.boton[0], y: P2.boton[1], w: P2.boton[2], h: P2.boton[3], radio: 5,
-      alTocar: function () { alternarMaximo(obj, max); repintarTodo(); } });
+      alTocar: function () { alternarMaximo(obj, maximo()); repintarTodo(); } });
     g.appendChild(campo.nodo); g.appendChild(boton.nodo);
     var aclaracion = texto('Es un estimado: al pagar se ajusta al total del pedido y a tus millas.', '', P2.x, P2.ajusY, 'font-size:12px;color:#767676;white-space:normal');
     aclaracion.style.width = P2.ancho + 'px';
@@ -302,9 +308,10 @@
       nodo: g,
       actualizar: function () {
         var c = COLORES[estado.segmento];
-        control.set(obj.millas, max, c);
+        control.set(obj.millas, maximo(), c);
         campo.set(obj.millas); boton.set(obj.maxActivo, c);
-        pesos.textContent = R.pesos(R.precioFicha(obj.millas)); pesos.style.color = c.precioPesos;
+        escalaMax.textContent = (conf.rotuloMax || 'Máximo para este producto: ') + R.miles(maximo());
+        pesos.textContent = R.pesos(precioCon(obj.millas)); pesos.style.color = c.precioPesos;
         mil.textContent = '+ ' + R.miles(obj.millas) + ' millas'; mil.style.color = c.precioMillas;
       }
     };
@@ -439,6 +446,13 @@
       { d: [893, 568], m: [8, 803], t: '«Agregar al carrito» solo sube el contador del ícono; el carrito lateral se abre tocando el ícono. <b>En este prototipo el aceite no aparece en la lista del carrito</b> (simplificación: el carrito del diseño tiene 3 productos).' },
       { d: [950, 30], m: [290, 30], t: 'Menú de usuario como en el sitio: etiqueta «Personal», nombre y saldo de millas. El cliente común no lleva la etiqueta «Personal» (en mobile, el ícono PB).' }
     ],
+    promo: [
+      { d: [106, 140], m: [80, 112], t: '<b>Cocardas como hoy, sin cambios</b> (las mismas de la tarjeta del listado). Una por cada promoción activa del producto, con el texto que arma <code>GetPromoBadgeCaption</code> según el tipo de oferta: «35% OFF» (descuento %) y «3x2» (n x m). Fondo <code>#000D3C</code> para Personal Bank y <code>#FF6200</code> para cliente común; texto blanco 14 px (10 px en mobile), alto 30 px (24 en mobile), bordes derechos redondeados 10 px y sombra suave. La de envío gratis es la imagen de la promoción «Envío Gratis» (tipo «Destacado»), de 26 px de alto. Probalo: cambiá el cliente.' },
+      { d: [893, 262], m: [376, 495], t: '<b>Recuadro de la promoción «n x m»</b> (nuevo, con los colores del boceto: fondo <code>#EAF7EF</code>, título 15/700 <code>#1A8A42</code>, texto 13 <code>#1FAA4B</code>; radio 8; sin ícono de regalo). El título sale del tipo de oferta: «¡Llevando 3, pagás 2!». «Podés combinarlo con otros productos participantes» va <b>solo si la promoción es combinable</b> (tipo 6, «Combinable»); un «MultiBuy n x m» (tipo 2) no lo lleva. Cada promoción ya tiene hoy un «Mensaje en producto» (<code>PromotionProductInfo</code>) que <code>wProduct</code> muestra en la ficha: puede ser la fuente del texto. <i>Contraste: los verdes del boceto no llegan a 4,5:1 (título 4,00; texto 2,76); <code>#167A3B</code> daría 4,91.</i>' },
+      { d: [893, 328], m: [376, 562], t: '<b>Cantidad</b>: el mismo control «− N +» del carrito lateral (extremos <code>#FF6200</code> de 44 × 34 y centro <code>#FAFAFA</code>), a todo el ancho de la columna. Al cambiar la cantidad se recalculan el desglose y las millas. Mínimo 1. Probalo con «+» y «−».' },
+      { d: [893, 400], m: [376, 636], t: '<b>Desglose de la compra</b> (nuevo): «Precio sin promo (N unidades)» tachado = N × $ 744; «Total con promo» = (N − unidades gratis) × $ 483,60, con unidades gratis = ⌊N ÷ 3⌋; «Ahorrás $ X en esta compra» = sin promo − total, en el verde del boceto (<code>#1FAA4B</code>, 14/700; contraste 3,04 sobre blanco: <code>#167A3B</code> daría 5,41); detalle «35% OFF + G unidad(es) gratis» en el gris de ayuda <code>#767676</code>. <b>No considera combinaciones con otros productos</b>: en el carrito el ahorro puede variar.' },
+      { d: [893, 518], m: [376, 752], t: '<b>Millas</b>: el mismo bloque de la ficha, con dos cambios. (1) El máximo se calcula sobre el <b>total con promoción de la cantidad</b>: ⌊total × 1,92⌋ (con 3 unidades, $ 967,20 → 1.857), nunca más que el saldo; el rótulo dice «Máximo para esta compra». (2) La línea de precio lleva arriba «Con tus millas, pagás» (frase del boceto), para que se lea como el total de la compra: con 3 unidades la mitad da $ 484, igual que el precio de una unidad. Valor por defecto: la mitad del máximo. Al cambiar la cantidad: con «Usar el máximo» activo sigue al máximo; si todavía no se tocó, sigue a la mitad; si ya se eligió un valor, se conserva (acotado al nuevo máximo).' }
+    ],
     cajon: [
       { d: [190, 99], m: [175, 99], t: 'Encabezado «$ X + N millas»: N es el menor entre la suma de lo elegido en las fichas, el saldo y el máximo del pedido (<b>tope</b>). Por eso el carrito puede mostrar <b>menos millas que las elegidas en las fichas</b>. Casos: (1) <b>descuentos</b>: la ficha calcula su máximo sin promociones; el aceite solo, con «Usar el máximo» (801), aplica 720 ($ 375 × 1,92); con este carrito, «Usar el máximo» en las tres fichas suma 4.880 y el pedido aplica 4.861, por el descuento de Personal Bank del cuchillo ($ 100 → $ 90); (2) <b>saldo</b>: la suma supera el saldo (caso real de producción: 8.324 millas elegidas con saldo 6.058). No hay aviso en el carrito: la ficha ya avisa que es un estimado. Hoy el sitio suma sin tope; el tope entra en el alcance. En el prototipo, las fichas de este carrito suman 2.000.' },
       { d: [10, 420], m: [10, 420], t: 'Sin millas por producto en las líneas del carrito.' }
@@ -457,7 +471,7 @@
       { d: null, m: [22, 557], t: 'En mobile el Resumen no está en este paso (la columna es <code>hidden-xs hidden-sm</code>): el panel muestra «Total a pagar» = total + envío (rótulo 14/700, monto 16/700). La divisoria de arriba toma el color de la pista del slider del segmento (Personal Bank <code>#B8BDC9</code>, cliente común <code>#FDD4B9</code>). Con envío a domicilio el envío siempre va con tarjeta: no se saltea Forma de pago. Con retiro sin costo y las millas cubriendo todo, «Total a pagar» queda en $ 0 y el botón pasa a «Continuar a Confirmación» (probalo: «Retiro», sucursal y «Usar el máximo»).' }
     ]
   };
-  var NOMBRES = { ficha: 'Ficha de producto', cajon: 'Carrito lateral', carrito: 'Carrito', entrega: 'Entrega' };
+  var NOMBRES = { ficha: 'Ficha de producto', promo: 'Ficha con promoción', cajon: 'Carrito lateral', carrito: 'Carrito', entrega: 'Entrega' };
 
   function pinesYPanel(capaPantalla, clave) {
     if (!estado.notas) return;
@@ -565,6 +579,44 @@
       mostrar(s, 'pb-icono', estado.segmento === 'pb');
       actualizadores.push(function () { ponerTexto(s, 'contador', estado.ficha.agregado ? '4' : '3'); });
       s.appendChild(zona(P(d, [913, 551, 370, 34], [15, 786, 360, 34]), 'Agregar al Carrito', function () { estado.ficha.agregado = true; repintarTodo(); }));
+      s.appendChild(zona(P(d, [1108, 18, 48, 47], [339, 8, 40, 38]), 'Abrir el carrito', function () { estado.cajon = true; render(false); }));
+      if (d) s.appendChild(zona(1243, 17.5, 70, 34, 'Pagar', function () { irA('entrega'); }));
+    }
+
+    if (p === 'promo') {
+      // Ficha con promoción: la cantidad recalcula el desglose y el máximo de millas (total con promoción × 1,92)
+      var pr = estado.promo, compra = function () { return R.compraPromo(pr.cantidad); };
+      var selP = crearSelectorFicha(v, repintarTodo, { dy: 233, obj: pr, maximo: function () { return compra().maximo; },
+        precio: function (m) { return R.precioPromo(compra().total, m); }, rotuloMax: 'Máximo para esta compra: ',
+        etiqueta: 'Millas para esta compra', alInteractuar: function () { pr.tocado = true; } });
+      s.appendChild(selP.nodo); actualizadores.push(selP.actualizar);
+      aplicarEncabezado(s);
+      mostrar(s, 'pb-icono', estado.segmento === 'pb');
+      var cant = marca(s, 'cantidad');
+      if (cant) { var centro = parseFloat(cant.style.left) + parseFloat(cant.style.width) / 2; cant.style.left = (centro - 40) + 'px'; cant.style.width = '80px'; cant.style.justifyContent = 'center'; cant.style.textAlign = 'center'; }
+      actualizadores.push(function () {
+        var c = compra(), n = c.cantidad;
+        ponerTexto(s, 'contador', pr.agregado ? '4' : '3');
+        ponerTexto(s, 'cantidad', String(n));
+        ponerTexto(s, 'promo-rotulo', 'Precio sin promo (' + n + (n === 1 ? ' unidad)' : ' unidades)'));
+        ponerTexto(s, 'promo-sin-promo', R.pesos(c.sinPromo));
+        ponerTexto(s, 'promo-total', R.pesos(c.total));
+        ponerTexto(s, 'promo-ahorro', 'Ahorrás ' + R.pesos(c.ahorro) + ' en esta compra');
+        ponerTexto(s, 'promo-detalle', R.PROMO.descuento + '% OFF' + (c.gratis ? ' + ' + c.gratis + (c.gratis === 1 ? ' unidad gratis' : ' unidades gratis') : ''));
+        Array.prototype.forEach.call(s.querySelectorAll('[data-k="cocarda"]'), function (n2) { n2.style.background = estado.segmento === 'pb' ? '#000D3C' : '#FF6200'; });
+      });
+      var cambiarCantidad = function (delta) {
+        pr.cantidad = Math.max(1, Math.min(99, pr.cantidad + delta));
+        var c = compra();
+        if (pr.maxActivo) pr.millas = c.maximo;
+        else if (!pr.tocado) pr.millas = c.porDefecto;
+        else pr.millas = Math.min(pr.millas, c.maximo);
+        if (pr.previo != null) pr.previo = pr.tocado ? Math.min(pr.previo, c.maximo) : c.porDefecto; // al desactivar «Usar el máximo» vuelve a la mitad
+        repintarTodo();
+      };
+      s.appendChild(zona(P(d, [913, 320, 44, 34], [15, 555, 44, 34]), 'Restar una unidad', function () { cambiarCantidad(-1); }));
+      s.appendChild(zona(P(d, [1239, 320, 44, 34], [331, 555, 44, 34]), 'Sumar una unidad', function () { cambiarCantidad(1); }));
+      s.appendChild(zona(P(d, [913, 784, 370, 34], [15, 1019, 360, 34]), 'Agregar al Carrito', function () { pr.agregado = true; repintarTodo(); }));
       s.appendChild(zona(P(d, [1108, 18, 48, 47], [339, 8, 40, 38]), 'Abrir el carrito', function () { estado.cajon = true; render(false); }));
       if (d) s.appendChild(zona(1243, 17.5, 70, 34, 'Pagar', function () { irA('entrega'); }));
     }
