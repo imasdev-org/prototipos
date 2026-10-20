@@ -140,12 +140,21 @@
       var r = c.getBoundingClientRect(), z = r.width / o.ancho; // z: zoom con el que se achica la pantalla en desktop
       return R.acotar(((ev.clientX - r.left) / z - MITAD) / UTIL * st.maximo, st.maximo);
     }
+    // Tocar el track lleva el tirador a ese punto con animación (la transición está en el css). Recién cuando el puntero
+    // se mueve más de 3 px empieza el arrastre: la clase «arrastrando» apaga la transición y el tirador sigue al puntero.
+    var inicioX = null;
     c.addEventListener('pointerdown', function (ev) {
-      ev.preventDefault(); c.setPointerCapture(ev.pointerId); c.classList.add('arrastrando'); c.focus({ preventScroll: true });
+      ev.preventDefault(); c.setPointerCapture(ev.pointerId); c.focus({ preventScroll: true });
+      inicioX = ev.clientX;
       o.alCambiar(desdeEvento(ev));
     });
-    c.addEventListener('pointermove', function (ev) { if (c.hasPointerCapture(ev.pointerId)) o.alCambiar(desdeEvento(ev)); });
-    c.addEventListener('pointerup', function () { c.classList.remove('arrastrando'); });
+    c.addEventListener('pointermove', function (ev) {
+      if (!c.hasPointerCapture(ev.pointerId)) return;
+      if (!c.classList.contains('arrastrando')) { if (Math.abs(ev.clientX - inicioX) < 3) return; c.classList.add('arrastrando'); }
+      o.alCambiar(desdeEvento(ev));
+    });
+    c.addEventListener('pointerup', function () { c.classList.remove('arrastrando'); inicioX = null; });
+    c.addEventListener('pointercancel', function () { c.classList.remove('arrastrando'); inicioX = null; });
     c.addEventListener('keydown', function (ev) {
       var v = st.valor, paso = ev.shiftKey ? 100 : 10, decimo = Math.round(st.maximo / 10);
       var mapa = { ArrowRight: v + paso, ArrowUp: v + paso, ArrowLeft: v - paso, ArrowDown: v - paso, Home: 0, End: st.maximo, PageUp: v + decimo, PageDown: v - decimo };
@@ -391,7 +400,7 @@
   // origen: esquina de la caja que las contiene, en coordenadas de la pantalla.
   function filasResumenCarrito(d, origen) {
     var r = R.resumenCarrito(estado.segmento, millasIniciales());
-    var X = d ? { izq: 1056, der: 1292, y: 588, det: [1072, 1299], chev: 1044 } : { izq: 35, der: 356, y: 1516, det: [50, 362], chev: 23 };
+    var X = d ? { izq: 1056, der: 1292, y: 588, det: [1072, 1299], chev: 1044 } : { izq: 35, der: 356, y: 1440, det: [50, 362], chev: 23 };
     var g = el('div', { class: 'capa', style: 'left:' + (-origen[0]) + 'px;top:' + (-origen[1]) + 'px' });
     function fila(t, v, y, estilo, izq, der, alto) {
       var f = pos(el('div', { class: 'fila-resumen', style: estilo }), izq || X.izq, y, (der || X.der) - (izq || X.izq), alto || 34);
@@ -557,7 +566,7 @@
         caja.appendChild(zona(22, 249, 234, 34, 'Proceder al Pago', proceder));
       } else {
         s.appendChild(filasResumenCarrito(d, [0, 0]));
-        s.appendChild(zona(35, 1714, 320, 34, 'Proceder al Pago', proceder));
+        s.appendChild(zona(35, 1639, 320, 34, 'Proceder al Pago', proceder));
       }
     }
 

@@ -175,6 +175,11 @@ body.barra-plegada #solapa { display: inline-flex; }
 .control:focus-visible { outline: none; }
 .control:focus-visible .tirador { outline: 3px solid #223F83; outline-offset: 2px; }
 .control.arrastrando .tirador { cursor: grabbing; }
+/* Cuando el valor salta (tocar el track, «Usar el máximo», teclado o campo) el tirador y el relleno se desplazan con
+   animación; al arrastrar siguen al puntero sin demora. Misma curva que el resto de las animaciones; se anima siempre. */
+.control .tirador { transition: left .25s cubic-bezier(.3,.7,.3,1); }
+.control .relleno { transition: width .25s cubic-bezier(.3,.7,.3,1); }
+.control.arrastrando .tirador, .control.arrastrando .relleno { transition: none; }
 
 /* Campo de millas */
 .campo {
