@@ -9,7 +9,7 @@ Este documento acompaña al prototipo. El prototipo muestra **cómo se ve y se c
 | Lugar | Hoy | Propuesta |
 |---|---|---|
 | Ficha de producto | Control de millas con «Usar disponibles» | Mismo control, botón **«Usar el máximo»** que funciona como interruptor y escala «0 … Máximo para este producto: N». Sigue siendo un **semi-simulador** |
-| Ficha con dos promociones (35 % OFF + «3x2») | Cocardas y precio «sin promo» | Las mismas cocardas y el mismo precio; nuevo, «Ahorrás $ X» en verde |
+| Ficha con dos promociones (35 % OFF + «3x2») | Cocardas y precio «sin promo» | Las mismas cocardas y el mismo precio; nuevo, la etiqueta «Ahorrás $ X» del checkout |
 | Carrito lateral y carrito completo | Suma lo elegido en las fichas **sin tope** | Misma suma, **con tope** (saldo y máximo del pedido) |
 | Checkout · Entrega | — | Panel nuevo **«¿Cuántas millas querés usar?»** antes de «Tu pedido»: control, campo, «Usar el máximo» y etiqueta «Ahorrás $ X» |
 | «Usar el máximo» (ficha y Entrega) | Naranja; activo con fondo durazno claro | Color del segmento (azul en Personal Bank, naranja en cliente común); activo con **tilde** y fondo más marcado |
@@ -100,7 +100,7 @@ Pedido del negocio (mail «Promociones MxN Tienda Volar»): un diseño realista 
 
 - **Producto del caso:** el del boceto, real en Tienda Volar: «Vino Tinto TRUMPETER Malbec Syrah 750 ml», $ 744, código de caja 264341 (foto, precio y breadcrumb de su ficha en producción, 20/10). Las promociones son las del mail; en la base de trunk de Itaú no hay ningún «n x m» activo.
 - **Las dos promociones, con lo que ya existe:** una cocarda por promoción, como hoy («35% OFF» y «3x2», texto de `GetPromoBadgeCaption`; Personal Bank `#000D3C`, cliente común `#FF6200`; 14 px y 30 de alto, 10 px y 24 en mobile) y el precio con el 35 % OFF con «sin promo» al lado: **$ 484** (de $ 483,60) y «sin promo $ 744».
-- **«Ahorrás $ X» en verde (lo único nuevo):** 14/700 `#1FAA4B` (el verde del boceto), debajo de «sin promo», en el espacio que ya había: no corre nada. X = precio sin promo − precio con promo, por unidad: $ 744 − $ 483,60 = **$ 260**.
+- **«Ahorrás $ X» (lo único nuevo):** es la **misma etiqueta del checkout** (alto 26, radio 4, ícono Lucide `piggy-bank` de 16 px, monto en semibold, fondo y texto del segmento; las cifras entran y salen animando su ancho). Va debajo de «sin promo», en el espacio que ya había: no corre nada. X = precio sin promo − precio con promo, **por unidad**: $ 744 − $ 483,60 = **$ 260**. El verde del boceto queda como referencia, pero la etiqueta toma los colores del segmento, como en Entrega (azul en Personal Bank, naranja suave en cliente común): si se quiere forzar el verde, se le pasa otra paleta a la etiqueta.
 - **Millas:** el mismo selector de la ficha. El máximo sale del precio con promoción: ⌊$ 483,60 × 1,92⌋ = **928**; por defecto, la mitad (464 → «$ 242 + 464 millas»).
 - **La tarjeta del listado no cambia:** ya muestra una cocarda por promoción, el precio «Antes» o «Sin Promo» y el precio con millas, y no tiene lugar para el «ahorrás». *(Verificado en el código: plantilla `idCardProduct` y `ProductItemToProductUIAnonymous`.)*
 

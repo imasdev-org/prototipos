@@ -586,11 +586,19 @@
       var pr = estado.promo;
       var selP = crearSelectorFicha(v, repintarTodo, { dy: 22, obj: pr, maximo: function () { return R.PROMO.maximo; }, precio: R.precioPromo });
       s.appendChild(selP.nodo); actualizadores.push(selP.actualizar);
+      // «Ahorrás $ X»: el mismo componente del checkout (chanchito, fondo del segmento y cifras animadas), con lo que se
+      // ahorra por unidad con la promoción. Va donde el diseño deja libre debajo del precio.
+      var ahorro = crearEtiquetaAhorro();
+      pos(ahorro.nodo, P(d, 913, 15), P(d, 235, 470));
+      selP.nodo.appendChild(ahorro.nodo);
+      actualizadores.push(function () { ahorro.pintar(COLORES[estado.segmento]); });
+      ahorro.poner(R.miles(R.PROMO.ahorro), false);
       aplicarEncabezado(s);
       mostrar(s, 'pb-icono', estado.segmento === 'pb');
       actualizadores.push(function () {
         ponerTexto(s, 'contador', pr.agregado ? '4' : '3');
         Array.prototype.forEach.call(s.querySelectorAll('[data-k="cocarda"]'), function (n) { n.style.background = estado.segmento === 'pb' ? '#000D3C' : '#FF6200'; });
+        ahorro.pintar(COLORES[estado.segmento]);
       });
       s.appendChild(zona(P(d, [913, 573, 370, 34], [15, 808, 360, 34]), 'Agregar al Carrito', function () { pr.agregado = true; repintarTodo(); }));
       s.appendChild(zona(P(d, [1108, 18, 48, 47], [339, 8, 40, 38]), 'Abrir el carrito', function () { estado.cajon = true; render(false); }));

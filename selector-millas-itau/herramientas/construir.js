@@ -19,12 +19,12 @@ const PANTALLAS = {
     marcar: { '68261e': 'contador', '6825fc': 'pb-icono' }
   },
   'promo-desktop': { // ficha con dos promociones (tablero «Propuesta · 01f …»): la 01b con el precio con promoción y «Ahorrás»
-    omitir: ['6e7235', '6e7236', '6e723a', '6e12cb'],
+    omitir: ['6e7235', '6e7236', '6e723a', '6e12cb', '3d140c'],
     marcar: { '6e130b': 'contador', '6e130e': 'pb-chip', '6e130f': 'pb-chip', '6e1311': 'saldo-encabezado', '86b6ea': 'cocarda', '41ce98': 'cocarda' },
     derecha: ['6e1311']
   },
   'promo-mobile': {
-    omitir: ['289984', '289985', '289989', '28995c'],
+    omitir: ['289984', '289985', '289989', '28995c', '1255ce'],
     marcar: { '292b52': 'contador', '28f647': 'pb-icono', '21e55f': 'cocarda', eb0d51: 'cocarda' }
   },
   'cajon-desktop': {

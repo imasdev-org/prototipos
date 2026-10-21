@@ -65,6 +65,7 @@
   PROMO.precioConPromo = PROMO.precioSinPromo * (1 - PROMO.descuento / 100);
   PROMO.maximo = Math.floor(PROMO.precioConPromo * TASA);
   PROMO.porDefecto = Math.floor(PROMO.maximo / 2);
+  PROMO.ahorro = Math.round(PROMO.precioSinPromo - PROMO.precioConPromo); // $ 260, lo que se ahorra por unidad
   function precioPromo(millas) {
     return Math.max(0, Math.round(PROMO.precioConPromo - millas / TASA));
   }
