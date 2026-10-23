@@ -9,7 +9,7 @@ Este documento acompaña al prototipo. El prototipo muestra **cómo se ve y se c
 | Lugar | Hoy | Propuesta |
 |---|---|---|
 | Ficha de producto | Control de millas con «Usar disponibles» | **Sin selector.** Un recuadro informa el precio del producto en millas: «Este producto equivale a **N millas**» y «Al finalizar la compra elegís cuántas canjear». Las millas se eligen solo en el checkout |
-| Ficha con dos promociones (35 % OFF + «3x2») | Cocardas y precio «sin promo» | Las mismas cocardas y el mismo precio; nuevo, la etiqueta «Ahorrás $ X» del checkout |
+| Ficha con dos promociones (35 % OFF + «3x2») | Cocardas y precio «sin promo» | Las mismas cocardas y el mismo precio; **sin selector**: el mismo recuadro de la ficha («Este producto equivale a 928 millas») |
 | Carrito lateral y carrito completo | Suma lo elegido en las fichas **sin tope** | **Solo pesos**: el encabezado y el Resumen no muestran millas (se eligen en Entrega) |
 | Checkout · Entrega | — | Panel nuevo **«¿Cuántas millas querés usar?»** antes de «Tu pedido»: control, campo, «Usar el máximo» y etiqueta «Ahorrás $ X» |
 | «Usar el máximo» (Entrega) | Naranja; activo con fondo durazno claro | Color del segmento (azul en Personal Bank, naranja en cliente común); activo con **tilde** y fondo más marcado |
@@ -74,7 +74,7 @@ En el prototipo se recorre así: Entrega → «Retiro» → elegir la sucursal �
 
 #### «Usar el máximo» (componente del panel de Entrega)
 
-- **«Usar el máximo»** es un interruptor: al activarlo guarda el valor anterior y pone el máximo; al desactivarlo vuelve al valor anterior. Si se mueve el control o se edita el campo, se desactiva. Hoy está en el panel de Entrega (la ficha con dos promociones todavía conserva el selector viejo), y toma el **color del segmento**, como el control y la etiqueta de ahorro:
+- **«Usar el máximo»** es un interruptor: al activarlo guarda el valor anterior y pone el máximo; al desactivarlo vuelve al valor anterior. Si se mueve el control o se edita el campo, se desactiva. Solo está en el panel de Entrega (las fichas ya no tienen selector), y toma el **color del segmento**, como el control y la etiqueta de ahorro:
 
   | Estado | Personal Bank (azul) | Cliente común (naranja) |
   |---|---|---|
@@ -99,12 +99,12 @@ En el prototipo se recorre así: Entrega → «Retiro» → elegir la sucursal �
 
 ### Ficha con dos promociones (35 % OFF + «3x2»)
 
-Pedido del negocio (mail «Promociones MxN Tienda Volar»): un diseño realista de la ficha de un producto con **dos promociones a la vez**, 35 % OFF por unidad (sin importar cuántas se compren) y además un «3x2», **usando lo que el sitio ya tiene** y los colores del boceto solo para lo que hoy no existe, **como el «ahorrás» en verde**. Se parte de la ficha de siempre y se cambia solo eso. Tableros «Propuesta · 01f Producto · con sesión · dos promociones (35% OFF + 3x2)» (desktop y mobile) y paso «Ficha con 2 promos» del prototipo.
+Pedido del negocio (mail «Promociones MxN Tienda Volar»): un diseño realista de la ficha de un producto con **dos promociones a la vez**, 35 % OFF por unidad (sin importar cuántas se compren) y además un «3x2», **usando lo que el sitio ya tiene** y los colores del boceto solo para lo que hoy no existe, **como el «ahorrás» en verde**. Se parte de la ficha de siempre y se cambia solo eso. Tableros «Propuesta · 01x Producto · con sesión · dos promociones · sin selector: precio en millas» (desktop y mobile; los anteriores con selector, «01f», quedan en Penpot) y paso «Ficha con 2 promos» del prototipo.
 
 - **Producto del caso:** el del boceto, real en Tienda Volar: «Vino Tinto TRUMPETER Malbec Syrah 750 ml», $ 744, código de caja 264341 (foto, precio y breadcrumb de su ficha en producción, 20/10). Las promociones son las del mail; en la base de trunk de Itaú no hay ningún «n x m» activo.
 - **Las dos promociones, con lo que ya existe:** una cocarda por promoción, como hoy («35% OFF» y «3x2», texto de `GetPromoBadgeCaption`; Personal Bank `#000D3C`, cliente común `#FF6200`; 14 px y 30 de alto, 10 px y 24 en mobile) y el precio con el 35 % OFF con «sin promo» al lado: **$ 484** (de $ 483,60) y «sin promo $ 744».
-- **«Ahorrás $ X» (lo único nuevo):** es la **misma etiqueta del checkout** (alto 26, radio 4, ícono Lucide `piggy-bank` de 16 px, monto en semibold, fondo y texto del segmento; las cifras entran y salen animando su ancho). Va debajo de «sin promo», en el espacio que ya había: no corre nada. X = precio sin promo − precio con promo, **por unidad**: $ 744 − $ 483,60 = **$ 260**. El verde del boceto queda como referencia, pero la etiqueta toma los colores del segmento, como en Entrega (azul en Personal Bank, naranja suave en cliente común): si se quiere forzar el verde, se le pasa otra paleta a la etiqueta.
-- **Millas:** el mismo selector de la ficha. El máximo sale del precio con promoción: ⌊$ 483,60 × 1,92⌋ = **928**; por defecto, la mitad (464 → «$ 242 + 464 millas»).
+- **«Ahorrás $ X»: se sacó.** El mail pedía «el ahorrás en verde», pero era el ahorro de la promoción por unidad ($ 744 − $ 483,60 = $ 260): repetía la diferencia que ya muestra «sin promo $ 744», no contaba el «3x2» y usaba la misma palabra que el ahorro con millas del checkout (otro significado).
+- **Millas: sin selector**, con el mismo recuadro de la ficha (colores del segmento, 12 px debajo de «sin promo» y 24 px hasta «Agregar al Carrito»): «Este producto equivale a **928 millas**» y «Al finalizar la compra elegís cuántas canjear». N sale del precio con promoción que muestra la ficha: ⌊$ 483,60 × 1,92⌋ = **928**.
 - **La tarjeta del listado no cambia:** ya muestra una cocarda por promoción, el precio «Antes» o «Sin Promo» y el precio con millas, y no tiene lugar para el «ahorrás». *(Verificado en el código: plantilla `idCardProduct` y `ProductItemToProductUIAnonymous`.)*
 
 ### Carrito lateral y carrito completo
@@ -202,12 +202,11 @@ Regla: todo lo que es **de millas** toma el color del segmento: en Personal Bank
 - **Retiro en Pickup Itaú con costo** *(hipótesis)*: en producción se vio un retiro con $ 189. Si el Pickup Itaú es una «Agencia» con costo de envío, el salteo de Forma de pago solo aplicaría a retiros sin costo.
 - **Confirmación sin forma de pago**: cómo se muestra el bloque de pago cuando se salteó Forma de pago.
 - **Cliente común en el encabezado** *(supuesto)*: que no lleve la etiqueta «Personal» ni el ícono PB se dedujo de cómo se ve un cliente Personal Bank; falta una captura del sitio con un cliente común.
-- **Verde del «ahorrás» (ficha con dos promociones)**: `#1FAA4B` sobre blanco da 3,04:1, por debajo de 4,5:1. Se respetó porque el negocio pidió ese color; si se quiere cumplir, `#167A3B` da 5,41:1.
 - **Texto de «Usar el máximo» normal en cliente común**: `#DE5500` sobre blanco da 3,89:1, por debajo de 4,5:1. Es el color de hoy y no se cambió; si se quiere cumplir, `#B34700` da 5,50:1.
 
 ## 7. Simplificaciones del prototipo
 
-- Las pantallas son HTML generado desde el diseño en Penpot (`herramientas/`): textos, cajas y vectores reales en posición absoluta, como en el diseño. Las fotos y logos son las imágenes del sitio. Lo que cambia con el estado (selector, panel de millas, Resumen, totales, contador, cliente común) son componentes vivos. La ficha sale de «Propuesta · 01v Producto · con sesión · sin selector: precio en millas» y los carritos, de «Propuesta · 02 Carrito lateral · solo pesos» y «Propuesta · 03 Carrito completo · solo pesos». Las pantallas de Entrega salen de los tableros «Alternativa · 04 Checkout · Entrega (domicilio) · millas parcial · pregunta + panel» y «Alternativa · 04 Checkout · Entrega (retiro) · millas parcial · pregunta + panel» de Penpot (desktop y mobile).
+- Las pantallas son HTML generado desde el diseño en Penpot (`herramientas/`): textos, cajas y vectores reales en posición absoluta, como en el diseño. Las fotos y logos son las imágenes del sitio. Lo que cambia con el estado (selector, panel de millas, Resumen, totales, contador, cliente común) son componentes vivos. La ficha sale de «Propuesta · 01v Producto · con sesión · sin selector: precio en millas», la ficha con dos promociones de «Propuesta · 01x …» y los carritos, de «Propuesta · 02 Carrito lateral · solo pesos» y «Propuesta · 03 Carrito completo · solo pesos». Las pantallas de Entrega salen de los tableros «Alternativa · 04 Checkout · Entrega (domicilio) · millas parcial · pregunta + panel» y «Alternativa · 04 Checkout · Entrega (retiro) · millas parcial · pregunta + panel» de Penpot (desktop y mobile).
 - Desktop y mobile recorren **envío a domicilio** (Gastos de Envío $ 150; dirección de ejemplo «Bv. Artigas 1234») y **retiro** (Gastos de Preparación $ 0; sucursal de ejemplo «Pickup Itau - Avenida Italia 5821»). El salteo de Forma de pago se recorre con retiro y «Usar el máximo». Los tableros de retiro en Penpot: desktop Personal Bank parcial y al máximo, cliente común parcial; mobile Personal Bank parcial. El cliente común usa el mismo tablero con los colores de su segmento.
 - Desktop ocupa todo el ancho de la ventana con el contenido en 1200 px centrados, como el sitio. Con ventanas de menos de 1232 px el prototipo achica la pantalla proporcionalmente en vez de reacomodarla.
 - En el carrito completo, la columna del Resumen llega hasta el pie para que se vea el efecto fijo con solo 3 productos.

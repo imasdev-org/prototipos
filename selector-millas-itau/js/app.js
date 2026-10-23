@@ -86,7 +86,7 @@
       segmento: previo ? previo.segmento : 'pb',
       notas: previo ? previo.notas : false,
       ficha: { agregado: false },
-      promo: { millas: R.PROMO.porDefecto, previo: null, maxActivo: false, agregado: false },
+      promo: { agregado: false },
       pedido: { millas: null, previo: null, maxActivo: false },
       facturaRut: false,
       entrega: previo ? previo.entrega : 'domicilio', // Entrega: 'domicilio' o 'retiro' (se elige con los botones de la pantalla)
@@ -270,53 +270,6 @@
     ponerTexto(raiz, 'saldo-encabezado', R.miles(R.saldo()) + ' millas');
   }
 
-  // Selector de la ficha (semi-simulador). «conf» lo reutiliza en la ficha con dos promociones: dy (corrimiento vertical),
-  // obj, maximo() y precio(millas).
-  function crearSelectorFicha(vista, repintarTodo, conf) {
-    conf = conf || {};
-    var d = vista === 'desktop', g = el('div', { class: 'capa', style: 'left:0;top:0' });
-    // Orden: rótulo → saldo (dato para decidir) → control → escala → campo y botón → aclaración como texto de ayuda
-    var P2 = d ? { x: 913, precioY: 283, rotuloY: 341, dispY: 361, controlY: 383, ancho: 370, escalaY: 424, campo: [913, 454, 150, 36], boton: [1070, 454, 150, 36], ajusY: 498 }
-               : { x: 15, precioY: 518, rotuloY: 576, dispY: 596, controlY: 618, ancho: 360, escalaY: 659, campo: [15, 689, 176, 36], boton: [198, 689, 176, 36], ajusY: 733 };
-    if (conf.dy) { ['precioY', 'rotuloY', 'dispY', 'controlY', 'escalaY', 'ajusY'].forEach(function (k) { P2[k] += conf.dy; }); P2.campo[1] += conf.dy; P2.boton[1] += conf.dy; }
-    var precio = pos(el('div', { class: 'txt', style: 'display:flex;align-items:baseline;gap:11px' }), P2.x, P2.precioY);
-    var pesos = el('span', { style: 'font-size:26px;font-weight:700;line-height:37px' }), mil = el('span', { style: 'font-size:17px;font-weight:600' });
-    precio.appendChild(pesos); precio.appendChild(mil); g.appendChild(precio);
-    // Título: semibold, más oscuro y con aire entre letras; subtítulo: texto gris con el número destacado
-    g.appendChild(texto('ELEGÍ LAS MILLAS A USAR', '', P2.x, P2.rotuloY, 'font-size:12px;font-weight:600;color:#464646;letter-spacing:.04em'));
-    var disponibles = texto('', '', P2.x, P2.dispY, 'font-size:12px;color:#767676');
-    disponibles.innerHTML = 'Tus millas disponibles: <b style="font-weight:600;color:#464646">' + R.miles(R.saldo()) + '</b>';
-    g.appendChild(disponibles);
-    var obj = conf.obj, maximo = conf.maximo; // hoy solo lo usa la ficha con dos promociones
-    var precioCon = conf.precio;
-    var control = crearControl({ x: P2.x, y: P2.controlY, ancho: P2.ancho, etiqueta: 'Millas para este producto',
-      alCambiar: function (v) { cambiarMillas(obj, v, maximo()); repintarTodo(); } });
-    g.appendChild(control.nodo);
-    var escala = pos(el('div', { class: 'txt', style: 'display:flex;justify-content:space-between;font-size:14px;color:#767676' }), P2.x, P2.escalaY, P2.ancho);
-    var escalaMax = el('span');
-    escala.appendChild(el('span', null, '0')); escala.appendChild(escalaMax);
-    g.appendChild(escala);
-    var campo = crearCampo({ x: P2.campo[0], y: P2.campo[1], w: P2.campo[2], h: P2.campo[3], borde: '#C8CFE1', radio: 5,
-      maximo: maximo, alCambiar: function (v) { cambiarMillas(obj, v, maximo()); repintarTodo(); } });
-    var boton = crearBotonMax({ x: P2.boton[0], y: P2.boton[1], w: P2.boton[2], h: P2.boton[3], radio: 5,
-      alTocar: function () { alternarMaximo(obj, maximo()); repintarTodo(); } });
-    g.appendChild(campo.nodo); g.appendChild(boton.nodo);
-    var aclaracion = texto('Es un estimado: al pagar se ajusta al total del pedido y a tus millas.', '', P2.x, P2.ajusY, 'font-size:12px;color:#767676;white-space:normal');
-    aclaracion.style.width = P2.ancho + 'px';
-    g.appendChild(aclaracion);
-    return {
-      nodo: g,
-      actualizar: function () {
-        var c = COLORES[estado.segmento];
-        control.set(obj.millas, maximo(), c);
-        campo.set(obj.millas); boton.set(obj.maxActivo, c);
-        escalaMax.textContent = 'Máximo para este producto: ' + R.miles(maximo());
-        pesos.textContent = R.pesos(precioCon(obj.millas)); pesos.style.color = c.precioPesos;
-        mil.textContent = '+ ' + R.miles(obj.millas) + ' millas'; mil.style.color = c.precioMillas;
-      }
-    };
-  }
-
   // Panel de millas del checkout (Entrega): la pregunta es la cabecera, adentro y sin banda; fondo y borde según el
   // segmento. Desktop: pregunta y etiqueta en la primera fila, «Millas disponibles» 8 px debajo y 20 px hasta el control.
   function crearTarjeta(vista, repintarTodo, y) {
@@ -427,6 +380,14 @@
     return g;
   }
 
+  // Fichas sin selector: el recuadro «Este producto equivale a N millas» toma los colores del segmento
+  // (fondo y borde del panel de Entrega; el monto, el color de las millas de la ficha).
+  function pintarPrecioEnMillas(raiz) {
+    var col = COLORES[estado.segmento], recuadro = marca(raiz, 'millas-recuadro'), texto = marca(raiz, 'millas-texto');
+    if (recuadro) { recuadro.style.background = col.panelFondo; recuadro.style.outlineColor = col.panelBorde; }
+    if (texto) { var tramos = texto.querySelectorAll('span span'); if (tramos.length) tramos[tramos.length - 1].style.color = col.precioMillas; }
+  }
+
   // Precios del cuchillo y etiqueta «Con Personal Bank» según el cliente (carrito lateral y completo).
   function aplicarCliente(raiz) {
     var pb = estado.segmento === 'pb', p = R.PRECIO_CUCHILLO[estado.segmento];
@@ -446,8 +407,7 @@
     ],
     promo: [
       { d: [106, 140], m: [80, 112], t: '<b>Las dos promociones del producto</b> (35 % OFF por unidad, sin importar cuántas se compren, y además un «3x2»), <b>con lo que el sitio ya tiene</b>: una cocarda por promoción, como hoy («35% OFF» y «3x2», texto de <code>GetPromoBadgeCaption</code>; Personal Bank <code>#000D3C</code>, cliente común <code>#FF6200</code>), y el precio con el 35 % OFF con «sin promo» al lado. Probalo: cambiá el cliente.' },
-      { d: [893, 236], m: [376, 471], t: '<b>«Ahorrás $ X» en verde</b>: lo único nuevo, con el verde del boceto (<code>#1FAA4B</code>, 14/700). Es lo que se ahorra por unidad: precio sin promo − precio con promo ($ 744 − $ 483,60 = $ 260). Va en el espacio que ya había debajo del precio: no corre nada. <i>Contraste 3,04 sobre blanco; <code>#167A3B</code> daría 5,41.</i>' },
-      { d: [893, 316], m: [8, 551], t: 'Selector de millas igual al de la ficha. El máximo sale del <b>precio con promoción</b> (⌊$ 483,60 × 1,92⌋ = 928) y el valor por defecto es la mitad (464).' }
+      { d: [893, 259], m: [8, 494], t: '<b>Sin selector</b>, igual que la ficha: el recuadro «Este producto equivale a <b>928 millas</b>» y «Al finalizar la compra elegís cuántas canjear», con los colores del segmento. N sale del <b>precio con promoción</b> que muestra la ficha: ⌊$ 483,60 × 1,92⌋ = 928. Se conserva «sin promo $ 744»; el «Ahorrás $ 260» se sacó (lo pidió el negocio en el mail, pero repetía la diferencia que ya muestra «sin promo» y usaba la misma palabra que el ahorro con millas del checkout).' }
     ],
     cajon: [
       { d: [190, 99], m: [175, 99], t: 'Encabezado <b>solo en pesos</b>: el total del carrito ($ 2.532 Personal Bank, $ 2.542 cliente común). Sin selector en la ficha, el carrito no muestra millas: se eligen al finalizar la compra, en Entrega.' },
@@ -570,11 +530,7 @@
     function repintarTodo() { actualizadores.forEach(function (f) { f(); }); }
 
     if (p === 'ficha') {
-      // Ficha sin selector: el recuadro «Este producto equivale a N millas» toma los colores del segmento
-      // (fondo y borde del panel de Entrega; el monto, el color de las millas de la ficha).
-      var col = COLORES[estado.segmento], recuadro = marca(s, 'millas-recuadro'), textoMillas = marca(s, 'millas-texto');
-      if (recuadro) { recuadro.style.background = col.panelFondo; recuadro.style.outlineColor = col.panelBorde; }
-      if (textoMillas) { var tramos = textoMillas.querySelectorAll('span span'); if (tramos.length) tramos[tramos.length - 1].style.color = col.precioMillas; }
+      pintarPrecioEnMillas(s);
       aplicarEncabezado(s);
       mostrar(s, 'pb-icono', estado.segmento === 'pb');
       actualizadores.push(function () { ponerTexto(s, 'contador', estado.ficha.agregado ? '4' : '3'); });
@@ -584,25 +540,16 @@
     }
 
     if (p === 'promo') {
-      // Ficha con dos promociones: la ficha de siempre con el precio con promoción y «Ahorrás $ X»
+      // Ficha con dos promociones, sin selector: el mismo recuadro de la ficha con el precio en millas del vino
       var pr = estado.promo;
-      var selP = crearSelectorFicha(v, repintarTodo, { dy: 22, obj: pr, maximo: function () { return R.PROMO.maximo; }, precio: R.precioPromo });
-      s.appendChild(selP.nodo); actualizadores.push(selP.actualizar);
-      // «Ahorrás $ X»: el mismo componente del checkout (chanchito, fondo del segmento y cifras animadas), con lo que se
-      // ahorra por unidad con la promoción. Va donde el diseño deja libre debajo del precio.
-      var ahorro = crearEtiquetaAhorro();
-      pos(ahorro.nodo, P(d, 913, 15), P(d, 235, 470));
-      selP.nodo.appendChild(ahorro.nodo);
-      actualizadores.push(function () { ahorro.pintar(COLORES[estado.segmento]); });
-      ahorro.poner(R.miles(R.PROMO.ahorro), false);
+      pintarPrecioEnMillas(s);
       aplicarEncabezado(s);
       mostrar(s, 'pb-icono', estado.segmento === 'pb');
       actualizadores.push(function () {
         ponerTexto(s, 'contador', pr.agregado ? '4' : '3');
         Array.prototype.forEach.call(s.querySelectorAll('[data-k="cocarda"]'), function (n) { n.style.background = estado.segmento === 'pb' ? '#000D3C' : '#FF6200'; });
-        ahorro.pintar(COLORES[estado.segmento]);
       });
-      s.appendChild(zona(P(d, [913, 573, 370, 34], [15, 808, 360, 34]), 'Agregar al Carrito', function () { pr.agregado = true; repintarTodo(); }));
+      s.appendChild(zona(P(d, [913, 333.4, 370, 34], [15, 568.4, 360, 34]), 'Agregar al Carrito', function () { pr.agregado = true; repintarTodo(); }));
       s.appendChild(zona(P(d, [1108, 18, 48, 47], [339, 8, 40, 38]), 'Abrir el carrito', function () { estado.cajon = true; render(false); }));
       if (d) s.appendChild(zona(1243, 17.5, 70, 34, 'Pagar', function () { irA('entrega'); }));
     }

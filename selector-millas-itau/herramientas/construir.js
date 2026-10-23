@@ -18,14 +18,14 @@ const PANTALLAS = {
     omitir: ['db05e8'],
     marcar: { db5bc0: 'contador', db5b9e: 'pb-icono', ebf9e8: 'millas-recuadro', bd056d: 'millas-texto' }
   },
-  'promo-desktop': { // ficha con dos promociones (tablero «Propuesta · 01f …»): la 01b con el precio con promoción y «Ahorrás»
-    omitir: ['6e7235', '6e7236', '6e723a', '6e12cb', '3d140c'],
-    marcar: { '6e130b': 'contador', '6e130e': 'pb-chip', '6e130f': 'pb-chip', '6e1311': 'saldo-encabezado', '86b6ea': 'cocarda', '41ce98': 'cocarda' },
-    derecha: ['6e1311']
+  'promo-desktop': { // ficha con dos promociones sin selector (tablero «Propuesta · 01x …»): el recuadro de la 01v
+    omitir: ['29886c'],
+    marcar: { '2988ac': 'contador', '29dd55': 'pb-chip', '29dd56': 'pb-chip', '29dd58': 'saldo-encabezado', '29dd6b': 'cocarda', '29dd6c': 'cocarda', c895bb: 'millas-recuadro', '3f58be': 'millas-texto' },
+    derecha: ['29dd58']
   },
   'promo-mobile': {
-    omitir: ['289984', '289985', '289989', '28995c', '1255ce'],
-    marcar: { '292b52': 'contador', '28f647': 'pb-icono', '21e55f': 'cocarda', eb0d51: 'cocarda' }
+    omitir: ['6aa12e'],
+    marcar: { '6ad3a8': 'contador', '6ad386': 'pb-icono', '6aa14a': 'cocarda', '6ad296': 'cocarda', b900fb: 'millas-recuadro', ae9ae6: 'millas-texto' }
   },
   'cajon-desktop': { // carrito «solo pesos» (tableros «… · solo pesos · …»): encabezado y Resumen sin millas
     omitir: ['6bc607'],
