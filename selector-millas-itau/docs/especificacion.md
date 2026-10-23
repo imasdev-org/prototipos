@@ -8,11 +8,11 @@ Este documento acompaña al prototipo. El prototipo muestra **cómo se ve y se c
 
 | Lugar | Hoy | Propuesta |
 |---|---|---|
-| Ficha de producto | Control de millas con «Usar disponibles» | Mismo control, botón **«Usar el máximo»** que funciona como interruptor y escala «0 … Máximo para este producto: N». Sigue siendo un **semi-simulador** |
+| Ficha de producto | Control de millas con «Usar disponibles» | **Sin selector.** Un recuadro informa el precio del producto en millas: «Este producto equivale a **N millas**» y «Al finalizar la compra elegís cuántas canjear». Las millas se eligen solo en el checkout |
 | Ficha con dos promociones (35 % OFF + «3x2») | Cocardas y precio «sin promo» | Las mismas cocardas y el mismo precio; nuevo, la etiqueta «Ahorrás $ X» del checkout |
-| Carrito lateral y carrito completo | Suma lo elegido en las fichas **sin tope** | Misma suma, **con tope** (saldo y máximo del pedido) |
+| Carrito lateral y carrito completo | Suma lo elegido en las fichas **sin tope** | **Solo pesos**: el encabezado y el Resumen no muestran millas (se eligen en Entrega) |
 | Checkout · Entrega | — | Panel nuevo **«¿Cuántas millas querés usar?»** antes de «Tu pedido»: control, campo, «Usar el máximo» y etiqueta «Ahorrás $ X» |
-| «Usar el máximo» (ficha y Entrega) | Naranja; activo con fondo durazno claro | Color del segmento (azul en Personal Bank, naranja en cliente común); activo con **tilde** y fondo más marcado |
+| «Usar el máximo» (Entrega) | Naranja; activo con fondo durazno claro | Color del segmento (azul en Personal Bank, naranja en cliente común); activo con **tilde** y fondo más marcado |
 | Resumen del carrito completo y del checkout (desktop) | Se va con el scroll | **Fijo al hacer scroll** (`position: sticky`) |
 | Checkout · Forma de pago | Siempre | **Se saltea** si las millas cubren todo y la entrega no tiene costo |
 
@@ -23,11 +23,9 @@ Referencia ejecutable: [`js/reglas.js`](../js/reglas.js) (el prototipo calcula t
 | Concepto | Regla | Ejemplo del prototipo |
 |---|---|---|
 | Cotización | 1,92 millas por peso | $ 50 = 96 millas |
-| Máximo en la **ficha** | `round(precio sin promoción × 1,92)` — en la ficha no se conocen los descuentos | $ 417 → **801** |
-| Valor por defecto en la ficha | La mitad del máximo (sin cambios respecto de hoy) | 400 |
-| Precio en la ficha | `max(0, round(precio sin promoción − millas ÷ 1,92))` | 400 millas → **$ 209** |
+| Precio en millas en la **ficha** | `floor(precio que se muestra × 1,92)` — el precio del producto en millas; no depende del saldo | $ 375 → **720** |
 | Máximo del **pedido** | `min(saldo, floor(total de productos con descuentos × 1,92))` | $ 2.532 → **4.861** (cliente común $ 2.542 → 4.880) |
-| Valor inicial en el checkout | `min(suma de lo elegido en las fichas, máximo del pedido)` | 2.000 → 2.000 · «Usar el máximo» en las tres fichas: 4.880 → **4.861** |
+| Valor inicial en el checkout | `floor(máximo del pedido ÷ 2)`: la mitad, como arranca hoy el slider de la ficha | 4.861 → **2.430** (cliente común 4.880 → 2.440; saldo 3.000 → 1.500) |
 | Orden | Las millas se aplican **después** de los descuentos (no pagan promociones y así no se usan de más) | — |
 | Envío / preparación | **No** se paga con millas (por ahora) | — |
 | Ahorro | `round(millas ÷ 1,92)` | 2.000 → **$ 1.042** |
@@ -64,9 +62,19 @@ En el prototipo se recorre así: Entrega → «Retiro» → elegir la sucursal �
 
 ### Ficha de producto
 
-- Precio en vivo «$ X + N millas» (26/700 y 17/600): en Personal Bank todo en azul marino `#000D3C`; en cliente común los pesos en naranja `#FF6200` y las millas en gris `#5F6062`, como hoy para quien no es Personal Bank.
-- Control, campo y botón **sincronizados**; el valor se acota entre 0 y 801.
-- **«Usar el máximo»** es un interruptor: al activarlo guarda el valor anterior y pone el máximo; al desactivarlo vuelve al valor anterior. Si se mueve el control o se edita el campo, se desactiva. Es el mismo componente en la ficha y en Entrega, y toma el **color del segmento**, como el control y la etiqueta de ahorro:
+**Sin selector de millas** (tableros «Propuesta · 01v Producto · con sesión · sin selector: precio en millas»). Las millas se eligen solo al finalizar la compra, en Entrega; la ficha informa cuánto vale el producto en millas.
+
+- **Precio:** «antes $ 417» arriba (14 italic + 16/400 tachado, `#A7A7A7`, como hoy en el sitio) y el precio actual «$ 375» (22/700 `#333333`) debajo. En este ejemplo no hay «sin promo»: así el recuadro de millas queda pegado al precio.
+- **Recuadro de millas**, 12 px debajo del precio, a todo el ancho de la columna (370 desktop · 360 mobile), alto 66, radio 12, 12 px de aire vertical y 14 horizontal; fondo y borde 1 px interior del panel de Entrega según el segmento (Personal Bank `#F4F5F9` / `#DEE2EC`; cliente común `#FFF7F2` / `#FFE7D9`).
+  - Primera línea: «Este producto equivale a **N millas**»: frase 14/400 `#464646`; «N millas» 17/600 en el color de las millas del segmento (Personal Bank `#000D3C`; cliente común `#5F6062`, como hoy). **N = `floor(precio que se muestra × 1,92)`**: $ 375 → 720. Es el precio del producto en millas, así que es cierto para cualquier cliente, tenga o no esas millas.
+  - Segunda línea, 4 px debajo: «Al finalizar la compra elegís cuántas canjear» (12/400 `#6E6E6E`, **sin punto final**, como la ayuda del sitio «Elegí cuántos puntos ITAU canjear deslizando la barra»). Responde dónde se eligen las millas ahora que la ficha no tiene control. `#6E6E6E` llega a 4,5:1 sobre los dos fondos (4,68 y 4,82); `#767676` no (4,17 y 4,29).
+  - Por qué «canjear»: es el verbo que el sitio ya usa para los puntos. *A confirmar con Itaú que es el que usan en el programa Volar.*
+- **«Agregar al Carrito»**, 24 px debajo del recuadro, solo sube el contador del ícono; el carrito lateral se abre tocando el ícono.
+- Las variantes descartadas de esta información (lista, banda, junto al precio, separador, etc.) quedan en Penpot, columna «Ficha de producto», como secciones «Variante 01h … 01w».
+
+#### «Usar el máximo» (componente del panel de Entrega)
+
+- **«Usar el máximo»** es un interruptor: al activarlo guarda el valor anterior y pone el máximo; al desactivarlo vuelve al valor anterior. Si se mueve el control o se edita el campo, se desactiva. Hoy está en el panel de Entrega (la ficha con dos promociones todavía conserva el selector viejo), y toma el **color del segmento**, como el control y la etiqueta de ahorro:
 
   | Estado | Personal Bank (azul) | Cliente común (naranja) |
   |---|---|---|
@@ -87,11 +95,6 @@ En el prototipo se recorre así: Entrega → «Retiro» → elegir la sucursal �
   - El botón **no cambia de tamaño** al activarse (ficha 150 × 36 desktop y 176 × 36 mobile, radio 5; Entrega 166 × 34 desktop y 154 × 34 mobile, radio 4).
   - La frase **no cambia de ancho** al activarse: el estado normal lleva `letter-spacing: .017em`, que en Myriad Pro 14 px la lleva de 89,7 a 93 px, lo mismo que mide en semibold. Sin esa compensación, la frase se ensancha un 3,7 % y se mueve.
   - Por qué cambió el activo: el anterior (fondo `#FEEEE3`, texto `#DE5500`) casi no se distinguía sobre el panel durazno de cliente común (1,07:1 contra el panel) y su texto daba 3,43:1, por debajo de 4,5:1. Los nuevos dan 7,04:1 (azul) y 4,84:1 (naranja).
-- Título «ELEGÍ LAS MILLAS A USAR»: 12 px, `font-weight: 600`, `#464646`, `letter-spacing: .04em`. Subtítulo «Tus millas disponibles: **N**»: 12 px `#767676` con el número en 600 `#464646` (mismo criterio que «Millas disponibles» en Entrega).
-- Orden del selector: «ELEGÍ LAS MILLAS A USAR» → «Tus millas disponibles: N» → control con su escala → campo y «Usar el máximo» → aclaración. El saldo va arriba del control porque es un dato para decidir, igual que en el panel de Entrega (pregunta → saldo → control).
-- Aclaración **siempre visible** como texto de ayuda justo debajo del campo: «Es un estimado: al pagar se ajusta al total del pedido y a tus millas.» (12 px `#767676`; puede ocupar dos renglones). Va visible y no en un tooltip: es lo que evita la sorpresa al pagar, y en mobile un tooltip pide un toque que casi nadie da. Queda inmediatamente antes de «Agregar al Carrito».
-- **«Agregar al Carrito»** solo sube el contador del ícono; el carrito lateral se abre tocando el ícono.
-- Lo elegido se guarda en el producto y se suma en el checkout.
 - Menú de usuario del encabezado (desktop), como en el sitio: etiqueta «Personal» (fondo `#000D3C`, texto blanco 9 px), nombre (14/300) y saldo «100.000 millas» (12/600 `#FF6200`) alineados a la derecha. El cliente común no lleva la etiqueta «Personal»; en mobile, tampoco el ícono PB.
 
 ### Ficha con dos promociones (35 % OFF + «3x2»)
@@ -106,13 +109,9 @@ Pedido del negocio (mail «Promociones MxN Tienda Volar»): un diseño realista 
 
 ### Carrito lateral y carrito completo
 
-- Encabezado «$ X + N millas»: N = valor inicial del checkout (suma de las fichas **con tope**). Hoy el sitio suma sin tope (caso real: 8.324 millas con saldo 6.058).
-- Por el tope, el carrito puede mostrar **menos millas que las elegidas en las fichas**. Pasa en dos casos:
-  - **Descuentos** (tope por el máximo del pedido): la ficha calcula su máximo sin descuentos y el pedido, con descuentos. El aceite solo, con «Usar el máximo» en la ficha (801), aplica 720 en el carrito ($ 375 × 1,92). Con el carrito del prototipo, «Usar el máximo» en las tres fichas suma 4.880 (157 + 192 + 4.531) y el pedido aplica 4.861, por el descuento de Personal Bank del cuchillo ($ 100 → $ 90). Con cliente común no hay descuento y entran las 4.880.
-  - **Saldo insuficiente**: la suma de lo elegido en las fichas supera el saldo. Caso real de producción: 8.324 millas elegidas con un saldo de 6.058.
-  - El carrito no muestra un aviso: la aclaración de la ficha ya anticipa que es un estimado.
+- Encabezado del carrito lateral **solo en pesos**: el total del carrito ($ 2.532 Personal Bank, $ 2.542 cliente común). Sin selector en la ficha no hay millas elegidas que sumar: las millas aparecen recién en Entrega, como dice la aclaración de la ficha («Al finalizar la compra elegís cuántas canjear»). Tableros «… · solo pesos · …» en Penpot.
 - Sin millas por producto en las líneas: el renglón «+ N millas» se quita del todo, **sin dejar su espacio** (el bloque de precio queda de un renglón). Si el producto tiene descuento de Personal Bank, «Con Personal Bank» va en el renglón de abajo del precio, pegado a él. Debajo, el mismo aire en todas las filas hasta la cantidad (carrito lateral) o «Eliminar» (carrito completo mobile).
-- El Resumen del carrito completo usa el mismo cálculo que el checkout.
+- El Resumen del carrito completo va **solo en pesos**: SubTotal, Descuentos y Total, sin la fila «Millas aplicadas». Sin la fila, el separador, el Total y «Proceder al Pago» suben 36 px y la caja se achica lo mismo.
 - En desktop, la caja del Resumen del carrito completo queda **fija al hacer scroll**, igual que en el checkout. **Hoy no lo está** *(verificado en la KB trunk: `wCartFull`, `wCartFullWC` y `wCartSummary` no tienen ninguna clase sticky; la única del carrito es `wStickyEmptyCart`, del carrito lateral)*.
 - Su título «RESUMEN» va centrado en vertical en su franja: hoy queda bajo y la línea gris lo corta.
 - Cliente común: sin precio ni etiqueta «Con Personal Bank» (en el ejemplo, el cuchillo vale $ 100 en lugar de $ 90) y sin fila de Descuentos.
@@ -120,7 +119,7 @@ Pedido del negocio (mail «Promociones MxN Tienda Volar»): un diseño realista 
 ### Checkout · Entrega
 
 - **El paso se muestra por etapas, como en el sitio actual.** Al entrar solo están el tipo de entrega (retiro o domicilio) y la consulta de **dirección** (en retiro, de **sucursal**); lo de abajo está oculto. En `wCheckoutStart2` *(verificado en la KB trunk, evento `Comboaddressid.ControlValueChanged`)*, con la dirección sin elegir (id ≤ 0) la subrutina `HIDETABLES` oculta «Tu pedido», las alternativas y las acciones; al elegir una dirección se refrescan los envíos y `SHOWTABLES` los muestra (en retiro, al cambiar el departamento «Tu pedido» se oculta hasta elegir la sucursal). Con el rediseño, al elegir la dirección aparecen además el **panel de millas**, la fecha, la factura y «Continuar», y el Resumen suma el costo de envío. Así el selector de millas **nunca se ve antes de conocer el envío**, que es lo que el pedido original resolvía poniendo el selector en el Resumen. El Resumen existe desde el inicio (`Componentoverview`, sin control de visibilidad).
-  - **Estado inicial (supuesto, sin verificar):** el Resumen muestra SubTotal, Descuentos, «Millas aplicadas» (la suma de lo elegido en las fichas, con tope) y Total **sin** fila de envío y con el título «RESUMEN». Falta una captura de producción del estado inicial para confirmarlo.
+  - **Estado inicial (supuesto, sin verificar):** el Resumen muestra SubTotal, Descuentos, «Millas aplicadas» (el valor inicial: la mitad del máximo del pedido) y Total **sin** fila de envío y con el título «RESUMEN». Falta una captura de producción del estado inicial para confirmarlo.
   - **Al elegir la dirección:** se agrega «Gastos de Envío», el Total suma el envío y, con domicilio, el título pasa a «Con $ X más el envío es gratis». En retiro, al elegir la sucursal se agrega «Gastos de Preparación $ 0» y el título sigue «RESUMEN».
   - **Transición:** las secciones aparecen con un fundido corto (≈ 350 ms), sin depender del ajuste de animaciones del sistema.
   - **En el prototipo:** «Retiro» y «Envío a domicilio» funcionan. Con domicilio, la dirección se elige en el selector (hay dos de ejemplo, con el mismo envío de $ 150); con retiro, la sucursal (una de ejemplo, «Pickup Itau - Avenida Italia 5821», sin costo). Cambiar de tipo vuelve a la consulta sin elegir y conserva las millas; volver a Entrega desde la barra reinicia el paso y conserva el tipo.
@@ -203,13 +202,12 @@ Regla: todo lo que es **de millas** toma el color del segmento: en Personal Bank
 - **Retiro en Pickup Itaú con costo** *(hipótesis)*: en producción se vio un retiro con $ 189. Si el Pickup Itaú es una «Agencia» con costo de envío, el salteo de Forma de pago solo aplicaría a retiros sin costo.
 - **Confirmación sin forma de pago**: cómo se muestra el bloque de pago cuando se salteó Forma de pago.
 - **Cliente común en el encabezado** *(supuesto)*: que no lleve la etiqueta «Personal» ni el ícono PB se dedujo de cómo se ve un cliente Personal Bank; falta una captura del sitio con un cliente común.
-- **«Usar el máximo» con el valor inicial en el máximo**: cuando la suma de las fichas supera el máximo, el checkout arranca en el máximo con el botón **sin** activar (en el prototipo el botón solo se activa al tocarlo).
 - **Verde del «ahorrás» (ficha con dos promociones)**: `#1FAA4B` sobre blanco da 3,04:1, por debajo de 4,5:1. Se respetó porque el negocio pidió ese color; si se quiere cumplir, `#167A3B` da 5,41:1.
 - **Texto de «Usar el máximo» normal en cliente común**: `#DE5500` sobre blanco da 3,89:1, por debajo de 4,5:1. Es el color de hoy y no se cambió; si se quiere cumplir, `#B34700` da 5,50:1.
 
 ## 7. Simplificaciones del prototipo
 
-- Las pantallas son HTML generado desde el diseño en Penpot (`herramientas/`): textos, cajas y vectores reales en posición absoluta, como en el diseño. Las fotos y logos son las imágenes del sitio. Lo que cambia con el estado (selector, panel de millas, Resumen, totales, contador, cliente común) son componentes vivos. Las pantallas de Entrega salen de los tableros «Alternativa · 04 Checkout · Entrega (domicilio) · millas parcial · pregunta + panel» y «Alternativa · 04 Checkout · Entrega (retiro) · millas parcial · pregunta + panel» de Penpot (desktop y mobile).
+- Las pantallas son HTML generado desde el diseño en Penpot (`herramientas/`): textos, cajas y vectores reales en posición absoluta, como en el diseño. Las fotos y logos son las imágenes del sitio. Lo que cambia con el estado (selector, panel de millas, Resumen, totales, contador, cliente común) son componentes vivos. La ficha sale de «Propuesta · 01v Producto · con sesión · sin selector: precio en millas» y los carritos, de «Propuesta · 02 Carrito lateral · solo pesos» y «Propuesta · 03 Carrito completo · solo pesos». Las pantallas de Entrega salen de los tableros «Alternativa · 04 Checkout · Entrega (domicilio) · millas parcial · pregunta + panel» y «Alternativa · 04 Checkout · Entrega (retiro) · millas parcial · pregunta + panel» de Penpot (desktop y mobile).
 - Desktop y mobile recorren **envío a domicilio** (Gastos de Envío $ 150; dirección de ejemplo «Bv. Artigas 1234») y **retiro** (Gastos de Preparación $ 0; sucursal de ejemplo «Pickup Itau - Avenida Italia 5821»). El salteo de Forma de pago se recorre con retiro y «Usar el máximo». Los tableros de retiro en Penpot: desktop Personal Bank parcial y al máximo, cliente común parcial; mobile Personal Bank parcial. El cliente común usa el mismo tablero con los colores de su segmento.
 - Desktop ocupa todo el ancho de la ventana con el contenido en 1200 px centrados, como el sitio. Con ventanas de menos de 1232 px el prototipo achica la pantalla proporcionalmente en vez de reacomodarla.
 - En el carrito completo, la columna del Resumen llega hasta el pie para que se vea el efecto fijo con solo 3 productos.
@@ -217,4 +215,4 @@ Regla: todo lo que es **de millas** toma el color del segmento: en Personal Bank
 - El recorrido termina en Entrega.
 - La ficha con dos promociones es un caso de ejemplo: el vino agregado no aparece en el carrito y las promociones (35 % OFF + «3x2») son las del mail, no unas configuradas en el sitio.
 - Las direcciones del selector de Entrega son de ejemplo y las dos dan el mismo envío ($ 150). En retiro hay una sola sucursal, sin costo.
-- Las fichas de los productos del carrito suman 2.000 millas. El tope del carrito no se puede recorrer en el prototipo (con este carrito, el tope por descuentos es de 19 millas); queda descrito arriba. El control «Saldo de millas: 3.000» muestra en Entrega el máximo limitado por el saldo.
+- El control «Saldo de millas: 3.000» muestra en Entrega el máximo limitado por el saldo.

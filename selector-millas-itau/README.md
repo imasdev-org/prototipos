@@ -1,6 +1,6 @@
 # Selector de millas · Tienda Volar (Itaú)
 
-Prototipo navegable del nuevo selector de millas en la ficha de producto, el carrito y el paso de Entrega del checkout.
+Prototipo navegable de las millas en la ficha de producto (precio en millas, sin selector), el carrito y el paso de Entrega del checkout (selector de millas).
 
 **Abrir el prototipo:** <https://imasdev-org.github.io/selector-millas-itau/>
 
@@ -13,14 +13,14 @@ La barra de arriba controla el prototipo. Con la flecha de la derecha se pliega 
 | Control | Qué hace |
 |---|---|
 | **Paso** | Salta a Ficha, Carrito o Entrega. También se puede recorrer tocando la pantalla (Agregar al Carrito, ícono del carrito, Pagar, Ver Carrito Completo, Proceder al Pago, Continuar). **Entrega arranca solo con la consulta de dirección**: al elegir una dirección en el selector aparecen el envío, «Tus millas», «Tu pedido» y el resto, como en el sitio |
-| **Vista** | Desktop o Mobile (las dos con envío a domicilio) |
+| **Vista** | Desktop o Mobile. En Entrega, «Retiro» y «Envío a domicilio» se eligen con los botones de la pantalla |
 | **Cliente** | Personal Bank o cliente común |
 | **Saldo de millas** | Millas disponibles del cliente: 100.000, o 3.000 para ver en Entrega el máximo limitado por el saldo |
 | **Notas para desarrollo** | Muestra pines numerados sobre la pantalla y un panel con las reglas de cada parte |
 
 Tocando un lugar de la pantalla que no hace nada se marcan por un momento las zonas que sí responden.
 
-El salteo de Forma de pago (millas que cubren todo con entrega sin costo) no se ve en este recorrido, porque el envío a domicilio cuesta $ 150; está descrito en la especificación.
+**Salteo de Forma de pago** (millas que cubren todo con entrega sin costo): en Entrega tocá «Retiro», elegí la sucursal y tocá «Usar el máximo». La pestaña FORMA DE PAGO se oculta, CONFIRMACIÓN pasa a su lugar y el botón dice «Continuar a Confirmación». Con envío a domicilio no pasa: el envío siempre va con tarjeta.
 
 ## Correrlo localmente
 

@@ -9,14 +9,14 @@
 const fs = require('fs'), path = require('path'), gen = require('./gen');
 
 const PANTALLAS = {
-  'ficha-desktop': {
-    omitir: ['dd7caa', 'dd7cab', 'dd7caf', 'dd7c47'],
-    marcar: { dd7c86: 'contador', '83526c': 'pb-chip', e01037: 'pb-chip', aa568e: 'saldo-encabezado' },
-    derecha: ['aa568e']
+  'ficha-desktop': { // ficha sin selector (tablero «Propuesta · 01v …»): recuadro «Este producto equivale a N millas»
+    omitir: ['cccd74'],
+    marcar: { cd3e56: 'contador', cd3e59: 'pb-chip', cd3e5a: 'pb-chip', cd3e5c: 'saldo-encabezado', '0275b9': 'millas-recuadro', b2dc11: 'millas-texto' },
+    derecha: ['cd3e5c']
   },
   'ficha-mobile': {
-    omitir: ['682520', '682521', '682525', '67c5e1'],
-    marcar: { '68261e': 'contador', '6825fc': 'pb-icono' }
+    omitir: ['db05e8'],
+    marcar: { db5bc0: 'contador', db5b9e: 'pb-icono', ebf9e8: 'millas-recuadro', bd056d: 'millas-texto' }
   },
   'promo-desktop': { // ficha con dos promociones (tablero «Propuesta · 01f …»): la 01b con el precio con promoción y «Ahorrás»
     omitir: ['6e7235', '6e7236', '6e723a', '6e12cb', '3d140c'],
@@ -27,25 +27,25 @@ const PANTALLAS = {
     omitir: ['289984', '289985', '289989', '28995c', '1255ce'],
     marcar: { '292b52': 'contador', '28f647': 'pb-icono', '21e55f': 'cocarda', eb0d51: 'cocarda' }
   },
-  'cajon-desktop': {
-    omitir: ['d1353b', 'd1353c'],
-    marcar: { d134e6: 'pb-etiqueta', d134f5: 'cuchillo-unidad', d134fa: 'cuchillo-total' },
-    derecha: ['d134fa']
+  'cajon-desktop': { // carrito «solo pesos» (tableros «… · solo pesos · …»): encabezado y Resumen sin millas
+    omitir: ['6bc607'],
+    marcar: { d5e3c8: 'pb-etiqueta', d5e3d7: 'cuchillo-unidad', d5e3dc: 'cuchillo-total' },
+    derecha: ['d5e3dc']
   },
   'cajon-mobile': {
-    omitir: ['9a9b71', '9a9b72'],
-    marcar: { '9a9b1b': 'pb-etiqueta', '9a9b2a': 'cuchillo-unidad', '9a9b2f': 'cuchillo-total' },
-    derecha: ['9a9b2f']
+    omitir: ['c5b7b0'],
+    marcar: { '090379': 'pb-etiqueta', '090388': 'cuchillo-unidad', '09038d': 'cuchillo-total' },
+    derecha: ['09038d']
   },
   'carrito-desktop': {
-    omitir: ['dad877', 'dad867', 'dad868', 'dad869', 'dad86a', 'dad86b'],
-    marcar: { dad83e: 'pb-etiqueta', dad838: 'cuchillo-unidad', dad83c: 'cuchillo-total', dad85f: 'resumen-carrito', '0e70fc': 'pb-chip', '848718': 'pb-chip', '4e6230': 'saldo-encabezado' },
-    derecha: ['dad83c', '4e6230']
+    omitir: ['a7bb9b', 'a7bb8b', 'a7bb8c', 'a7bb8d', 'a7bb8e', 'a7bb8f'],
+    marcar: { a7bb61: 'pb-etiqueta', a7bb5b: 'cuchillo-unidad', a7bb5f: 'cuchillo-total', a7bb83: 'resumen-carrito', a7d52c: 'pb-chip', a7d52d: 'pb-chip', a7d52f: 'saldo-encabezado' },
+    derecha: ['a7bb5f', 'a7d52f']
   },
   'carrito-mobile': {
-    omitir: ['1e7708', '1e773b', '1e773c', '1e773d', '1e773e', '1e773f'],
-    marcar: { '1e76d7': 'pb-etiqueta', '1e76d1': 'cuchillo-unidad', '1e76d5': 'cuchillo-total', '1e7774': 'pb-icono' },
-    derecha: ['1e76d5']
+    omitir: ['d7239b', 'd723cf', 'd723d0', 'd723d1', 'd723d2', 'd723d3'],
+    marcar: { d72369: 'pb-etiqueta', d72363: 'cuchillo-unidad', d72367: 'cuchillo-total', d72408: 'pb-icono' },
+    derecha: ['d72367']
   },
   'entrega-desktop': { // envío a domicilio (tablero «Alternativa · … · pregunta + panel»)
     omitir: ['71e113', '71e102', '71e178'],

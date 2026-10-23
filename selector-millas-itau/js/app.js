@@ -85,7 +85,7 @@
       cajon: false,
       segmento: previo ? previo.segmento : 'pb',
       notas: previo ? previo.notas : false,
-      ficha: { millas: R.FICHA.porDefecto, previo: null, maxActivo: false, agregado: false },
+      ficha: { agregado: false },
       promo: { millas: R.PROMO.porDefecto, previo: null, maxActivo: false, agregado: false },
       pedido: { millas: null, previo: null, maxActivo: false },
       facturaRut: false,
@@ -287,8 +287,8 @@
     var disponibles = texto('', '', P2.x, P2.dispY, 'font-size:12px;color:#767676');
     disponibles.innerHTML = 'Tus millas disponibles: <b style="font-weight:600;color:#464646">' + R.miles(R.saldo()) + '</b>';
     g.appendChild(disponibles);
-    var obj = conf.obj || estado.ficha, maximo = conf.maximo || function () { return R.FICHA.maximo; };
-    var precioCon = conf.precio || R.precioFicha;
+    var obj = conf.obj, maximo = conf.maximo; // hoy solo lo usa la ficha con dos promociones
+    var precioCon = conf.precio;
     var control = crearControl({ x: P2.x, y: P2.controlY, ancho: P2.ancho, etiqueta: 'Millas para este producto',
       alCambiar: function (v) { cambiarMillas(obj, v, maximo()); repintarTodo(); } });
     g.appendChild(control.nodo);
@@ -404,10 +404,10 @@
     return { nodo: col, caja: caja };
   }
 
-  // Filas del Resumen del carrito completo (mismo cálculo que el checkout, sin entrega).
+  // Filas del Resumen del carrito completo: solo pesos (las millas se eligen recién en Entrega), sin entrega.
   // origen: esquina de la caja que las contiene, en coordenadas de la pantalla.
   function filasResumenCarrito(d, origen) {
-    var r = R.resumenCarrito(estado.segmento, millasIniciales());
+    var r = R.resumenCarrito(estado.segmento, 0);
     var X = d ? { izq: 1056, der: 1292, y: 588, det: [1072, 1299], chev: 1044 } : { izq: 35, der: 356, y: 1440, det: [50, 362], chev: 23 };
     var g = el('div', { class: 'capa', style: 'left:' + (-origen[0]) + 'px;top:' + (-origen[1]) + 'px' });
     function fila(t, v, y, estilo, izq, der, alto) {
@@ -422,9 +422,8 @@
       fila('Descuentos', R.pesos(-r.descuento), y, 'color:#223F83', X.izq + 5); y += 33;
       fila('10%OFF-Personal Bank', R.pesos(-r.descuento), y, 'color:#223F83;font-size:11px', X.det[0], X.det[1], 21); y += 16;
     }
-    fila('Millas aplicadas', R.miles(r.millas), y, 'color:#223F83');
-    g.appendChild(pos(el('div', { class: 'separador-resumen' }), X.izq, y + 43, X.der - X.izq));
-    fila('Total', R.pesos(r.total), y + 57, 'color:#464646;font-weight:700');
+    g.appendChild(pos(el('div', { class: 'separador-resumen' }), X.izq, y + 7, X.der - X.izq));
+    fila('Total', R.pesos(r.total), y + 21, 'color:#464646;font-weight:700');
     return g;
   }
 
@@ -440,10 +439,9 @@
   // ---------------------------------------------------------------- notas para desarrollo
   var NOTAS = {
     ficha: [
-      { d: [893, 300], m: [8, 535], t: 'La ficha es un <b>semi-simulador</b>: en la ficha no se conocen los descuentos, así que el máximo se calcula sobre el precio sin promoción ($ 417 × 1,92 = 801). El ajuste fino se hace al pagar, y por eso la aclaración visible: «Es un estimado: al pagar se ajusta al total del pedido y a tus millas.» (siempre visible, sin tooltip), como texto de ayuda justo debajo del campo. El saldo va arriba del control, como en la tarjeta de Entrega. Lo elegido se guarda en el producto y se suma en el checkout.' },
-      { d: [893, 352], m: [8, 586], t: 'Precio = precio sin promoción − millas ÷ 1,92, redondeado y nunca menor a $ 0. Valor por defecto: la mitad del máximo (sin cambios respecto de hoy). Rótulos fijos: solo cambian los valores. Colores del precio: Personal Bank todo en azul marino <code>#000D3C</code>; cliente común pesos en naranja <code>#FF6200</code> y millas en gris <code>#5F6062</code>, como hoy para quien no es Personal Bank.' },
-      { d: [1234, 472], m: [376, 707], t: '<b>«Usar el máximo»</b> funciona como interruptor, con el color del segmento. <b>Personal Bank (azul):</b> normal, borde 1 px y texto <code>#223F83</code>; activo, fondo <code>#D3D9E6</code>, borde 2 px y texto semibold <code>#223F83</code>. <b>Cliente común (naranja):</b> normal, borde 1 px <code>#FF6200</code> y texto <code>#DE5500</code>, como hoy; activo, fondo <code>#FFE0CC</code>, borde 2 px <code>#DE5500</code> y texto semibold <code>#A84300</code>. Activo lleva una <b>tilde</b> (Lucide check, ISC, 16 px) 5 px antes del texto, con el contenido centrado. <b>Al activarse se anima</b> (200 ms): la tilde entra con fundido y escala y el texto se desliza 10,5 px a la derecha para hacerle lugar, como el botón segmentado de Material 3; al desactivarse la tilde se va sin animación y el texto vuelve. Se anima siempre (no depende de «reducir movimiento»). Así el estado no depende solo del color, y el texto activo pasa 4,5:1 (azul 7,0:1; naranja 4,8:1). El botón no cambia de tamaño. Para que la frase no cambie de ancho, el estado normal lleva <code>letter-spacing: .017em</code> (Myriad Pro 14 px: semibold 93 px, normal 89,7 px). Al desactivarlo vuelve al valor anterior. Si se mueve el control o se edita el campo, se desactiva. <b>Hover</b> (solo con mouse, <code>@media (hover: hover)</code>): el fondo toma el color del texto al 8 % (Personal Bank <code>#EDF0F5</code>, activo <code>#C5CDDE</code>; cliente común <code>#FCF1EB</code>, activo <code>#F8D3BC</code>) y, en cliente común, el texto y la tilde pasan a <code>#9A3D00</code> para no bajar de 4,5:1. <b>Foco con teclado</b>: contorno 3 px <code>#223F83</code> separado 2 px.' },
-      { d: [893, 568], m: [8, 803], t: '«Agregar al carrito» solo sube el contador del ícono; el carrito lateral se abre tocando el ícono. <b>En este prototipo el aceite no aparece en la lista del carrito</b> (simplificación: el carrito del diseño tiene 3 productos).' },
+      { d: [893, 236], m: [8, 471], t: '<b>Ficha sin selector de millas.</b> Las millas se eligen solo al finalizar la compra (Entrega); la ficha informa el <b>precio en millas</b> del producto en un recuadro debajo del precio: «Este producto equivale a <b>N millas</b>» y, debajo, «Al finalizar la compra elegís cuántas canjear» (sin punto final, como la ayuda del sitio). N = ⌊precio que se muestra × 1,92⌋: $ 375 → 720. Al ser el precio del producto, es cierto para cualquier cliente (no depende del saldo). Recuadro: fondo y borde de 1 px del panel de Entrega según el segmento (Personal Bank <code>#F4F5F9</code> / <code>#DEE2EC</code>; cliente común <code>#FFF7F2</code> / <code>#FFE7D9</code>), radio 12, 12 px de aire vertical y 14 horizontal; 12 px debajo del precio y 24 px hasta «Agregar al Carrito». Frase 14/400 <code>#464646</code>; «N millas» 17/600 en el color de las millas del segmento (Personal Bank <code>#000D3C</code>; cliente común <code>#5F6062</code>, como hoy); aclaración 12/400 <code>#6E6E6E</code> (4,5:1 sobre los dos fondos). Probalo: cambiá el cliente.' },
+      { d: [893, 150], m: [8, 385], t: 'Precio con «antes» arriba (tachado, <code>#A7A7A7</code>) y el precio actual debajo, como en el sitio. En este ejemplo no hay «sin promo»: así el recuadro de millas queda pegado al precio.' },
+      { d: [893, 327], m: [8, 562], t: '«Agregar al carrito» solo sube el contador del ícono; el carrito lateral se abre tocando el ícono. <b>En este prototipo el aceite no aparece en la lista del carrito</b> (simplificación: el carrito del diseño tiene 3 productos).' },
       { d: [950, 30], m: [290, 30], t: 'Menú de usuario como en el sitio: etiqueta «Personal», nombre y saldo de millas. El cliente común no lleva la etiqueta «Personal» (en mobile, el ícono PB).' }
     ],
     promo: [
@@ -452,16 +450,16 @@
       { d: [893, 316], m: [8, 551], t: 'Selector de millas igual al de la ficha. El máximo sale del <b>precio con promoción</b> (⌊$ 483,60 × 1,92⌋ = 928) y el valor por defecto es la mitad (464).' }
     ],
     cajon: [
-      { d: [190, 99], m: [175, 99], t: 'Encabezado «$ X + N millas»: N es el menor entre la suma de lo elegido en las fichas, el saldo y el máximo del pedido (<b>tope</b>). Por eso el carrito puede mostrar <b>menos millas que las elegidas en las fichas</b>. Casos: (1) <b>descuentos</b>: la ficha calcula su máximo sin promociones; el aceite solo, con «Usar el máximo» (801), aplica 720 ($ 375 × 1,92); con este carrito, «Usar el máximo» en las tres fichas suma 4.880 y el pedido aplica 4.861, por el descuento de Personal Bank del cuchillo ($ 100 → $ 90); (2) <b>saldo</b>: la suma supera el saldo (caso real de producción: 8.324 millas elegidas con saldo 6.058). No hay aviso en el carrito: la ficha ya avisa que es un estimado. Hoy el sitio suma sin tope; el tope entra en el alcance. En el prototipo, las fichas de este carrito suman 2.000.' },
+      { d: [190, 99], m: [175, 99], t: 'Encabezado <b>solo en pesos</b>: el total del carrito ($ 2.532 Personal Bank, $ 2.542 cliente común). Sin selector en la ficha, el carrito no muestra millas: se eligen al finalizar la compra, en Entrega.' },
       { d: [10, 420], m: [10, 420], t: 'Sin millas por producto en las líneas del carrito.' }
     ],
     carrito: [
-      { d: [1030, 605], m: [12, 1533], t: 'Resumen del carrito completo: mismo cálculo que el checkout (fila «Millas aplicadas» con la cantidad, SubTotal ya descontadas las millas, con tope). En desktop queda <b>fijo al hacer scroll</b>, como en el checkout: <b>hoy no lo está</b> (<code>wCartFull</code>, <code>wCartFullWC</code> y <code>wCartSummary</code> no tienen ninguna regla sticky). Título «RESUMEN» centrado en su franja.' }
+      { d: [1030, 605], m: [12, 1533], t: 'Resumen del carrito completo <b>solo en pesos</b>: SubTotal, Descuentos y Total, sin la fila «Millas aplicadas» (las millas se eligen en Entrega). En desktop queda <b>fijo al hacer scroll</b>, como en el checkout: <b>hoy no lo está</b> (<code>wCartFull</code>, <code>wCartFullWC</code> y <code>wCartSummary</code> no tienen ninguna regla sticky). Título «RESUMEN» centrado en su franja.' }
     ],
     entrega: [
       { d: [1015, 258], m: [372, 266], t: '<b>El paso se muestra por etapas</b>, como en el sitio. Al entrar solo están el tipo de entrega y la consulta de <b>dirección</b> (en retiro, la sucursal); lo de abajo está oculto. En <code>wCheckoutStart2</code>, con la dirección sin elegir <code>HIDETABLES</code> oculta «Tu pedido», las alternativas y las acciones; al elegirla se refrescan los envíos y <code>SHOWTABLES</code> los muestra. Acá, además, aparecen el panel de millas, la fecha, la factura y «Continuar», y el Resumen suma el envío. Así el selector de millas nunca aparece antes de conocer el envío. <i>Qué muestra el Resumen antes de elegir la dirección es un supuesto (no verificado).</i> Probalo: elegí una dirección en el selector (o tocá «Retiro» y elegí la sucursal).' },
       { d: [125, 321], m: [20, 330], t: 'Panel <b>«¿Cuántas millas querés usar?»</b> antes de «Tu pedido». La pregunta es la cabecera, <b>adentro del panel y sin banda</b> (18 px, semibold, <code>#464646</code>), así no se lee como otra tarjeta de envío. Fondo y borde (1 px, interior) según el segmento: Personal Bank <code>#F4F5F9</code> / <code>#DEE2EC</code>; cliente común <code>#FFF7F2</code> / <code>#FFE7D9</code>. Radio 15, sin sombra. Desktop: pregunta y etiqueta en la primera fila, «Millas disponibles» 8 px debajo (se lee como subtítulo) y 20 px hasta el control. 30 px hasta el selector de dirección y hasta «Tu pedido» (32 en mobile). Se elige después del tipo de entrega y la sucursal o dirección: ahí el monto con tarjeta ya es definitivo.' },
-      { d: [125, 410], m: [22, 422], t: 'Valor inicial = suma de lo elegido en las fichas, con tope. Máximo del pedido = piso(total de productos con descuentos × 1,92), nunca más que el saldo. Las millas se aplican después de los descuentos (así no se usan de más) y <b>no cubren el envío</b> (por ahora).' },
+      { d: [125, 410], m: [22, 422], t: 'Valor inicial = <b>la mitad del máximo del pedido</b> (la ficha ya no tiene selector; es como arranca hoy el slider de la ficha). Máximo del pedido = piso(total de productos con descuentos × 1,92), nunca más que el saldo. Las millas se aplican después de los descuentos (así no se usan de más) y <b>no cubren el envío</b> (por ahora).' },
       { d: [1008, 411], m: [372, 502], t: 'Control, campo y «Usar el máximo» sincronizados; el valor se acota entre 0 y el máximo. «Usar el máximo» es el mismo componente de la ficha. Teclado: flechas ±10, Shift+flechas ±100, Inicio/Fin.' },
       { d: [846, 334], m: [372, 380], t: 'Ahorro = millas ÷ 1,92, redondeado. Se muestra una sola vez. Etiqueta: azul en Personal Bank (fondo <code>#223F83</code> al 10 %), naranja suave en cliente común (fondo <code>#FF6200</code> al 10 %, texto gris por contraste). Monto en <code>font-weight: 600</code>. Ícono: Lucide piggy-bank (ISC). <b>Se adapta al contenido</b> (anclada a la derecha del panel): al ganar o perder cifras, cada cifra y el punto de los miles entran o salen animando su ancho y su opacidad (~250 ms), así el ícono desliza en lugar de saltar. En mobile comparte fila con «Millas disponibles»: si entre ambas quedan menos de 16 px, la etiqueta baja a su propia línea, alineada a la derecha (flex-wrap, column-gap 16 px). Se anima siempre: no depende del ajuste de animaciones del sistema (no condicionarla a «reducir movimiento»).' },
       { d: [1043, 110], m: null, t: '<b>Resumen fijo al hacer scroll</b> (<code>position: sticky</code>) en los pasos del checkout, desktop. Título «RESUMEN» centrado en su franja. SubTotal en pesos ya descontadas las millas; fila «Millas aplicadas» con la cantidad (hoy dice «millas»); Total = SubTotal − Descuentos + entrega. Con todo cubierto: SubTotal $ 0 y sin fila de Descuentos. Con envío a domicilio, el título dice «Con $ X más el envío es gratis», como hoy en el sitio (X = $ 3.000 − SubTotal; umbral y cálculo tomados de una captura del sitio, a confirmar).' },
@@ -572,11 +570,15 @@
     function repintarTodo() { actualizadores.forEach(function (f) { f(); }); }
 
     if (p === 'ficha') {
-      var sel = crearSelectorFicha(v, repintarTodo); s.appendChild(sel.nodo); actualizadores.push(sel.actualizar);
+      // Ficha sin selector: el recuadro «Este producto equivale a N millas» toma los colores del segmento
+      // (fondo y borde del panel de Entrega; el monto, el color de las millas de la ficha).
+      var col = COLORES[estado.segmento], recuadro = marca(s, 'millas-recuadro'), textoMillas = marca(s, 'millas-texto');
+      if (recuadro) { recuadro.style.background = col.panelFondo; recuadro.style.outlineColor = col.panelBorde; }
+      if (textoMillas) { var tramos = textoMillas.querySelectorAll('span span'); if (tramos.length) tramos[tramos.length - 1].style.color = col.precioMillas; }
       aplicarEncabezado(s);
       mostrar(s, 'pb-icono', estado.segmento === 'pb');
       actualizadores.push(function () { ponerTexto(s, 'contador', estado.ficha.agregado ? '4' : '3'); });
-      s.appendChild(zona(P(d, [913, 551, 370, 34], [15, 786, 360, 34]), 'Agregar al Carrito', function () { estado.ficha.agregado = true; repintarTodo(); }));
+      s.appendChild(zona(P(d, [913, 310.4, 370, 34], [15, 545.4, 360, 34]), 'Agregar al Carrito', function () { estado.ficha.agregado = true; repintarTodo(); }));
       s.appendChild(zona(P(d, [1108, 18, 48, 47], [339, 8, 40, 38]), 'Abrir el carrito', function () { estado.cajon = true; render(false); }));
       if (d) s.appendChild(zona(1243, 17.5, 70, 34, 'Pagar', function () { irA('entrega'); }));
     }
@@ -618,10 +620,10 @@
         caja.style.top = ((altoBarra + 16) / zoomActual) + 'px';
         colCarrito.appendChild(caja); s.appendChild(colCarrito);
         caja.appendChild(filasResumenCarrito(d, [1035, 537]));
-        caja.appendChild(zona(22, 249, 234, 34, 'Proceder al Pago', proceder));
+        caja.appendChild(zona(22, 213, 234, 34, 'Proceder al Pago', proceder));
       } else {
         s.appendChild(filasResumenCarrito(d, [0, 0]));
-        s.appendChild(zona(35, 1639, 320, 34, 'Proceder al Pago', proceder));
+        s.appendChild(zona(35, 1603, 320, 34, 'Proceder al Pago', proceder));
       }
     }
 
@@ -672,11 +674,10 @@
     if (telefono) cont.style.zoom = 1;
     var s = pantallaGenerada(nombre);
     aplicarCliente(s);
-    // Encabezado «$ X + N millas» con tope
-    var r = R.resumenCarrito(estado.segmento, millasIniciales());
+    // Encabezado solo en pesos: las millas se eligen recién en Entrega
+    var r = R.resumenCarrito(estado.segmento, 0);
     var enc = pos(el('div', { class: 'total-cajon' }), 15, 81.5);
-    enc.appendChild(el('span', { class: 'importe' }, R.pesos(r.total) + ' + ' + R.miles(r.millas)));
-    enc.appendChild(el('span', { class: 'unidad' }, 'millas'));
+    enc.appendChild(el('span', { class: 'importe' }, R.pesos(r.total)));
     s.appendChild(enc);
     s.appendChild(zona(d ? 245 : 220, 82, d ? 140 : 116, 34, 'Pagar', function () { irA('entrega'); }));
     s.appendChild(zona(15, 22, d ? 203 : 175, 34, 'Ver Carrito Completo', function () { irA('carrito'); }));

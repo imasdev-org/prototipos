@@ -9,14 +9,14 @@
 
 const RECEPTOR = 'http://127.0.0.1:8766/save?f=';
 const TABLEROS = {
-  'ficha-desktop': 'Propuesta · 01b Producto · con sesión · Desktop 1440',
-  'ficha-mobile': 'Propuesta · 01b Producto · con sesión · Mobile 390',
+  'ficha-desktop': 'Propuesta · 01v Producto · con sesión · sin selector: precio en millas · Desktop 1440',
+  'ficha-mobile': 'Propuesta · 01v Producto · con sesión · sin selector: precio en millas · Mobile 390',
   'promo-desktop': 'Propuesta · 01f Producto · con sesión · dos promociones (35% OFF + 3x2) · Desktop 1440',
   'promo-mobile': 'Propuesta · 01f Producto · con sesión · dos promociones (35% OFF + 3x2) · Mobile 390',
-  'cajon-desktop': 'Propuesta · 02 Carrito lateral · Desktop (panel 400)',
-  'cajon-mobile': 'Propuesta · 02 Carrito lateral · Mobile 390 (panel 351)',
-  'carrito-desktop': 'Propuesta · 03 Carrito completo · Desktop 1440',
-  'carrito-mobile': 'Propuesta · 03 Carrito completo · Mobile 390',
+  'cajon-desktop': 'Propuesta · 02 Carrito lateral · solo pesos · Desktop (panel 400)',
+  'cajon-mobile': 'Propuesta · 02 Carrito lateral · solo pesos · Mobile 390 (panel 351)',
+  'carrito-desktop': 'Propuesta · 03 Carrito completo · solo pesos · Desktop 1440',
+  'carrito-mobile': 'Propuesta · 03 Carrito completo · solo pesos · Mobile 390',
   'entrega-desktop': 'Alternativa · 04 Checkout · Entrega (domicilio) · millas parcial · pregunta + panel · Desktop 1440',
   'entrega-mobile': 'Alternativa · 04 Checkout · Entrega (domicilio) · millas parcial · pregunta + panel · Mobile 390',
   'entrega-retiro-desktop': 'Alternativa · 04 Checkout · Entrega (retiro) · millas parcial · pregunta + panel · Desktop 1440',

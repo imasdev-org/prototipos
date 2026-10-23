@@ -27,13 +27,10 @@
     comun: { final: 2542, descuento: 0 }
   };
 
-  // Ficha del aceite: semi-simulador. En la ficha no se conocen los descuentos,
-  // así que el máximo se calcula sobre el precio sin promoción.
-  var FICHA = { precioSinPromo: 417, precioConPromo: 375, porDefecto: 400 };
-  FICHA.maximo = Math.round(FICHA.precioSinPromo * TASA); // 801, como hoy en el sitio
-
-  // Suma de lo elegido en las fichas de los productos del carrito (por ejemplo: leche 100 + cuchillo 100 + sopera 1.800).
-  var SUMA_FICHAS = 2000;
+  // Ficha del aceite: sin selector. Muestra el precio en millas del producto, sobre el precio que se ve en la ficha
+  // («antes $ 417», precio $ 375): «Este producto equivale a 720 millas». Las millas se eligen solo en el checkout.
+  var FICHA = { precioAntes: 417, precio: 375 };
+  FICHA.millas = Math.floor(FICHA.precio * TASA); // 720
 
   function maximoPedido(segmento) {
     // Nunca más de lo que se paga por los productos (con descuentos) ni más que el saldo.
@@ -41,8 +38,8 @@
   }
 
   function valorInicialPedido(segmento) {
-    // El checkout arranca con la suma de lo elegido en las fichas, con tope.
-    return Math.min(SUMA_FICHAS, maximoPedido(segmento));
+    // Sin selector en la ficha, el checkout arranca en la mitad del máximo del pedido (como hoy el slider de la ficha).
+    return Math.floor(maximoPedido(segmento) / 2);
   }
 
   function acotar(valor, maximo) {
@@ -52,10 +49,6 @@
 
   function ahorro(millas) {
     return Math.round(millas / TASA);
-  }
-
-  function precioFicha(millas) {
-    return Math.max(0, Math.round(FICHA.precioSinPromo - millas / TASA));
   }
 
   // Ficha con dos promociones (el caso del mail de Rodrigo, sobre un producto real de Tienda Volar): Vino Tinto TRUMPETER
@@ -113,8 +106,8 @@
   }
 
   window.Reglas = {
-    TASA: TASA, ENVIO_GRATIS_DESDE: ENVIO_GRATIS_DESDE, saldo: saldo, fijarSaldo: fijarSaldo, FICHA: FICHA, SUMA_FICHAS: SUMA_FICHAS, CARRITO: CARRITO, PRECIO_CUCHILLO: { pb: 90, comun: 100 },
+    TASA: TASA, ENVIO_GRATIS_DESDE: ENVIO_GRATIS_DESDE, saldo: saldo, fijarSaldo: fijarSaldo, FICHA: FICHA, CARRITO: CARRITO, PRECIO_CUCHILLO: { pb: 90, comun: 100 },
     maximoPedido: maximoPedido, valorInicialPedido: valorInicialPedido, acotar: acotar,
-    ahorro: ahorro, precioFicha: precioFicha, PROMO: PROMO, precioPromo: precioPromo, resumen: resumen, resumenCarrito: resumenCarrito, miles: miles, pesos: pesos
+    ahorro: ahorro, PROMO: PROMO, precioPromo: precioPromo, resumen: resumen, resumenCarrito: resumenCarrito, miles: miles, pesos: pesos
   };
 })();
