@@ -86,7 +86,6 @@
       segmento: previo ? previo.segmento : 'pb',
       notas: previo ? previo.notas : false,
       ficha: { agregado: false },
-      promo: { agregado: false },
       pedido: { millas: null, previo: null, maxActivo: false },
       facturaRut: false,
       entrega: previo ? previo.entrega : 'domicilio', // Entrega: 'domicilio' o 'retiro' (se elige con los botones de la pantalla)
@@ -405,10 +404,6 @@
       { d: [893, 327], m: [8, 562], t: '«Agregar al carrito» solo sube el contador del ícono; el carrito lateral se abre tocando el ícono. <b>En este prototipo el aceite no aparece en la lista del carrito</b> (simplificación: el carrito del diseño tiene 3 productos).' },
       { d: [950, 30], m: [290, 30], t: 'Menú de usuario como en el sitio: etiqueta «Personal», nombre y saldo de millas. El cliente común no lleva la etiqueta «Personal» (en mobile, el ícono PB).' }
     ],
-    promo: [
-      { d: [106, 140], m: [80, 112], t: '<b>Las dos promociones del producto</b> (35 % OFF por unidad, sin importar cuántas se compren, y además un «3x2»), <b>con lo que el sitio ya tiene</b>: una cocarda por promoción, como hoy («35% OFF» y «3x2», texto de <code>GetPromoBadgeCaption</code>; Personal Bank <code>#000D3C</code>, cliente común <code>#FF6200</code>), y el precio con el 35 % OFF con «sin promo» al lado. Probalo: cambiá el cliente.' },
-      { d: [893, 259], m: [8, 494], t: '<b>Sin selector</b>, igual que la ficha: el recuadro «Este producto equivale a <b>928 millas</b>» y «Al finalizar la compra elegís cuántas canjear», con los colores del segmento. N sale del <b>precio con promoción</b> que muestra la ficha: ⌊$ 483,60 × 1,92⌋ = 928. Se conserva «sin promo $ 744»; el «Ahorrás $ 260» se sacó (lo pidió el negocio en el mail, pero repetía la diferencia que ya muestra «sin promo» y usaba la misma palabra que el ahorro con millas del checkout).' }
-    ],
     cajon: [
       { d: [190, 99], m: [175, 99], t: 'Encabezado <b>solo en pesos</b>: el total del carrito ($ 2.532 Personal Bank, $ 2.542 cliente común). Sin selector en la ficha, el carrito no muestra millas: se eligen al finalizar la compra, en Entrega.' },
       { d: [10, 420], m: [10, 420], t: 'Sin millas por producto en las líneas del carrito.' }
@@ -427,7 +422,7 @@
       { d: null, m: [22, 557], t: 'En mobile el Resumen no está en este paso (la columna es <code>hidden-xs hidden-sm</code>): el panel muestra «Total a pagar» = total + envío (rótulo 14/700, monto 16/700). La divisoria de arriba toma el color de la pista del slider del segmento (Personal Bank <code>#B8BDC9</code>, cliente común <code>#FDD4B9</code>). Con envío a domicilio el envío siempre va con tarjeta: no se saltea Forma de pago. Con retiro sin costo y las millas cubriendo todo, «Total a pagar» queda en $ 0 y el botón pasa a «Continuar a Confirmación» (probalo: «Retiro», sucursal y «Usar el máximo»).' }
     ]
   };
-  var NOMBRES = { ficha: 'Ficha de producto', promo: 'Ficha con dos promociones', cajon: 'Carrito lateral', carrito: 'Carrito', entrega: 'Entrega' };
+  var NOMBRES = { ficha: 'Ficha de producto', cajon: 'Carrito lateral', carrito: 'Carrito', entrega: 'Entrega' };
 
   function pinesYPanel(capaPantalla, clave) {
     if (!estado.notas) return;
@@ -535,21 +530,6 @@
       mostrar(s, 'pb-icono', estado.segmento === 'pb');
       actualizadores.push(function () { ponerTexto(s, 'contador', estado.ficha.agregado ? '4' : '3'); });
       s.appendChild(zona(P(d, [913, 310.4, 370, 34], [15, 545.4, 360, 34]), 'Agregar al Carrito', function () { estado.ficha.agregado = true; repintarTodo(); }));
-      s.appendChild(zona(P(d, [1108, 18, 48, 47], [339, 8, 40, 38]), 'Abrir el carrito', function () { estado.cajon = true; render(false); }));
-      if (d) s.appendChild(zona(1243, 17.5, 70, 34, 'Pagar', function () { irA('entrega'); }));
-    }
-
-    if (p === 'promo') {
-      // Ficha con dos promociones, sin selector: el mismo recuadro de la ficha con el precio en millas del vino
-      var pr = estado.promo;
-      pintarPrecioEnMillas(s);
-      aplicarEncabezado(s);
-      mostrar(s, 'pb-icono', estado.segmento === 'pb');
-      actualizadores.push(function () {
-        ponerTexto(s, 'contador', pr.agregado ? '4' : '3');
-        Array.prototype.forEach.call(s.querySelectorAll('[data-k="cocarda"]'), function (n) { n.style.background = estado.segmento === 'pb' ? '#000D3C' : '#FF6200'; });
-      });
-      s.appendChild(zona(P(d, [913, 333.4, 370, 34], [15, 568.4, 360, 34]), 'Agregar al Carrito', function () { pr.agregado = true; repintarTodo(); }));
       s.appendChild(zona(P(d, [1108, 18, 48, 47], [339, 8, 40, 38]), 'Abrir el carrito', function () { estado.cajon = true; render(false); }));
       if (d) s.appendChild(zona(1243, 17.5, 70, 34, 'Pagar', function () { irA('entrega'); }));
     }

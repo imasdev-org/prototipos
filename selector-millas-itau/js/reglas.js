@@ -51,13 +51,6 @@
     return Math.round(millas / TASA);
   }
 
-  // Ficha con dos promociones (el caso del mail de Rodrigo, sobre un producto real de Tienda Volar): Vino Tinto TRUMPETER
-  // Malbec Syrah 750 ml, $ 744, con 35 % OFF por unidad y además un «3x2». La ficha muestra el precio con el 35 % OFF
-  // ($ 483,60 → $ 484) y, como la ficha sin selector, su precio en millas: ⌊483,60 × 1,92⌋ = 928.
-  var PROMO = { precioSinPromo: 744, descuento: 35 };
-  PROMO.precioConPromo = PROMO.precioSinPromo * (1 - PROMO.descuento / 100);
-  PROMO.millas = Math.floor(PROMO.precioConPromo * TASA); // 928
-
   // Resumen del pedido con las millas elegidas (mismo cálculo que hoy):
   // SubTotal en pesos ya descontadas las millas, fila "millas" con la cantidad,
   // Total = SubTotal − Descuentos + entrega. Con todo cubierto: SubTotal $ 0 y sin fila de Descuentos.
@@ -103,6 +96,6 @@
   window.Reglas = {
     TASA: TASA, ENVIO_GRATIS_DESDE: ENVIO_GRATIS_DESDE, saldo: saldo, fijarSaldo: fijarSaldo, FICHA: FICHA, CARRITO: CARRITO, PRECIO_CUCHILLO: { pb: 90, comun: 100 },
     maximoPedido: maximoPedido, valorInicialPedido: valorInicialPedido, acotar: acotar,
-    ahorro: ahorro, PROMO: PROMO, resumen: resumen, resumenCarrito: resumenCarrito, miles: miles, pesos: pesos
+    ahorro: ahorro, resumen: resumen, resumenCarrito: resumenCarrito, miles: miles, pesos: pesos
   };
 })();

@@ -18,15 +18,6 @@ const PANTALLAS = {
     omitir: ['db05e8'],
     marcar: { db5bc0: 'contador', db5b9e: 'pb-icono', ebf9e8: 'millas-recuadro', bd056d: 'millas-texto' }
   },
-  'promo-desktop': { // ficha con dos promociones sin selector (tablero «Propuesta · 01x …»): el recuadro de la 01v
-    omitir: ['29886c'],
-    marcar: { '2988ac': 'contador', '29dd55': 'pb-chip', '29dd56': 'pb-chip', '29dd58': 'saldo-encabezado', '29dd6b': 'cocarda', '29dd6c': 'cocarda', c895bb: 'millas-recuadro', '3f58be': 'millas-texto' },
-    derecha: ['29dd58']
-  },
-  'promo-mobile': {
-    omitir: ['6aa12e'],
-    marcar: { '6ad3a8': 'contador', '6ad386': 'pb-icono', '6aa14a': 'cocarda', '6ad296': 'cocarda', b900fb: 'millas-recuadro', ae9ae6: 'millas-texto' }
-  },
   'cajon-desktop': { // carrito «solo pesos» (tableros «… · solo pesos · …»): encabezado y Resumen sin millas
     omitir: ['6bc607'],
     marcar: { d5e3c8: 'pb-etiqueta', d5e3d7: 'cuchillo-unidad', d5e3dc: 'cuchillo-total' },
