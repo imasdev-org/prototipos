@@ -9,8 +9,8 @@
 
 const RECEPTOR = 'http://127.0.0.1:8766/save?f=';
 const TABLEROS = {
-  'ficha-desktop': 'Propuesta · 01z5 Producto · con sesión · sin selector: precio en millas (tinte al 8 %) · Desktop 1440',
-  'ficha-mobile': 'Propuesta · 01z5 Producto · con sesión · sin selector: precio en millas (tinte al 8 %) · Mobile 390',
+  'ficha-desktop': 'Propuesta · 01z7 Producto · con sesión · sin selector: precio en millas (tinte al 8 %, desaturado) · Desktop 1440',
+  'ficha-mobile': 'Propuesta · 01z7 Producto · con sesión · sin selector: precio en millas (tinte al 8 %, desaturado) · Mobile 390',
   'cajon-desktop': 'Propuesta · 02 Carrito lateral · solo pesos · Desktop (panel 400)',
   'cajon-mobile': 'Propuesta · 02 Carrito lateral · solo pesos · Mobile 390 (panel 351)',
   'carrito-desktop': 'Propuesta · 03 Carrito completo · solo pesos · Desktop 1440',

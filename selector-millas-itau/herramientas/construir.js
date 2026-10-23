@@ -9,14 +9,14 @@
 const fs = require('fs'), path = require('path'), gen = require('./gen');
 
 const PANTALLAS = {
-  'ficha-desktop': { // ficha sin selector (tablero «Propuesta · 01z5 …»): recuadro con tinte «Equivale a N millas»
-    omitir: ['caff07'],
-    marcar: { caff47: 'contador', caff4a: 'pb-chip', caff4b: 'pb-chip', caff4d: 'saldo-encabezado', cb33c2: 'millas-recuadro', cb33c3: 'millas-texto' },
-    derecha: ['caff4d']
+  'ficha-desktop': { // ficha sin selector (tablero «Propuesta · 01z7 …»): recuadro con tinte «Equivale a N millas»
+    omitir: ['376371'],
+    marcar: { '3763b1': 'contador', '3763b4': 'pb-chip', '3763b5': 'pb-chip', '3763b7': 'saldo-encabezado', '3763e9': 'millas-recuadro', '3763ea': 'millas-texto' },
+    derecha: ['3763b7']
   },
   'ficha-mobile': {
-    omitir: ['b57385'],
-    marcar: { b5a6b4: 'contador', b5a692: 'pb-icono', b573bd: 'millas-recuadro', b573be: 'millas-texto' }
+    omitir: ['e15a31'],
+    marcar: { e1e728: 'contador', e1e706: 'pb-icono', e184f9: 'millas-recuadro', e184fa: 'millas-texto' }
   },
   'cajon-desktop': { // carrito «solo pesos» (tableros «… · solo pesos · …»): encabezado y Resumen sin millas
     omitir: ['6bc607'],
