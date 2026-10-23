@@ -196,7 +196,7 @@ body.barra-plegada #solapa { display: inline-flex; }
 /* Foco: borde y aureola difuminada del mismo color, el naranja de los botones (#FF6200) con transparencia */
 .campo:focus-within { border-color: rgba(255, 98, 0, .2); box-shadow: 0 0 6px 3px rgba(255, 98, 0, .2); }
 
-/* "Usar el máximo" (ficha y Entrega, funciona como interruptor). Los colores vienen del segmento (COLORES en app.js):
+/* "Usar el máximo" (Entrega, funciona como interruptor). Los colores vienen del segmento (COLORES en app.js):
    Personal Bank azul, cliente común naranja. Activo: fondo suave, borde de 2 px, semibold y una tilde antes del texto. */
 .boton-max {
   position: absolute; display: flex; align-items: center; justify-content: center;

@@ -27,8 +27,9 @@
     comun: { final: 2542, descuento: 0 }
   };
 
-  // Ficha del aceite: sin selector. Muestra el precio en millas del producto, sobre el precio que se ve en la ficha
-  // («antes $ 417», precio $ 375): «Este producto equivale a 720 millas». Las millas se eligen solo en el checkout.
+  // Ficha del aceite: sin selector. Muestra el precio en millas del producto, sobre el precio unitario que paga este cliente
+  // («antes $ 417», precio $ 375): «Equivale a 720 millas». Con precio Personal Bank, N sale de ese precio (a confirmar con Itaú).
+  // Las millas se eligen solo en el checkout.
   var FICHA = { precioAntes: 417, precio: 375 };
   FICHA.millas = Math.floor(FICHA.precio * TASA); // 720
 
@@ -52,7 +53,7 @@
   }
 
   // Resumen del pedido con las millas elegidas (mismo cálculo que hoy):
-  // SubTotal en pesos ya descontadas las millas, fila "millas" con la cantidad,
+  // SubTotal = productos antes de descuentos − valor en pesos de las millas, fila «Millas aplicadas» con la cantidad,
   // Total = SubTotal − Descuentos + entrega. Con todo cubierto: SubTotal $ 0 y sin fila de Descuentos.
   function resumen(segmento, tipoEntrega, millas) {
     return calcular(segmento, millas, COSTO_ENTREGA[tipoEntrega], ROTULO_ENTREGA[tipoEntrega]);
@@ -65,10 +66,12 @@
 
   function calcular(segmento, millas, costoEntrega, rotuloEntrega) {
     var c = CARRITO[segmento];
-    var cubierto = Math.min(millas / TASA, c.final);
-    var resto = c.final - cubierto;
-    var todoCubierto = resto < 0.5;
-    var subtotal = todoCubierto ? 0 : Math.round(resto + c.descuento);
+    // Valor en pesos de las millas: el mismo número que «Ahorrás $ X», nunca más que los productos con descuentos.
+    var enPesos = Math.min(ahorro(millas), c.final);
+    // Las millas cubren todo cuando su valor en pesos alcanza los productos con descuentos. Con el máximo del pedido
+    // (si el saldo no lo limita) siempre pasa, aunque el máximo se redondee hacia abajo. A confirmar con Itaú.
+    var todoCubierto = enPesos >= c.final;
+    var subtotal = todoCubierto ? 0 : c.final + c.descuento - enPesos;
     var descuento = todoCubierto ? 0 : c.descuento;
     var entrega = costoEntrega;
     return {
@@ -80,6 +83,9 @@
       millas: millas,
       total: subtotal - descuento + entrega,
       todoCubierto: todoCubierto,
+      // Cuánto falta para el envío gratis, medido sobre el SubTotal antes de las millas: así usar millas
+      // no hace perder el envío gratis. A confirmar con Itaú.
+      faltaEnvioGratis: ENVIO_GRATIS_DESDE - (c.final + c.descuento),
       // Se saltea Forma de pago solo si las millas cubren todo y la entrega no tiene costo.
       salteaPago: todoCubierto && entrega === 0
     };
