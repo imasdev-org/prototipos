@@ -94,7 +94,9 @@ body.barra-plegada #solapa { display: inline-flex; }
 /* La página ocupa todo el ancho de la ventana; la pantalla del diseño va centrada encima */
 .lienzo { position: relative; zoom: var(--z); background: #fff; overflow-x: clip; }
 .lienzo .banda { position: absolute; left: 0; right: 0; }
-.lienzo > .pantalla { position: absolute; top: 0; }
+/* En desktop la pantalla no recorta en horizontal: el logo del checkout, anclado al borde de la ventana, queda fuera de
+   sus 1440 px cuando la ventana es más ancha. El lienzo ya recorta lo que se pase del ancho de la ventana. */
+.lienzo > .pantalla { position: absolute; top: 0; overflow-x: visible; overflow-y: clip; }
 /* overflow: clip (no hidden) para no romper el Resumen con position: sticky */
 .pantalla { position: relative; background: #fff; overflow: clip; font-family: var(--fuente-sitio); }
 .capa { position: absolute; }
