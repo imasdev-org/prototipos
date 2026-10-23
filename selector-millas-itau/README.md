@@ -6,14 +6,16 @@ Prototipo navegable de las millas en la ficha de producto (precio en millas, sin
 
 **Reglas para desarrollo:** [docs/especificacion.md](docs/especificacion.md)
 
+**Plantilla para prototipos nuevos:** [plantilla/](plantilla/) (barra, vista, notas para desarrollo y zonas tocables, listas para completar con otra feature).
+
 ## Cómo se usa
 
 La barra de arriba controla el prototipo. Con la flecha de la derecha se pliega a una solapa chica; tocando la solapa vuelve.
 
 | Control | Qué hace |
 |---|---|
-| **Paso** | Salta a Ficha, Carrito o Entrega. También se puede recorrer tocando la pantalla (Agregar al Carrito, ícono del carrito, Pagar, Ver Carrito Completo, Proceder al Pago, Continuar). **Entrega arranca solo con la consulta de dirección**: al elegir una dirección en el selector aparecen el envío, «Tus millas», «Tu pedido» y el resto, como en el sitio |
 | **Vista** | Desktop o Mobile. En Entrega, «Retiro» y «Envío a domicilio» se eligen con los botones de la pantalla |
+| **Paso** | Salta a Ficha, Carrito o Entrega. También se puede recorrer tocando la pantalla (Agregar al Carrito, ícono del carrito, Pagar, Ver Carrito Completo, Proceder al Pago, Continuar). **Entrega arranca solo con la consulta de dirección**: al elegir una dirección en el selector aparecen el envío, «Tus millas», «Tu pedido» y el resto, como en el sitio |
 | **Cliente** | Personal Bank o cliente común |
 | **Saldo de millas** | Millas disponibles del cliente: 100.000, o 3.000 para ver en Entrega el máximo limitado por el saldo |
 | **Notas para desarrollo** | Muestra pines numerados sobre la pantalla y un panel con las reglas de cada parte |
@@ -40,6 +42,7 @@ En la vista mobile no hay barra de desplazamiento: se desplaza con el dedo, la r
 | `css/prototipo.css` | Estilos de los componentes y del prototipo |
 | `docs/especificacion.md` | Especificación para desarrollo |
 | `herramientas/` | Exportación desde Penpot y generador de `pantallas/` |
+| `plantilla/` | Plantilla para prototipos nuevos (ver su README) |
 
 ## Regenerar las pantallas desde Penpot
 
