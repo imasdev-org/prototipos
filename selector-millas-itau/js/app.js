@@ -65,13 +65,13 @@
   var COLORES = {
     pb: { pista: '#B8BDC9', relleno: 'linear-gradient(90deg,#5A6380,#000C39)', tirador: '#000D3A',
       etiquetaFondo: 'rgba(34,63,131,.10)', etiquetaTexto: '#223F83', etiquetaMonto: '#000D3C', icono: '#223F83',
-      fichaFondo: '#E9ECF3', fichaMonto: '#000D3C',
+      fichaFondo: '#EDF0F5', fichaMonto: '#000D3C',
       panelFondo: '#F4F5F9', panelBorde: '#DEE2EC', divisoria: '#B8BDC9',
       botonBorde: '#223F83', botonTexto: '#223F83', botonActivoFondo: '#D3D9E6', botonActivoBorde: '#223F83', botonActivoTexto: '#223F83',
       botonHoverFondo: '#EDF0F5', botonHoverTexto: '#223F83', botonHoverActivoFondo: '#C5CDDE', botonHoverActivoTexto: '#223F83' },
     comun: { pista: '#FDD4B9', relleno: 'linear-gradient(90deg,#FE9A5A,#F95E00)', tirador: '#FE6002',
       etiquetaFondo: 'rgba(255,98,0,.10)', etiquetaTexto: '#464646', etiquetaMonto: '#464646', icono: '#C75000',
-      fichaFondo: '#FFEFE6', fichaMonto: '#943B00',
+      fichaFondo: '#FAF3EF', fichaMonto: '#943B00',
       panelFondo: '#FFF7F2', panelBorde: '#FFE7D9', divisoria: '#FDD4B9',
       botonBorde: '#FF6200', botonTexto: '#DE5500', botonActivoFondo: '#FFE0CC', botonActivoBorde: '#DE5500', botonActivoTexto: '#A84300',
       botonHoverFondo: '#FCF1EB', botonHoverTexto: '#9A3D00', botonHoverActivoFondo: '#F8D3BC', botonHoverActivoTexto: '#9A3D00' }
@@ -381,7 +381,7 @@
   }
 
   // Ficha sin selector: el recuadro «Equivale a N millas» (solo tinte, sin borde) toma los colores del segmento:
-  // fondo = color del segmento al 10 % y monto en azul marino (Personal Bank) o naranja oscuro (cliente común).
+  // fondo = color del segmento al 8 % (en cliente común, desaturado) y monto en azul marino (Personal Bank) o naranja oscuro (cliente común).
   function pintarPrecioEnMillas(raiz) {
     var col = COLORES[estado.segmento], recuadro = marca(raiz, 'millas-recuadro'), texto = marca(raiz, 'millas-texto');
     if (recuadro) recuadro.style.background = col.fichaFondo;
@@ -400,7 +400,7 @@
   // ---------------------------------------------------------------- notas para desarrollo
   var NOTAS = {
     ficha: [
-      { d: [893, 236], m: [8, 471], t: '<b>Ficha sin selector de millas.</b> Las millas se eligen solo al finalizar la compra (Entrega); la ficha informa el <b>precio en millas</b> del producto en un recuadro debajo del precio: «Equivale a <b>N millas</b>» y, debajo, «Al finalizar la compra elegís cuántas canjear» (sin punto final, como la ayuda del sitio). N = ⌊precio que se muestra × 1,92⌋: $ 375 → 720. Al ser el precio del producto, es cierto para cualquier cliente (no depende del saldo). <b>Recuadro solo con tinte, sin borde</b> (así no se confunde con el panel de Entrega, que es interactivo): el color del segmento al 10 % (Personal Bank <code>#E9ECF3</code>; cliente común <code>#FFEFE6</code>), radio 12, 12 px de aire vertical y 14 horizontal; 12 px debajo del precio y 24 px hasta «Agregar al Carrito». «Equivale a» 14/400 <code>#464646</code>; «N millas» 17/600 en azul marino <code>#000D3C</code> (Personal Bank) o naranja oscuro <code>#943B00</code> (cliente común, 6,5:1); aclaración 13/400 <code>#5F5F5F</code> (5,4 y 5,7:1). Probalo: cambiá el cliente.' },
+      { d: [893, 236], m: [8, 471], t: '<b>Ficha sin selector de millas.</b> Las millas se eligen solo al finalizar la compra (Entrega); la ficha informa el <b>precio en millas</b> del producto en un recuadro debajo del precio: «Equivale a <b>N millas</b>» y, debajo, «Al finalizar la compra elegís cuántas canjear» (sin punto final, como la ayuda del sitio). N = ⌊precio que se muestra × 1,92⌋: $ 375 → 720. Al ser el precio del producto, es cierto para cualquier cliente (no depende del saldo). <b>Recuadro solo con tinte, sin borde</b> (así no se confunde con el panel de Entrega, que es interactivo): el color del segmento al 8 % (Personal Bank <code>#EDF0F5</code>, 1,14:1 contra el blanco; cliente común <code>#FAF3EF</code>, durazno al 8 % con la mitad de saturación, 1,10:1, para no formar un bloque naranja con «Agregar al Carrito» ni parecerse al fondo de los avisos del carrito <code>#fff7ec</code>), radio 12, 12 px de aire vertical y 14 horizontal; 12 px debajo del precio y 24 px hasta «Agregar al Carrito». «Equivale a» 14/400 <code>#464646</code>; «N millas» 17/600 en azul marino <code>#000D3C</code> (Personal Bank) o naranja oscuro <code>#943B00</code> (cliente común, 6,6:1); aclaración 13/400 <code>#5F5F5F</code> (5,6 y 5,8:1). Probalo: cambiá el cliente.' },
       { d: [893, 150], m: [8, 385], t: 'Precio con «antes» arriba (tachado, <code>#A7A7A7</code>) y el precio actual debajo, como en el sitio. En este ejemplo no hay «sin promo»: así el recuadro de millas queda pegado al precio.' },
       { d: [893, 327], m: [8, 562], t: '«Agregar al carrito» solo sube el contador del ícono; el carrito lateral se abre tocando el ícono. <b>En este prototipo el aceite no aparece en la lista del carrito</b> (simplificación: el carrito del diseño tiene 3 productos).' },
       { d: [950, 30], m: [290, 30], t: 'Menú de usuario como en el sitio: etiqueta «Personal», nombre y saldo de millas. El cliente común no lleva la etiqueta «Personal» (en mobile, el ícono PB).' }

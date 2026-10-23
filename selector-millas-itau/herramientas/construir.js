@@ -9,14 +9,14 @@
 const fs = require('fs'), path = require('path'), gen = require('./gen');
 
 const PANTALLAS = {
-  'ficha-desktop': { // ficha sin selector (tablero «Propuesta · 01z …»): recuadro con tinte «Equivale a N millas»
-    omitir: ['0c6234'],
-    marcar: { '0cbfa2': 'contador', '0cbfa5': 'pb-chip', '0cbfa6': 'pb-chip', '0cbfa8': 'saldo-encabezado', '0cbfda': 'millas-recuadro', '9e2b30': 'millas-texto' },
-    derecha: ['0cbfa8']
+  'ficha-desktop': { // ficha sin selector (tablero «Propuesta · 01z5 …»): recuadro con tinte «Equivale a N millas»
+    omitir: ['caff07'],
+    marcar: { caff47: 'contador', caff4a: 'pb-chip', caff4b: 'pb-chip', caff4d: 'saldo-encabezado', cb33c2: 'millas-recuadro', cb33c3: 'millas-texto' },
+    derecha: ['caff4d']
   },
   'ficha-mobile': {
-    omitir: ['481587'],
-    marcar: { '4816be': 'contador', '48169c': 'pb-icono', '4815bf': 'millas-recuadro', '80c238': 'millas-texto' }
+    omitir: ['b57385'],
+    marcar: { b5a6b4: 'contador', b5a692: 'pb-icono', b573bd: 'millas-recuadro', b573be: 'millas-texto' }
   },
   'cajon-desktop': { // carrito «solo pesos» (tableros «… · solo pesos · …»): encabezado y Resumen sin millas
     omitir: ['6bc607'],
