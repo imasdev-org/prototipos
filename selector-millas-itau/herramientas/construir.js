@@ -18,6 +18,15 @@ const PANTALLAS = {
     omitir: ['96edf6'],
     marcar: { '971bcf': 'contador', '971bad': 'pb-icono', '96ee2e': 'millas-recuadro', '96ee2f': 'millas-texto' }
   },
+  'ficha-linea-desktop': { // variante recomendada (tablero «… en la línea del precio …»): «$ 375  o 720 millas» y aclaración con ícono bajo el botón
+    omitir: ['dbbf1a'],
+    marcar: { dbbf5a: 'contador', dbbf5d: 'pb-chip', dbbf5e: 'pb-chip', dbbf60: 'saldo-encabezado', '349a18': 'icono-volar' },
+    derecha: ['dbbf60']
+  },
+  'ficha-linea-mobile': {
+    omitir: ['0ebaa7'],
+    marcar: { '0ee953': 'contador', '0ee931': 'pb-icono', '2e3998': 'icono-volar' }
+  },
   'cajon-desktop': { // carrito «solo pesos» (tableros «… · solo pesos · …»): encabezado y Resumen sin millas
     omitir: ['6bc607'],
     marcar: { d5e3c8: 'pb-etiqueta', d5e3d7: 'cuchillo-unidad', d5e3dc: 'cuchillo-total' },

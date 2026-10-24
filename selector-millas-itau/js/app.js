@@ -83,6 +83,7 @@
     return {
       vista: previo ? previo.vista : (anchoVentana() < 700 ? 'mobile' : 'desktop'),
       pantalla: 'ficha',
+      fichaDiseno: previo ? previo.fichaDiseno : disenoDesdeUrl(), // 'linea' (recomendada) o 'recuadro'
       cajon: false,
       segmento: previo ? previo.segmento : 'pb',
       notas: previo ? previo.notas : false,
@@ -92,6 +93,11 @@
       entrega: previo ? previo.entrega : 'domicilio', // Entrega: 'domicilio' o 'retiro' (se elige con los botones de la pantalla)
       direccion: '' // Entrega: dirección elegida (vacío = todavía no eligió; las secciones de abajo están ocultas)
     };
+  }
+  // Diseño de la ficha: se elige en la barra y viaja en la URL (?ficha=linea | ?ficha=recuadro) para compartir cada uno.
+  function disenoDesdeUrl() { var m = /[?&]ficha=(linea|recuadro)/.exec(location.search); return m ? m[1] : 'linea'; }
+  function guardarDisenoEnUrl() {
+    try { var u = new URL(location.href); u.searchParams.set('ficha', estado.fichaDiseno); history.replaceState(null, '', u); } catch (e) { /* file:// sin history */ }
   }
   function maximoPedido() { return R.maximoPedido(estado.segmento); }
   function millasIniciales() { return R.valorInicialPedido(estado.segmento); }
@@ -388,6 +394,13 @@
     if (texto) { var tramos = texto.querySelectorAll('span span'); if (tramos.length) tramos[tramos.length - 1].style.color = col.fichaMonto; }
   }
 
+  // Ficha en línea: el círculo de Volar del ícono de la aclaración toma el color del tirador del segmento
+  // (Personal Bank azul marino, cliente común naranja); el círculo de pesos queda en gris oscuro, como el precio.
+  function pintarIconoVolar(raiz) {
+    var c = marca(raiz, 'icono-volar');
+    if (c) c.style.background = COLORES[estado.segmento].tirador;
+  }
+
   // Precios del cuchillo y etiqueta «Con Personal Bank» según el cliente (carrito lateral y completo).
   function aplicarCliente(raiz) {
     var pb = estado.segmento === 'pb', p = R.PRECIO_CUCHILLO[estado.segmento];
@@ -403,6 +416,13 @@
       { d: [893, 236], m: [8, 471], t: '<b>Ficha sin selector de millas.</b> Debajo del precio, un recuadro informa el <b>precio en millas</b> del producto: «Equivale a <b>N millas</b>» y, debajo, «Al finalizar la compra elegís con cuántas pagar» (sin punto final). Las millas se eligen solo en Entrega. N = ⌊precio unitario que paga este cliente × 1,92⌋: $ 375 → 720; no depende del saldo. Si el producto tiene precio Personal Bank, N sale de ese precio <i>(a confirmar con Itaú)</i>. Productos por peso y promociones por cantidad: <i>a definir</i>. Recuadro solo con tinte, sin borde: Personal Bank <code>#EFF0F3</code>, cliente común <code>#FAF3EF</code>; radio 12, 12 px de aire vertical y 14 horizontal; 12 px debajo del precio y 24 px hasta «Agregar al Carrito». «Equivale a» 14/400 <code>#464646</code>; «N millas» 17/600 <code>#000D3C</code> (Personal Bank) o <code>#943B00</code> (cliente común); aclaración 13/400 <code>#5F5F5F</code>. Por qué estos textos y colores: ver la especificación. Probalo: cambiá el cliente.' },
       { d: [893, 150], m: [8, 385], t: 'Precio con «antes» arriba (tachado, <code>#A7A7A7</code>) y el precio actual debajo, como en el sitio. En este ejemplo no hay «sin promo»: así el recuadro de millas queda pegado al precio.' },
       { d: [893, 327], m: [8, 562], t: '«Agregar al Carrito» solo sube el contador del ícono; el carrito lateral se abre tocando el ícono. <b>En este prototipo el aceite no aparece en la lista del carrito</b> (simplificación: el carrito del diseño tiene 3 productos).' },
+      { d: [950, 30], m: [290, 30], t: 'Desktop: menú de usuario como en el sitio, con la etiqueta «Personal», el nombre y el saldo de millas. Mobile: solo el ícono PB. <i>Supuesto, sin captura del sitio:</i> el cliente común no lleva la etiqueta ni el ícono.' }
+    ],
+    'ficha-linea': [
+      { d: [1078, 194], m: [180, 430], t: '<b>Diseño recomendado: las millas en la línea del precio, sin recuadro.</b> «$ 375» y, a 10 px, «o <b>720 millas</b>», alineado a la línea base del precio: «o» 15/400 <code>#5F5F5F</code>; «720 millas» 17/600 <code>#333333</code>, el mismo color del precio (en color se leería como un precio en promoción). N = ⌊precio unitario que paga este cliente × 1,92⌋: $ 375 → 720; no depende del saldo. Si el producto tiene precio Personal Bank, N sale de ese precio <i>(a confirmar con Itaú)</i>. Productos por peso y promociones por cantidad: <i>a definir</i>. Las millas se eligen solo al pagar (Entrega). Probalo: cambiá el diseño de la ficha en la barra.' },
+      { d: [893, 150], m: [8, 385], t: 'Precio con «antes» arriba (tachado, <code>#A7A7A7</code>) y el precio actual debajo, como en el sitio. En este ejemplo no hay «sin promo».' },
+      { d: [893, 250], m: [8, 485], t: '«Agregar al Carrito» 24 px debajo de la línea del precio. Solo sube el contador del ícono; el carrito lateral se abre tocando el ícono. <b>En este prototipo el aceite no aparece en la lista del carrito</b> (simplificación: el carrito del diseño tiene 3 productos).' },
+      { d: [1138, 286], m: [236, 521], t: '<b>Aclaración debajo del botón</b>, 10 px: ícono + «Combiná pesos y millas al pagar» (13/400 <code>#5F5F5F</code>, sin punto final). Dice qué se combina y dónde, así se entiende sola, lejos del número de millas. «Al pagar» es la palabra del sitio: el botón «Pagar» del carrito lleva al paso donde se eligen las millas. <b>Ícono</b> (24 × 14 px, 6 px antes del texto): dos círculos de 14 px que se solapan 2,5 px. Pesos: fondo blanco, borde 1,2 px y «$» bold 10 px, en <code>#333333</code>. Volar: relleno del color del tirador del slider del segmento (Personal Bank <code>#000D3A</code>, cliente común <code>#FE6002</code>), aro blanco de 1,2 px que lo separa del de pesos, y los cinco puntos con «+» de la marca en blanco (la palabra «volar» a ese tamaño no se lee). Probalo: cambiá el cliente.' },
       { d: [950, 30], m: [290, 30], t: 'Desktop: menú de usuario como en el sitio, con la etiqueta «Personal», el nombre y el saldo de millas. Mobile: solo el ícono PB. <i>Supuesto, sin captura del sitio:</i> el cliente común no lleva la etiqueta ni el ícono.' }
     ],
     cajon: [
@@ -424,7 +444,7 @@
       { d: [650, 411], m: [22, 502], t: '<b>Control y campo.</b> El tirador (30 px) queda siempre dentro de la pista: su centro recorre el ancho − 30 px. Tocar la pista lleva el tirador hasta ahí con animación (250 ms); al arrastrar (desde los 3 px de movimiento) sigue al puntero sin animación. El campo acepta solo dígitos, no deja pasar el máximo, vacío vale 0, Enter confirma y al salir muestra el separador de miles. Al cambiar entre retiro y domicilio, las millas elegidas se conservan. <i>A definir:</i> qué se muestra con saldo 0, y qué pasa con las millas elegidas si el cliente vuelve al carrito y cambia el pedido.' }
     ]
   };
-  var NOMBRES = { ficha: 'Ficha de producto', cajon: 'Carrito lateral', carrito: 'Carrito', entrega: 'Entrega' };
+  var NOMBRES = { ficha: 'Ficha de producto · recuadro', 'ficha-linea': 'Ficha de producto · en la línea del precio', cajon: 'Carrito lateral', carrito: 'Carrito', entrega: 'Entrega' };
 
   function pinesYPanel(capaPantalla, clave) {
     if (!estado.notas) return;
@@ -456,6 +476,7 @@
   // Pantalla generada que corresponde al estado: la Entrega tiene una por tipo (envío a domicilio o retiro).
   function nombrePantalla() {
     var p = estado.pantalla, v = estado.vista;
+    if (p === 'ficha' && estado.fichaDiseno === 'linea') return 'ficha-linea-' + v;
     return p === 'entrega' && estado.entrega === 'retiro' ? 'entrega-retiro-' + v : p + '-' + v;
   }
   function pantallaGenerada(nombre) {
@@ -527,11 +548,13 @@
     function repintarTodo() { actualizadores.forEach(function (f) { f(); }); }
 
     if (p === 'ficha') {
-      pintarPrecioEnMillas(s);
+      var linea = estado.fichaDiseno === 'linea';
+      if (linea) pintarIconoVolar(s); else pintarPrecioEnMillas(s);
       aplicarEncabezado(s);
       mostrar(s, 'pb-icono', estado.segmento === 'pb');
       actualizadores.push(function () { ponerTexto(s, 'contador', estado.ficha.agregado ? '4' : '3'); });
-      s.appendChild(zona(P(d, [913, 310.4, 370, 34], [15, 545.4, 360, 34]), 'Agregar al Carrito', function () { estado.ficha.agregado = true; repintarTodo(); }));
+      // en la variante en línea el botón sube 77 px: el recuadro ya no está entre el precio y el botón
+      s.appendChild(zona(linea ? P(d, [913, 233.4, 370, 34], [15, 468.4, 360, 34]) : P(d, [913, 310.4, 370, 34], [15, 545.4, 360, 34]), 'Agregar al Carrito', function () { estado.ficha.agregado = true; repintarTodo(); }));
       s.appendChild(zona(P(d, [1108, 18, 48, 47], [339, 8, 40, 38]), 'Abrir el carrito', function () { estado.cajon = true; render(false); }));
       if (d) s.appendChild(zona(1243, 17.5, 70, 34, 'Pagar', function () { irA('entrega'); }));
     }
@@ -587,7 +610,7 @@
     }
 
     repintarTodo();
-    pinesYPanel(s, p);
+    pinesYPanel(s, p === 'ficha' && estado.fichaDiseno === 'linea' ? 'ficha-linea' : p);
     return s;
   }
 
@@ -723,6 +746,8 @@
       });
     };
     marcar('#b-pasos', estado.pantalla);
+    marcar('#b-diseno', estado.fichaDiseno);
+    document.getElementById('g-diseno').hidden = estado.pantalla !== 'ficha'; // solo tiene sentido en la ficha
     marcar('#b-vista', estado.vista);
     marcar('#b-cliente', estado.segmento);
     marcar('#b-saldo', String(R.saldo()));
@@ -741,6 +766,10 @@
     var reiniciarPedido = function () { estado.pedido = { millas: null, previo: null, maxActivo: false }; };
     document.getElementById('b-pasos').addEventListener('click', function (e) { var b = e.target.closest('button'); if (b) irA(b.dataset.valor); });
     document.getElementById('b-vista').addEventListener('click', function (e) { var b = e.target.closest('button'); if (b) { estado.vista = b.dataset.valor; estado.cajon = false; render(true); } });
+    document.getElementById('b-diseno').addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (!b) return;
+      estado.fichaDiseno = b.dataset.valor; guardarDisenoEnUrl(); render(false);
+    });
     document.getElementById('b-cliente').addEventListener('click', function (e) {
       var b = e.target.closest('button'); if (!b) return;
       estado.segmento = b.dataset.valor; reiniciarPedido(); render(false);
