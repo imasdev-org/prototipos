@@ -15,7 +15,7 @@ La barra de arriba controla el prototipo. Con la flecha de la derecha se pliega 
 |---|---|
 | **Vista** | Desktop o Mobile. En Entrega, «Retiro» y «Envío a domicilio» se eligen con los botones de la pantalla |
 | **Paso** | Salta a Ficha, Carrito o Entrega. También se puede recorrer tocando la pantalla (Agregar al Carrito, ícono del carrito, Pagar, Ver Carrito Completo, Proceder al Pago, Continuar). **Entrega arranca solo con la consulta de dirección**: al elegir una dirección en el selector aparecen el envío, «Tus millas», «Tu pedido» y el resto, como en el sitio |
-| **Diseño de la ficha** | Solo en el paso Ficha: **En la línea del precio · recomendada** («$ 375  o 720 millas» y, debajo del botón, «Combiná pesos y millas al pagar») o **Recuadro** («Equivale a 720 millas»). El link lleva el elegido: `?ficha=linea` o `?ficha=recuadro` |
+| **Diseño de la ficha** | Solo en el paso Ficha: **En la línea del precio**, la que abre por defecto («$ 375  o 720 millas» y, debajo del botón, «Combiná pesos y millas al pagar») o **Recuadro** («Equivale a 720 millas»). El link lleva el elegido: `?ficha=linea` o `?ficha=recuadro` |
 | **Cliente** | Personal Bank o cliente común |
 | **Saldo de millas** | Millas disponibles del cliente: 100.000, o 3.000 para ver en Entrega el máximo limitado por el saldo |
 | **Notas para desarrollo** | Muestra pines numerados sobre la pantalla y un panel con las reglas de cada parte |
