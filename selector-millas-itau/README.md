@@ -6,7 +6,6 @@ Prototipo navegable de las millas en la ficha de producto (precio en millas, sin
 
 **Reglas para desarrollo:** [docs/especificacion.md](docs/especificacion.md)
 
-**Plantilla para prototipos nuevos:** [plantilla/](plantilla/) (barra, vista, notas para desarrollo y zonas tocables, listas para completar con otra feature).
 
 ## Cómo se usa
 
@@ -42,7 +41,6 @@ En la vista mobile no hay barra de desplazamiento: se desplaza con el dedo, la r
 | `css/prototipo.css` | Estilos de los componentes y del prototipo |
 | `docs/especificacion.md` | Especificación para desarrollo |
 | `herramientas/` | Exportación desde Penpot y generador de `pantallas/` |
-| `plantilla/` | Plantilla para prototipos nuevos (ver su README) |
 
 ## Regenerar las pantallas desde Penpot
 
