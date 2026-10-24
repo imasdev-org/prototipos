@@ -25,5 +25,5 @@ Este repositorio es la base de los prototipos navegables. Para una feature nueva
 5. **Navegación:** desde una zona, `Prototipo.ir('paso', 'valor')` cambia de paso; `Prototipo.render()` repinta tras cambiar el estado; `Prototipo.aviso(título, texto, botones)` muestra un aviso, por ejemplo el fin del recorrido.
 6. **Pantallas:** `pantalla(estado)` devuelve `{ nodo, alto, bandas }` en coordenadas del diseño (desktop `anchoDiseno` × alto con el contenido en `anchoContenido` centrado; mobile `mobile.ancho`). `bandas` son franjas que en desktop llegan a los bordes de la ventana.
 7. **Versión:** activar el hook una vez por clon (`git config core.hooksPath .githooks`). Antes de cada commit pone `?v=fecha-hora` en los archivos de `index.html`, para que GitHub Pages no sirva versiones viejas.
-8. **Sin narración por voz:** los prototipos no llevan la pestaña de narración (excepción a la regla general de HTML).
+8. **Sin narración por voz:** los prototipos no llevan la pestaña de narración (solo la llevan las explicaciones visuales).
 9. **Verificar** en el navegador, en desktop y en mobile: la barra (plegar y desplegar), cada paso, las notas con sus pines y la pista de zonas.
