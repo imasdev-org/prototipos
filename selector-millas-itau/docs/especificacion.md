@@ -100,7 +100,7 @@ Tableros «Propuesta · 02 Producto · con sesión · promoción 3x2 (gana una s
   - **Texto:** «Aplica promo 3x2» es el que ya muestra el carrito en la línea del producto; no se redacta en la ficha. «Ahorrás $ X» = precio de lista × unidades − total de la línea: lo calcula la ficha, porque el carrito no lo trae.
   - **Estilo:** fondo `#EEF6F0`, radio 8, 43 px de alto (12 px arriba y abajo, 16 a los lados). Texto 14 px en una línea: «Aplica promo 3x2» 400 `#333333` (11,5:1 sobre la franja); « · » `#8A8A8A` (3,1:1) con 4 px más de espacio a cada lado; «Ahorrás $ X» 700 `#136B33` (6,0:1). El verde es el del ahorro; el texto de la promo no va en azul porque la cocarda, que es una imagen, ya es azul.
 - **Total**, 16 px debajo de la franja: «Total con promo» 16/600 `#333333` a la izquierda; monto 22/700 `#333333` a la derecha y, debajo, «o **N millas**» con los estilos de la línea del precio. Total = unidades que se pagan × precio; N = `floor(total × 1,92)`, calculado aparte porque el carrito solo trae las millas elegidas con el slider, no las del total. Va fuera de la franja para que conserve el peso y la alineación de la columna.
-- **Sin la promo aplicada** (1 o 2 unidades de un 3x2) *(a confirmar)*: no hay franja, el rótulo dice «Total» y el bloque sube hasta quedar 24 px debajo del botón.
+- **Sin la promo aplicada** (1 o 2 unidades de un 3x2): no hay **ni franja ni total**; aparecen y desaparecen juntos, con la misma condición. La ficha queda como la del producto sin promo: aclaración 10 px debajo del botón y «Compartir» 48 px debajo del botón. Sin descuento, el total sería solo unidades × precio y ya está en el carrito. Para anunciar la promo antes de llegar a las unidades está el texto configurable de la promoción, que la ficha muestra siempre que esté cargado.
 - **Aclaración** 12 px debajo de las millas del total, como en el diseño en la línea del precio; «Compartir» 32 px más abajo.
 - **Redondeo** *(a confirmar)*: el prototipo redondea las millas hacia abajo, como en el resto de la propuesta; el sitio hoy las redondea hacia arriba al repartir el precio entre pesos y millas, así que puede haber 1 milla de diferencia.
 - **Solo Itaú:** se activa con una configuración nueva del canal de Itaú, sin depender de la que hoy prende el slider de la ficha (esa también está prendida en Anda). Tienda Inglesa no cambia.
@@ -224,9 +224,7 @@ Regla: todo lo que es **de millas** toma el color del segmento: en Personal Bank
 
 - **Cuándo las millas cubren todo** *(a confirmar con Itaú)*: la propuesta es «su valor en pesos alcanza el total de productos con descuentos», que con el máximo del pedido siempre se cumple. Así no queda un resto de centavos que impida saltear Forma de pago.
 - **Base del envío gratis** *(a confirmar con Itaú)*: la propuesta mide «Con $ X más el envío es gratis» sobre el SubTotal antes de las millas, para que usar millas no haga perder el envío gratis.
-- **N con precio Personal Bank** *(a confirmar con Itaú)*: la propuesta calcula N sobre el precio que paga ese cliente. Productos por peso: a definir.
-- **Ficha con promo, por debajo de las unidades de la promo** *(a confirmar)*: sin franja y con el rótulo «Total».
-- **Saldo 0**: qué muestra el panel de millas de Entrega. A definir.
+- **N con precio Personal Bank** *(a confirmar con Itaú)*: la propuesta calcula N sobre el precio que paga ese cliente. Productos por peso: a definir.- **Saldo 0**: qué muestra el panel de millas de Entrega. A definir.
 - **Volver al carrito**: qué pasa con las millas elegidas si el cliente vuelve al carrito y cambia el pedido. A definir.
 
 - **Resumen antes de elegir la dirección** *(supuesto)*: el prototipo lo muestra sin fila de envío, con «Millas aplicadas» ya cargadas y título «RESUMEN». Falta una captura del sitio en ese estado.

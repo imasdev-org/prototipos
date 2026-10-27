@@ -31,14 +31,14 @@ const PANTALLAS = {
     omitir: ['3b8e22'],
     marcar: { '3bf8d5': 'pb-chip', '3bf8d6': 'pb-chip', '3bf8d8': 'saldo-encabezado', '3c5fea': 'icono-volar', '3c5fe4': 'cantidad',
       '3b8e16': 'promo-franja', '3b8e17': 'promo-texto', '3b8e19': 'total-rotulo', '3b8e1a': 'total-monto', '3b8e1e': 'total-millas',
-      '3b8e1b': 'bajo-total', '3b8e1c': 'bajo-total', '3bf921': 'bajo-total' },
+      '3b8e1b': 'aclaracion', '3b8e1c': 'aclaracion', '3bf921': 'compartir' },
     derecha: ['3bf8d8', '3b8e1a', '3b8e1e']
   },
   'ficha-promo-mobile': {
     omitir: ['8f977f'],
     marcar: { '8fce63': 'pb-icono', '8fcf32': 'icono-volar', '8fcf2c': 'cantidad',
       '8f9773': 'promo-franja', '8f9774': 'promo-texto', '8f9776': 'total-rotulo', '8f9777': 'total-monto', '8f977b': 'total-millas',
-      '8f9778': 'bajo-total', '8f9779': 'bajo-total', '8f97d1': 'bajo-total' },
+      '8f9778': 'aclaracion', '8f9779': 'aclaracion', '8f97d1': 'compartir' },
     derecha: ['8f9777', '8f977b']
   },
   'cajon-desktop': { // carrito «solo pesos» (tableros «… · solo pesos · …»): encabezado y Resumen sin millas

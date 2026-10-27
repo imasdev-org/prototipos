@@ -411,10 +411,10 @@
     if (c) c.style.background = COLORES[estado.segmento].tirador;
   }
 
-  // Ficha con promo 3x2: la cantidad se cambia con − y +. Desde 3 unidades aparece la franja «Aplica promo 3x2 ·
-  // Ahorrás $ X» y el rótulo dice «Total con promo»; por debajo no hay franja y el total con lo que sigue sube
-  // 59 px (alto de la franja + 16 px), así queda a 24 px del botón, como la franja.
-  var SUBE_SIN_FRANJA = 59;
+  // Ficha con promo 3x2: la cantidad se cambia con − y +. Desde 3 unidades aparecen juntos la franja «Aplica promo 3x2 ·
+  // Ahorrás $ X» y el «Total con promo». Por debajo no hay ni franja ni total y la ficha queda como la del aceite:
+  // la aclaración sube hasta ~10 px del botón y «Compartir» hasta 48 px (las distancias de la ficha en línea).
+  var SUBE_SIN_PROMO = { aclaracion: 135.4, compartir: 149 };
   function ultimoTramo(raiz, clave, valor) {
     var n = marca(raiz, clave); if (!n) return;
     var tramos = n.querySelectorAll('span span');
@@ -426,15 +426,13 @@
     actualizadores.push(function () {
       var cant = estado.ficha.cantidad, r = R.fichaPromo(cant);
       ponerTexto(s, 'cantidad', String(cant));
-      mostrar(s, 'promo-franja', r.aplica);
-      mostrar(s, 'promo-texto', r.aplica);
+      ['promo-franja', 'promo-texto', 'total-rotulo', 'total-monto', 'total-millas'].forEach(function (k) { mostrar(s, k, r.aplica); });
       ultimoTramo(s, 'promo-texto', 'Ahorrás ' + R.pesos(r.ahorro));
-      ponerTexto(s, 'total-rotulo', r.aplica ? 'Total con promo' : 'Total');
       ponerTexto(s, 'total-monto', R.pesos(r.total));
       ultimoTramo(s, 'total-millas', R.miles(r.millasTotal) + ' millas');
-      ['total-rotulo', 'total-monto', 'total-millas', 'bajo-total'].forEach(function (k) {
+      Object.keys(SUBE_SIN_PROMO).forEach(function (k) {
         Array.prototype.forEach.call(s.querySelectorAll('[data-k="' + k + '"]'), function (n) {
-          n.style.transform = r.aplica ? '' : 'translateY(' + (-SUBE_SIN_FRANJA) + 'px)';
+          n.style.transform = r.aplica ? '' : 'translateY(' + (-SUBE_SIN_PROMO[k]) + 'px)';
         });
       });
     });
@@ -473,11 +471,11 @@
       { d: [950, 30], m: [290, 30], t: 'Desktop: menú de usuario como en el sitio, con la etiqueta «Personal», el nombre y el saldo de millas. Mobile: solo el ícono PB. <i>Supuesto, sin captura del sitio:</i> el cliente común no lleva la etiqueta ni el ícono.' }
     ],
     'ficha-promo': [
-      { d: [893, 230], m: [8, 465], t: '<b>Producto ya en el carrito:</b> el botón muestra la cantidad «− 3 +». En el prototipo va de 1 a 12. <b>Probalo:</b> bajá a 2 y la franja de la promo desaparece; subí a 6 y el ahorro se duplica.' },
+      { d: [893, 230], m: [8, 465], t: '<b>Producto ya en el carrito:</b> el botón muestra la cantidad «− 3 +». En el prototipo va de 1 a 12. <b>Probalo:</b> bajá a 2 y desaparecen la franja y el total; subí a 6 y el ahorro se duplica.' },
       { d: [1078, 180], m: [180, 415], t: 'Millas en la línea del precio, como en la ficha sin promo: «$ 744» y, a 10 px, «o <b>1.428 millas</b>» («o» 15/400 <code>#5F5F5F</code>; «1.428 millas» 17/600 <code>#333333</code>). N = ⌊precio unitario × 1,92⌋, sobre el precio de una unidad: no cambia con la cantidad ni con la promo.' },
       { d: [893, 290], m: [8, 525], t: '<b>Franja de la promo</b>: «Aplica promo 3x2 · Ahorrás $ 744». <b>Solo aparece en promos que se cumplen con unidades de este mismo producto</b> (lleva N y paga M, N por $ X, la N.ª al X %) y <b>recién desde las unidades que pide la promo</b> (en un 3x2, desde 3). No aparece en las promos que combinan productos distintos (el descuento va al total del carrito y no se puede atribuir a este producto), en «% OFF» o antes/después (el precio ya viene rebajado y se ve el «antes» tachado), ni en precios especiales o descuentos en millas. «Aplica promo 3x2» es el texto que ya muestra el carrito en la línea del producto, sin redactar en la ficha. «Ahorrás $ X» = precio de lista × unidades − total de la línea: lo calcula la ficha, el carrito no lo trae. Franja <code>#EEF6F0</code>, radio 8, 43 px de alto (12 arriba y abajo, 16 a los lados), del ancho de la columna y 24 px debajo del botón. Texto 14 px: «Aplica promo 3x2» 400 <code>#333333</code> (11,5:1); « · » <code>#8A8A8A</code> con 4 px más de espacio a cada lado; «Ahorrás $ X» 700 <code>#136B33</code> (6,0:1).' },
-      { d: [893, 352], m: [8, 587], t: '<b>Total</b> 16 px debajo de la franja: rótulo 16/600 <code>#333333</code>; monto 22/700 <code>#333333</code>, alineado a la derecha; debajo, «o <b>N millas</b>» con los mismos estilos que la línea del precio. Total = unidades que se pagan × precio (3 en un 3x2 → 2 × $ 744 = $ 1.488). N = ⌊total × 1,92⌋ (1.488 → 2.856): se calcula aparte, porque el carrito no trae las millas del total. <i>A confirmar:</i> el sitio hoy redondea las millas hacia arriba, así que N puede diferir en 1. <i>A confirmar:</i> sin la promo aplicada el rótulo dice «Total» y el bloque sube hasta quedar a 24 px del botón.' },
-      { d: [1146, 410], m: [246, 645], t: 'Aclaración 12 px debajo de las millas del total: ícono + «Combiná pesos y millas al pagar», igual que en la ficha sin promo (el círculo de Volar toma el color del segmento). «Compartir» 32 px más abajo. Probalo: cambiá el cliente.' },
+      { d: [893, 352], m: [8, 587], t: '<b>Total</b> 16 px debajo de la franja: rótulo 16/600 <code>#333333</code>; monto 22/700 <code>#333333</code>, alineado a la derecha; debajo, «o <b>N millas</b>» con los mismos estilos que la línea del precio. Total = unidades que se pagan × precio (3 en un 3x2 → 2 × $ 744 = $ 1.488). N = ⌊total × 1,92⌋ (1.488 → 2.856): se calcula aparte, porque el carrito no trae las millas del total. <i>A confirmar:</i> el sitio hoy redondea las millas hacia arriba, así que N puede diferir en 1. <b>Aparece y desaparece con la franja</b>: sin la promo aplicada no hay total (sin descuento sería solo unidades × precio) y la ficha queda como la del producto sin promo.' },
+      { d: [1146, 410], m: [246, 645], t: 'Aclaración 12 px debajo de las millas del total: ícono + «Combiná pesos y millas al pagar», igual que en la ficha sin promo (el círculo de Volar toma el color del segmento). «Compartir» 32 px más abajo. Sin la promo aplicada (sin franja ni total), las dos suben a las distancias de la ficha sin promo: aclaración 10 px debajo del botón y «Compartir» 48 px debajo del botón. Probalo: cambiá el cliente.' },
       { d: [950, 30], m: [290, 30], t: 'Desktop: menú de usuario como en el sitio, con la etiqueta «Personal», el nombre y el saldo de millas. Mobile: solo el ícono PB. <i>Supuesto, sin captura del sitio:</i> el cliente común no lleva la etiqueta ni el ícono.' }
     ],
     cajon: [
