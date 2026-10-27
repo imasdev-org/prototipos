@@ -395,6 +395,36 @@
     var tramos = n.querySelectorAll('span span');
     (tramos.length ? tramos[tramos.length - 1] : n.querySelector('span')).textContent = valor;
   }
+  // Cocarda de la promo según el cliente, como hoy en el sitio (ConvertPromoBadgeToDiscountTextDisplay):
+  // Personal Bank .wPromoTextInProductDisplayPB #000D3C; cliente común .wPromoTextInProductDisplay #FF6200.
+  function pintarCocarda(raiz) {
+    var c = marca(raiz, 'cocarda');
+    if (c) c.style.background = estado.segmento === 'pb' ? '#000D3C' : '#FF6200';
+  }
+
+  // El nombre del producto ocupa dos líneas en Penpot (Source Sans 3) y una con Myriad Pro, la fuente del sitio, si está
+  // instalada. Con la pantalla ya dibujada se mide cuántas líneas ocupa; si sobra alto en su caja, lo que está debajo
+  // del nombre en la columna del producto sube esa diferencia (con «translate», que se suma al «transform» de la ficha).
+  function cerrarHuecoDelTitulo(pantalla) {
+    var t = marca(pantalla, 'titulo'); if (!t) return;
+    var caja = t.getBoundingClientRect(), texto = t.querySelector('span').getBoundingClientRect();
+    var sobra = parseFloat(t.style.height) * (1 - texto.height / caja.height);
+    if (sobra < 2) return;
+    var d = estado.vista === 'desktop';
+    function enPantalla(n, prop) { var v = 0; for (; n && n !== pantalla; n = n.parentElement) v += parseFloat(n.style[prop]) || 0; return v; }
+    var abajo = enPantalla(t, 'top') + parseFloat(t.style.height), desdeX = d ? 880 : 0, hastaY = d ? 940 : 960;
+    var mueve = function (n) {
+      var y = enPantalla(n, 'top');
+      // los importes anclados a la derecha (sin left) son todos de la columna del producto
+      return y >= abajo - 1 && y < hastaY && (enPantalla(n, 'left') >= desdeX || (!n.style.left && !!n.style.right));
+    };
+    Array.prototype.forEach.call(pantalla.querySelectorAll('.b, .t, .v, .g, .zona, .pin'), function (n) {
+      if (!mueve(n)) return;
+      for (var p = n.parentElement; p && p !== pantalla; p = p.parentElement) if (p.matches('.b, .t, .v, .g') && mueve(p)) return;
+      n.style.translate = '0 ' + (-sobra) + 'px';
+    });
+  }
+
   function armarFicha(s, d, actualizadores) {
     var c = marca(s, 'cantidad');
     if (c) { c.style.left = '0px'; c.style.width = c.parentElement.style.width; c.style.textAlign = 'center'; }
@@ -446,7 +476,8 @@
       { d: [893, 290], m: [8, 525], t: '<b>Franja de la promo</b>: «Aplica promo 3x2 • Ahorrás $ 744». <b>Solo aparece en promos que se cumplen con unidades de este mismo producto</b> (lleva N y paga M, N por $ X, la N.ª al X %) y <b>recién desde las unidades que pide la promo</b> (en un 3x2, desde 3). No aparece en las promos que combinan productos distintos (el descuento va al total del carrito y no se puede atribuir a este producto), en «% OFF» o antes/después (el precio ya viene rebajado y se ve el «antes» tachado), ni en precios especiales o descuentos en millas. «Aplica promo 3x2» es el texto que ya muestra el carrito en la línea del producto, sin redactar en la ficha. «Ahorrás $ X» = precio de lista × unidades − total de la línea: lo calcula la ficha, el carrito no lo trae. Franja <code>#EEF6F0</code>, radio 8, 43 px de alto (12 arriba y abajo, 16 a los lados), del ancho de la columna y 24 px debajo del botón. Texto 14 px: «Aplica promo 3x2» 400 <code>#333333</code> (11,5:1); « • » (viñeta, no punto medio: mide 3 px y queda centrada) <code>#8A8A8A</code> con 4 px más de espacio a cada lado; «Ahorrás $ X» 700 <code>#136B33</code> (6,0:1).' },
       { d: [893, 352], m: [8, 587], t: '<b>Total</b> 16 px debajo de la franja: rótulo 16/600 <code>#333333</code>; monto 22/700 <code>#333333</code>, alineado a la derecha; debajo, «o <b>N millas</b>» con los mismos estilos que la línea del precio. Total = unidades que se pagan × precio (3 en un 3x2 → 2 × $ 744 = $ 1.488). N = ⌊total × 1,92⌋ (1.488 → 2.856): se calcula aparte, porque el carrito no trae las millas del total. <i>A confirmar:</i> el sitio hoy redondea las millas hacia arriba, así que N puede diferir en 1. <b>Aparece y desaparece con la franja</b>: sin la promo aplicada no hay total (sin descuento sería solo unidades × precio) y la ficha queda como la de un producto sin promo.' },
       { d: [1146, 410], m: [246, 645], t: '<b>Aclaración</b> 10 px debajo del botón (12 px debajo de las millas del total cuando hay promo aplicada): ícono + «Combiná pesos y millas al pagar» (14/400 <code>#5F5F5F</code>, sin punto final). Dice qué se combina y dónde, así se entiende sola, lejos del número de millas. «Al pagar» es la palabra del sitio: el botón «Pagar» del carrito lleva al paso donde se eligen las millas. <b>Ícono</b> (26,5 × 14,5 px, 6 px antes del texto): dos círculos de 14,5 px que se solapan 2,5 px, del tamaño de los de la referencia. Pesos: fondo blanco, borde 1,2 px y «$» bold 10 px, en <code>#333333</code>. Volar: relleno del color del tirador del slider del segmento (Personal Bank <code>#000D3A</code>, cliente común <code>#FE6002</code>), aro blanco de 1,2 px que lo separa del de pesos, y los cinco puntos con «+» de la marca en blanco (la palabra «volar» a ese tamaño no se lee). «Compartir» 48 px debajo del botón (32 px debajo de la aclaración cuando hay promo aplicada). Probalo: cambiá el cliente.' },
-      { d: [950, 30], m: [290, 30], t: 'Desktop: menú de usuario como en el sitio, con la etiqueta «Personal», el nombre y el saldo de millas. Mobile: solo el ícono PB. <i>Supuesto, sin captura del sitio:</i> el cliente común no lleva la etiqueta ni el ícono.' }
+      { d: [950, 30], m: [290, 30], t: 'Desktop: menú de usuario como en el sitio, con la etiqueta «Personal», el nombre y el saldo de millas. Mobile: solo el ícono PB. <i>Supuesto, sin captura del sitio:</i> el cliente común no lleva la etiqueta ni el ícono.' },
+      { d: [108, 128], m: [0, 104], t: '<b>Cocarda de la promo</b> sobre la foto, como hoy en el sitio: una sola, la de la promo que gana, y su color depende del cliente: Personal Bank <code>#000D3C</code> (<code>.wPromoTextInProductDisplayPB</code>), cliente común <code>#FF6200</code> (<code>.wPromoTextInProductDisplay</code>), texto blanco. Probalo: cambiá el cliente.' }
     ],
     cajon: [
       { d: [190, 99], m: [175, 99], t: 'Encabezado <b>solo en pesos</b>: el total del carrito ($ 2.532 Personal Bank, $ 2.542 cliente común). Sin selector en la ficha, el carrito no muestra millas: se eligen al finalizar la compra, en Entrega.' },
@@ -571,6 +602,7 @@
 
     if (p === 'ficha') {
       pintarIconoVolar(s);
+      pintarCocarda(s);
       aplicarEncabezado(s);
       mostrar(s, 'pb-icono', estado.segmento === 'pb');
       armarFicha(s, d, actualizadores);
@@ -738,6 +770,7 @@
       Array.prototype.forEach.call(pantalla.querySelectorAll('[data-k="ancla-izquierda"]'), function (n) { n.style.transform = 'translateX(' + (-izquierda) + 'px)'; });
       lienzo.appendChild(pantalla);
       esc.appendChild(lienzo);
+      cerrarHuecoDelTitulo(pantalla);
       if (estado.cajon) construirCajon(esc, false);
       window.scrollTo(0, scrollPrevio);
     } else {
@@ -749,6 +782,7 @@
       sc.appendChild(pant); tel.appendChild(sc);
       if (conPanel) tel.style.marginLeft = Math.max(16, (ancho - 384 - 390) / 2) + 'px';
       esc.appendChild(tel);
+      cerrarHuecoDelTitulo(pant);
       if (estado.cajon) construirCajon(tel, true);
       arrastrarParaDesplazar(sc);
       var cajonTel = tel.querySelector('.cajon'); if (cajonTel) arrastrarParaDesplazar(cajonTel);
@@ -803,6 +837,8 @@
       clearTimeout(pista); pista = setTimeout(function () { esc.classList.remove('ver-zonas'); }, 700);
     });
     render(true);
+    // el alto del nombre depende de la fuente: se vuelve a dibujar cuando terminan de cargar
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { render(false); });
   }
   document.addEventListener('DOMContentLoaded', iniciar);
 })();

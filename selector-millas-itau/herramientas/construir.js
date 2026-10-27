@@ -11,7 +11,7 @@ const fs = require('fs'), path = require('path'), gen = require('./gen');
 const PANTALLAS = {
   'ficha-desktop': { // vino con promo 3x2 (tablero «… promoción 3x2 … variante A2 …»): cantidad en el botón, franja de la promo y total
     omitir: ['3b8e22'],
-    marcar: { '3bf8d2': 'contador', '3bf8d5': 'pb-chip', '3bf8d6': 'pb-chip', '3bf8d8': 'saldo-encabezado', '3c5fea': 'icono-volar',
+    marcar: { '3bf8f2': 'titulo', '3bf8ec': 'cocarda', '3bf8d2': 'contador', '3bf8d5': 'pb-chip', '3bf8d6': 'pb-chip', '3bf8d8': 'saldo-encabezado', '3c5fea': 'icono-volar',
       '3b8e18': 'control-cantidad', '3c5fe4': 'cantidad',
       '3b8e16': 'promo-franja', '3b8e17': 'promo-texto', '3b8e19': 'total-rotulo', '3b8e1a': 'total-monto', '3b8e1e': 'total-millas',
       '3b8e1b': 'aclaracion', '3b8e1c': 'aclaracion', '3bf921': 'compartir' },
@@ -19,7 +19,7 @@ const PANTALLAS = {
   },
   'ficha-mobile': {
     omitir: ['8f977f'],
-    marcar: { '8fce85': 'contador', '8fce63': 'pb-icono', '8fcf32': 'icono-volar', '8f9775': 'control-cantidad', '8fcf2c': 'cantidad',
+    marcar: { '8f97a1': 'titulo', '8f979c': 'cocarda', '8fce85': 'contador', '8fce63': 'pb-icono', '8fcf32': 'icono-volar', '8f9775': 'control-cantidad', '8fcf2c': 'cantidad',
       '8f9773': 'promo-franja', '8f9774': 'promo-texto', '8f9776': 'total-rotulo', '8f9777': 'total-monto', '8f977b': 'total-millas',
       '8f9778': 'aclaracion', '8f9779': 'aclaracion', '8f97d1': 'compartir' },
     derecha: ['8f9777', '8f977b']
