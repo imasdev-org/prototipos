@@ -33,7 +33,7 @@
   var FICHA = { precioAntes: 417, precio: 375 };
   FICHA.millas = Math.floor(FICHA.precio * TASA); // 720
 
-  // Ficha del vino con promo 3x2 (lleva 3, paga 2). La franja «Aplica promo 3x2 · Ahorrás $ X» y el «Total con promo»
+  // Ficha del vino con promo 3x2 (lleva 3, paga 2). La franja «Aplica promo 3x2 • Ahorrás $ X» y el «Total con promo»
   // se arman con lo que ya calcula el carrito para la línea del producto: solo promos que se cumplen con unidades de ese
   // mismo producto (lleva N paga M, N por $ X, la N.ª al X %), y recién desde las unidades que pide la promo.
   var FICHA_PROMO = { precio: 744, lleva: 3, paga: 2, cantidadInicial: 3, cantidadMaxima: 12 };
