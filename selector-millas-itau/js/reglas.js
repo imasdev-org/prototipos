@@ -33,6 +33,23 @@
   var FICHA = { precioAntes: 417, precio: 375 };
   FICHA.millas = Math.floor(FICHA.precio * TASA); // 720
 
+  // Ficha del vino con promo 3x2 (lleva 3, paga 2). La franja «Aplica promo 3x2 · Ahorrás $ X» y el «Total con promo»
+  // se arman con lo que ya calcula el carrito para la línea del producto: solo promos que se cumplen con unidades de ese
+  // mismo producto (lleva N paga M, N por $ X, la N.ª al X %), y recién desde las unidades que pide la promo.
+  var FICHA_PROMO = { precio: 744, lleva: 3, paga: 2, cantidadInicial: 3, cantidadMaxima: 12 };
+  FICHA_PROMO.millas = Math.floor(FICHA_PROMO.precio * TASA); // 1.428
+
+  function fichaPromo(cantidad) {
+    var p = FICHA_PROMO, gratis = Math.floor(cantidad / p.lleva) * (p.lleva - p.paga);
+    var total = (cantidad - gratis) * p.precio;
+    return {
+      aplica: gratis > 0,
+      ahorro: gratis * p.precio, // precio de lista × unidades − total de la línea
+      total: total,
+      millasTotal: Math.floor(total * TASA)
+    };
+  }
+
   function maximoPedido(segmento) {
     // Nunca más de lo que se paga por los productos (con descuentos) ni más que el saldo.
     return Math.min(SALDO, Math.floor(CARRITO[segmento].final * TASA));
@@ -101,6 +118,7 @@
 
   window.Reglas = {
     TASA: TASA, ENVIO_GRATIS_DESDE: ENVIO_GRATIS_DESDE, saldo: saldo, fijarSaldo: fijarSaldo, FICHA: FICHA, CARRITO: CARRITO, PRECIO_CUCHILLO: { pb: 90, comun: 100 },
+    FICHA_PROMO: FICHA_PROMO, fichaPromo: fichaPromo,
     maximoPedido: maximoPedido, valorInicialPedido: valorInicialPedido, acotar: acotar,
     ahorro: ahorro, resumen: resumen, resumenCarrito: resumenCarrito, miles: miles, pesos: pesos
   };

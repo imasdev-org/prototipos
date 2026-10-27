@@ -84,10 +84,11 @@
       vista: previo ? previo.vista : (anchoVentana() < 700 ? 'mobile' : 'desktop'),
       pantalla: 'ficha',
       fichaDiseno: previo ? previo.fichaDiseno : disenoDesdeUrl(), // 'linea' (recomendada) o 'recuadro'
+      fichaProducto: previo ? previo.fichaProducto : productoDesdeUrl(), // 'aceite' (sin promo) o 'promo' (vino 3x2)
       cajon: false,
       segmento: previo ? previo.segmento : 'pb',
       notas: previo ? previo.notas : false,
-      ficha: { agregado: false },
+      ficha: { agregado: false, cantidad: R.FICHA_PROMO.cantidadInicial },
       pedido: { millas: null, previo: null, maxActivo: false },
       facturaRut: false,
       entrega: previo ? previo.entrega : 'domicilio', // Entrega: 'domicilio' o 'retiro' (se elige con los botones de la pantalla)
@@ -98,6 +99,15 @@
   function disenoDesdeUrl() { var m = /[?&]ficha=(linea|recuadro)/.exec(location.search); return m ? m[1] : 'linea'; }
   function guardarDisenoEnUrl() {
     try { var u = new URL(location.href); u.searchParams.set('ficha', estado.fichaDiseno); history.replaceState(null, '', u); } catch (e) { /* file:// sin history */ }
+  }
+  // Producto de la ficha: el aceite (sin promo, en los dos diseños) o el vino con promo 3x2 (?producto=promo).
+  function productoDesdeUrl() { return /[?&]producto=promo\b/.test(location.search) ? 'promo' : 'aceite'; }
+  function guardarProductoEnUrl() {
+    try {
+      var u = new URL(location.href);
+      if (estado.fichaProducto === 'promo') u.searchParams.set('producto', 'promo'); else u.searchParams.delete('producto');
+      history.replaceState(null, '', u);
+    } catch (e) { /* file:// sin history */ }
   }
   function maximoPedido() { return R.maximoPedido(estado.segmento); }
   function millasIniciales() { return R.valorInicialPedido(estado.segmento); }
@@ -401,6 +411,43 @@
     if (c) c.style.background = COLORES[estado.segmento].tirador;
   }
 
+  // Ficha con promo 3x2: la cantidad se cambia con − y +. Desde 3 unidades aparece la franja «Aplica promo 3x2 ·
+  // Ahorrás $ X» y el rótulo dice «Total con promo»; por debajo no hay franja y el total con lo que sigue sube
+  // 59 px (alto de la franja + 16 px), así queda a 24 px del botón, como la franja.
+  var SUBE_SIN_FRANJA = 59;
+  function ultimoTramo(raiz, clave, valor) {
+    var n = marca(raiz, clave); if (!n) return;
+    var tramos = n.querySelectorAll('span span');
+    (tramos.length ? tramos[tramos.length - 1] : n.querySelector('span')).textContent = valor;
+  }
+  function fichaPromo(s, d, actualizadores) {
+    var c = marca(s, 'cantidad');
+    if (c) { c.style.left = '0px'; c.style.width = c.parentElement.style.width; c.style.textAlign = 'center'; }
+    actualizadores.push(function () {
+      var cant = estado.ficha.cantidad, r = R.fichaPromo(cant);
+      ponerTexto(s, 'cantidad', String(cant));
+      mostrar(s, 'promo-franja', r.aplica);
+      mostrar(s, 'promo-texto', r.aplica);
+      ultimoTramo(s, 'promo-texto', 'Ahorrás ' + R.pesos(r.ahorro));
+      ponerTexto(s, 'total-rotulo', r.aplica ? 'Total con promo' : 'Total');
+      ponerTexto(s, 'total-monto', R.pesos(r.total));
+      ultimoTramo(s, 'total-millas', R.miles(r.millasTotal) + ' millas');
+      ['total-rotulo', 'total-monto', 'total-millas', 'bajo-total'].forEach(function (k) {
+        Array.prototype.forEach.call(s.querySelectorAll('[data-k="' + k + '"]'), function (n) {
+          n.style.transform = r.aplica ? '' : 'translateY(' + (-SUBE_SIN_FRANJA) + 'px)';
+        });
+      });
+    });
+    var cambiar = function (delta) {
+      return function () {
+        estado.ficha.cantidad = Math.max(1, Math.min(R.FICHA_PROMO.cantidadMaxima, estado.ficha.cantidad + delta));
+        actualizadores.forEach(function (f) { f(); });
+      };
+    };
+    s.appendChild(zona(P(d, [913, 224.5, 44, 34], [15, 459.5, 44, 34]), 'Quitar una unidad', cambiar(-1)));
+    s.appendChild(zona(P(d, [1239, 224.5, 44, 34], [331, 459.5, 44, 34]), 'Agregar una unidad', cambiar(1)));
+  }
+
   // Precios del cuchillo y etiqueta «Con Personal Bank» según el cliente (carrito lateral y completo).
   function aplicarCliente(raiz) {
     var pb = estado.segmento === 'pb', p = R.PRECIO_CUCHILLO[estado.segmento];
@@ -425,6 +472,14 @@
       { d: [1146, 287], m: [246, 522], t: '<b>Aclaración debajo del botón</b>, 10 px: ícono + «Combiná pesos y millas al pagar» (14/400 <code>#5F5F5F</code>, sin punto final). Dice qué se combina y dónde, así se entiende sola, lejos del número de millas. «Al pagar» es la palabra del sitio: el botón «Pagar» del carrito lleva al paso donde se eligen las millas. <b>Ícono</b> (26,5 × 14,5 px, 6 px antes del texto): dos círculos de 14,5 px que se solapan 2,5 px, del tamaño de los de la referencia. Pesos: fondo blanco, borde 1,2 px y «$» bold 10 px, en <code>#333333</code>. Volar: relleno del color del tirador del slider del segmento (Personal Bank <code>#000D3A</code>, cliente común <code>#FE6002</code>), aro blanco de 1,2 px que lo separa del de pesos, y los cinco puntos con «+» de la marca en blanco (la palabra «volar» a ese tamaño no se lee). Probalo: cambiá el cliente.' },
       { d: [950, 30], m: [290, 30], t: 'Desktop: menú de usuario como en el sitio, con la etiqueta «Personal», el nombre y el saldo de millas. Mobile: solo el ícono PB. <i>Supuesto, sin captura del sitio:</i> el cliente común no lleva la etiqueta ni el ícono.' }
     ],
+    'ficha-promo': [
+      { d: [893, 230], m: [8, 465], t: '<b>Producto ya en el carrito:</b> el botón muestra la cantidad «− 3 +». En el prototipo va de 1 a 12. <b>Probalo:</b> bajá a 2 y la franja de la promo desaparece; subí a 6 y el ahorro se duplica.' },
+      { d: [1078, 180], m: [180, 415], t: 'Millas en la línea del precio, como en la ficha sin promo: «$ 744» y, a 10 px, «o <b>1.428 millas</b>» («o» 15/400 <code>#5F5F5F</code>; «1.428 millas» 17/600 <code>#333333</code>). N = ⌊precio unitario × 1,92⌋, sobre el precio de una unidad: no cambia con la cantidad ni con la promo.' },
+      { d: [893, 290], m: [8, 525], t: '<b>Franja de la promo</b>: «Aplica promo 3x2 · Ahorrás $ 744». <b>Solo aparece en promos que se cumplen con unidades de este mismo producto</b> (lleva N y paga M, N por $ X, la N.ª al X %) y <b>recién desde las unidades que pide la promo</b> (en un 3x2, desde 3). No aparece en las promos que combinan productos distintos (el descuento va al total del carrito y no se puede atribuir a este producto), en «% OFF» o antes/después (el precio ya viene rebajado y se ve el «antes» tachado), ni en precios especiales o descuentos en millas. «Aplica promo 3x2» es el texto que ya muestra el carrito en la línea del producto, sin redactar en la ficha. «Ahorrás $ X» = precio de lista × unidades − total de la línea: lo calcula la ficha, el carrito no lo trae. Franja <code>#EEF6F0</code>, radio 8, 43 px de alto (12 arriba y abajo, 16 a los lados), del ancho de la columna y 24 px debajo del botón. Texto 14 px: «Aplica promo 3x2» 400 <code>#333333</code> (11,5:1); « · » <code>#8A8A8A</code> con 4 px más de espacio a cada lado; «Ahorrás $ X» 700 <code>#136B33</code> (6,0:1).' },
+      { d: [893, 352], m: [8, 587], t: '<b>Total</b> 16 px debajo de la franja: rótulo 16/600 <code>#333333</code>; monto 22/700 <code>#333333</code>, alineado a la derecha; debajo, «o <b>N millas</b>» con los mismos estilos que la línea del precio. Total = unidades que se pagan × precio (3 en un 3x2 → 2 × $ 744 = $ 1.488). N = ⌊total × 1,92⌋ (1.488 → 2.856): se calcula aparte, porque el carrito no trae las millas del total. <i>A confirmar:</i> el sitio hoy redondea las millas hacia arriba, así que N puede diferir en 1. <i>A confirmar:</i> sin la promo aplicada el rótulo dice «Total» y el bloque sube hasta quedar a 24 px del botón.' },
+      { d: [1146, 410], m: [246, 645], t: 'Aclaración 12 px debajo de las millas del total: ícono + «Combiná pesos y millas al pagar», igual que en la ficha sin promo (el círculo de Volar toma el color del segmento). «Compartir» 32 px más abajo. Probalo: cambiá el cliente.' },
+      { d: [950, 30], m: [290, 30], t: 'Desktop: menú de usuario como en el sitio, con la etiqueta «Personal», el nombre y el saldo de millas. Mobile: solo el ícono PB. <i>Supuesto, sin captura del sitio:</i> el cliente común no lleva la etiqueta ni el ícono.' }
+    ],
     cajon: [
       { d: [190, 99], m: [175, 99], t: 'Encabezado <b>solo en pesos</b>: el total del carrito ($ 2.532 Personal Bank, $ 2.542 cliente común). Sin selector en la ficha, el carrito no muestra millas: se eligen al finalizar la compra, en Entrega.' },
       { d: [10, 420], m: [10, 420], t: 'Sin millas por producto en las líneas del carrito.' }
@@ -444,7 +499,7 @@
       { d: [650, 411], m: [22, 502], t: '<b>Control y campo.</b> El tirador (30 px) queda siempre dentro de la pista: su centro recorre el ancho − 30 px. Tocar la pista lleva el tirador hasta ahí con animación (250 ms); al arrastrar (desde los 3 px de movimiento) sigue al puntero sin animación. El campo acepta solo dígitos, no deja pasar el máximo, vacío vale 0, Enter confirma y al salir muestra el separador de miles. Al cambiar entre retiro y domicilio, las millas elegidas se conservan. <i>A definir:</i> qué se muestra con saldo 0, y qué pasa con las millas elegidas si el cliente vuelve al carrito y cambia el pedido.' }
     ]
   };
-  var NOMBRES = { ficha: 'Ficha de producto · recuadro', 'ficha-linea': 'Ficha de producto · en la línea del precio', cajon: 'Carrito lateral', carrito: 'Carrito', entrega: 'Entrega' };
+  var NOMBRES = { ficha: 'Ficha de producto · recuadro', 'ficha-linea': 'Ficha de producto · en la línea del precio', 'ficha-promo': 'Ficha de producto · promo 3x2', cajon: 'Carrito lateral', carrito: 'Carrito', entrega: 'Entrega' };
 
   function pinesYPanel(capaPantalla, clave) {
     if (!estado.notas) return;
@@ -476,6 +531,7 @@
   // Pantalla generada que corresponde al estado: la Entrega tiene una por tipo (envío a domicilio o retiro).
   function nombrePantalla() {
     var p = estado.pantalla, v = estado.vista;
+    if (p === 'ficha' && estado.fichaProducto === 'promo') return 'ficha-promo-' + v;
     if (p === 'ficha' && estado.fichaDiseno === 'linea') return 'ficha-linea-' + v;
     return p === 'entrega' && estado.entrega === 'retiro' ? 'entrega-retiro-' + v : p + '-' + v;
   }
@@ -547,7 +603,14 @@
     var actualizadores = [];
     function repintarTodo() { actualizadores.forEach(function (f) { f(); }); }
 
-    if (p === 'ficha') {
+    if (p === 'ficha' && estado.fichaProducto === 'promo') {
+      pintarIconoVolar(s);
+      aplicarEncabezado(s);
+      mostrar(s, 'pb-icono', estado.segmento === 'pb');
+      fichaPromo(s, d, actualizadores);
+      s.appendChild(zona(P(d, [1108, 18, 48, 47], [339, 8, 40, 38]), 'Abrir el carrito', function () { estado.cajon = true; render(false); }));
+      if (d) s.appendChild(zona(1243, 17.5, 70, 34, 'Pagar', function () { irA('entrega'); }));
+    } else if (p === 'ficha') {
       var linea = estado.fichaDiseno === 'linea';
       if (linea) pintarIconoVolar(s); else pintarPrecioEnMillas(s);
       aplicarEncabezado(s);
@@ -610,7 +673,7 @@
     }
 
     repintarTodo();
-    pinesYPanel(s, p === 'ficha' && estado.fichaDiseno === 'linea' ? 'ficha-linea' : p);
+    pinesYPanel(s, p !== 'ficha' ? p : estado.fichaProducto === 'promo' ? 'ficha-promo' : estado.fichaDiseno === 'linea' ? 'ficha-linea' : p);
     return s;
   }
 
@@ -746,8 +809,11 @@
       });
     };
     marcar('#b-pasos', estado.pantalla);
+    marcar('#b-producto', estado.fichaProducto);
     marcar('#b-diseno', estado.fichaDiseno);
-    document.getElementById('g-diseno').hidden = estado.pantalla !== 'ficha'; // solo tiene sentido en la ficha
+    document.getElementById('g-producto').hidden = estado.pantalla !== 'ficha'; // solo tiene sentido en la ficha
+    // el vino con promo está en un solo diseño (en la línea del precio): la elección de diseño es del aceite
+    document.getElementById('g-diseno').hidden = estado.pantalla !== 'ficha' || estado.fichaProducto === 'promo';
     marcar('#b-vista', estado.vista);
     marcar('#b-cliente', estado.segmento);
     marcar('#b-saldo', String(R.saldo()));
@@ -769,6 +835,10 @@
     document.getElementById('b-diseno').addEventListener('click', function (e) {
       var b = e.target.closest('button'); if (!b) return;
       estado.fichaDiseno = b.dataset.valor; guardarDisenoEnUrl(); render(false);
+    });
+    document.getElementById('b-producto').addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (!b) return;
+      estado.fichaProducto = b.dataset.valor; guardarProductoEnUrl(); render(false);
     });
     document.getElementById('b-cliente').addEventListener('click', function (e) {
       var b = e.target.closest('button'); if (!b) return;
