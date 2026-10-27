@@ -57,7 +57,6 @@
   var CHEVRON = '<svg class="chevron" viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="#9AA3B8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
   // Colores por segmento (Personal Bank = azul marino; cliente común = naranja).
-  // ficha*: recuadro «Equivale a N millas» de la ficha (fondo sin borde y monto).
   // panel*: fondo y borde del panel de millas de Entrega; divisoria = color de la pista.
   // boton*: «Usar el máximo» (inactivo: borde y texto; activo: fondo, borde de 2 px y texto, con tilde).
   // botonHover*: con el mouse encima, fondo = color del texto al 8 % sobre el fondo del estado (capa de Material 3);
@@ -65,13 +64,11 @@
   var COLORES = {
     pb: { pista: '#B8BDC9', relleno: 'linear-gradient(90deg,#5A6380,#000C39)', tirador: '#000D3A',
       etiquetaFondo: 'rgba(34,63,131,.10)', etiquetaTexto: '#223F83', etiquetaMonto: '#000D3C', icono: '#223F83',
-      fichaFondo: '#EFF0F3', fichaMonto: '#000D3C',
       panelFondo: '#F4F5F9', panelBorde: '#DEE2EC', divisoria: '#B8BDC9',
       botonBorde: '#223F83', botonTexto: '#223F83', botonActivoFondo: '#D3D9E6', botonActivoBorde: '#223F83', botonActivoTexto: '#223F83',
       botonHoverFondo: '#EDF0F5', botonHoverTexto: '#223F83', botonHoverActivoFondo: '#C5CDDE', botonHoverActivoTexto: '#223F83' },
     comun: { pista: '#FDD4B9', relleno: 'linear-gradient(90deg,#FE9A5A,#F95E00)', tirador: '#FE6002',
       etiquetaFondo: 'rgba(255,98,0,.10)', etiquetaTexto: '#464646', etiquetaMonto: '#464646', icono: '#C75000',
-      fichaFondo: '#FAF3EF', fichaMonto: '#943B00',
       panelFondo: '#FFF7F2', panelBorde: '#FFE7D9', divisoria: '#FDD4B9',
       botonBorde: '#FF6200', botonTexto: '#DE5500', botonActivoFondo: '#FFE0CC', botonActivoBorde: '#DE5500', botonActivoTexto: '#A84300',
       botonHoverFondo: '#FCF1EB', botonHoverTexto: '#9A3D00', botonHoverActivoFondo: '#F8D3BC', botonHoverActivoTexto: '#9A3D00' }
@@ -83,31 +80,15 @@
     return {
       vista: previo ? previo.vista : (anchoVentana() < 700 ? 'mobile' : 'desktop'),
       pantalla: 'ficha',
-      fichaDiseno: previo ? previo.fichaDiseno : disenoDesdeUrl(), // 'linea' (recomendada) o 'recuadro'
-      fichaProducto: previo ? previo.fichaProducto : productoDesdeUrl(), // 'aceite' (sin promo) o 'promo' (vino 3x2)
       cajon: false,
       segmento: previo ? previo.segmento : 'pb',
       notas: previo ? previo.notas : false,
-      ficha: { agregado: false, cantidad: R.FICHA_PROMO.cantidadInicial },
+      ficha: { cantidad: R.FICHA.cantidadInicial }, // unidades del vino en el carrito (0 = «Agregar al Carrito»)
       pedido: { millas: null, previo: null, maxActivo: false },
       facturaRut: false,
       entrega: previo ? previo.entrega : 'domicilio', // Entrega: 'domicilio' o 'retiro' (se elige con los botones de la pantalla)
       direccion: '' // Entrega: dirección elegida (vacío = todavía no eligió; las secciones de abajo están ocultas)
     };
-  }
-  // Diseño de la ficha: se elige en la barra y viaja en la URL (?ficha=linea | ?ficha=recuadro) para compartir cada uno.
-  function disenoDesdeUrl() { var m = /[?&]ficha=(linea|recuadro)/.exec(location.search); return m ? m[1] : 'linea'; }
-  function guardarDisenoEnUrl() {
-    try { var u = new URL(location.href); u.searchParams.set('ficha', estado.fichaDiseno); history.replaceState(null, '', u); } catch (e) { /* file:// sin history */ }
-  }
-  // Producto de la ficha: el aceite (sin promo, en los dos diseños) o el vino con promo 3x2 (?producto=promo).
-  function productoDesdeUrl() { return /[?&]producto=promo\b/.test(location.search) ? 'promo' : 'aceite'; }
-  function guardarProductoEnUrl() {
-    try {
-      var u = new URL(location.href);
-      if (estado.fichaProducto === 'promo') u.searchParams.set('producto', 'promo'); else u.searchParams.delete('producto');
-      history.replaceState(null, '', u);
-    } catch (e) { /* file:// sin history */ }
   }
   function maximoPedido() { return R.maximoPedido(estado.segmento); }
   function millasIniciales() { return R.valorInicialPedido(estado.segmento); }
@@ -396,35 +377,45 @@
     return g;
   }
 
-  // Ficha sin selector: el recuadro «Equivale a N millas» (solo tinte, sin borde) toma los colores del segmento:
-  // fondo = color del segmento al 8 % con la mitad de saturación y monto en azul marino (Personal Bank) o naranja oscuro (cliente común).
-  function pintarPrecioEnMillas(raiz) {
-    var col = COLORES[estado.segmento], recuadro = marca(raiz, 'millas-recuadro'), texto = marca(raiz, 'millas-texto');
-    if (recuadro) recuadro.style.background = col.fichaFondo;
-    if (texto) { var tramos = texto.querySelectorAll('span span'); if (tramos.length) tramos[tramos.length - 1].style.color = col.fichaMonto; }
-  }
-
-  // Ficha en línea: el círculo de Volar del ícono de la aclaración toma el color del tirador del segmento
+  // Ficha: el círculo de Volar del ícono de la aclaración toma el color del tirador del segmento
   // (Personal Bank azul marino, cliente común naranja); el círculo de pesos queda en gris oscuro, como el precio.
   function pintarIconoVolar(raiz) {
     var c = marca(raiz, 'icono-volar');
     if (c) c.style.background = COLORES[estado.segmento].tirador;
   }
 
-  // Ficha con promo 3x2: la cantidad se cambia con − y +. Desde 3 unidades aparecen juntos la franja «Aplica promo 3x2 •
-  // Ahorrás $ X» y el «Total con promo». Por debajo no hay ni franja ni total y la ficha queda como la del aceite:
-  // la aclaración sube hasta ~10 px del botón y «Compartir» hasta 48 px (las distancias de la ficha en línea).
+  // Ficha del vino con promo 3x2. Arranca sin unidades en el carrito: «Agregar al Carrito» (como en el diseño de la ficha
+  // sin promo) en el mismo lugar que el botón con la cantidad. Al agregar, el botón pasa a «− 1 +» y el contador del
+  // carrito sube de 3 a 4; con «−» en 1 vuelve «Agregar al Carrito». Desde 3 unidades aparecen juntos la franja
+  // «Aplica promo 3x2 • Ahorrás $ X» y el «Total con promo». Por debajo no hay ni franja ni total: la aclaración sube
+  // hasta ~10 px del botón y «Compartir» hasta 48 px (las distancias del diseño de la ficha sin promo, en Penpot).
   var SUBE_SIN_PROMO = { aclaracion: 135.4, compartir: 149 };
   function ultimoTramo(raiz, clave, valor) {
     var n = marca(raiz, clave); if (!n) return;
     var tramos = n.querySelectorAll('span span');
     (tramos.length ? tramos[tramos.length - 1] : n.querySelector('span')).textContent = valor;
   }
-  function fichaPromo(s, d, actualizadores) {
+  function armarFicha(s, d, actualizadores) {
     var c = marca(s, 'cantidad');
     if (c) { c.style.left = '0px'; c.style.width = c.parentElement.style.width; c.style.textAlign = 'center'; }
+    var cambiar = function (delta) {
+      return function () {
+        estado.ficha.cantidad = Math.max(0, Math.min(R.FICHA.cantidadMaxima, estado.ficha.cantidad + delta));
+        actualizadores.forEach(function (f) { f(); });
+      };
+    };
+    var quitar = zona(P(d, [913, 224.5, 44, 34], [15, 459.5, 44, 34]), 'Quitar una unidad', cambiar(-1));
+    var sumar = zona(P(d, [1239, 224.5, 44, 34], [331, 459.5, 44, 34]), 'Agregar una unidad', cambiar(1));
+    var agregar = zona(P(d, [913, 224.5, 370, 34], [15, 459.5, 360, 34]), 'Agregar al Carrito', cambiar(1));
+    agregar.classList.add('boton-agregar');
+    agregar.removeAttribute('title');
+    agregar.textContent = 'Agregar al Carrito';
+    s.appendChild(quitar); s.appendChild(sumar); s.appendChild(agregar);
     actualizadores.push(function () {
-      var cant = estado.ficha.cantidad, r = R.fichaPromo(cant);
+      var cant = estado.ficha.cantidad, r = R.fichaPromo(cant), enCarrito = cant > 0;
+      mostrar(s, 'control-cantidad', enCarrito);
+      quitar.hidden = !enCarrito; sumar.hidden = !enCarrito; agregar.hidden = enCarrito;
+      ponerTexto(s, 'contador', enCarrito ? '4' : '3');
       ponerTexto(s, 'cantidad', String(cant));
       ['promo-franja', 'promo-texto', 'total-rotulo', 'total-monto', 'total-millas'].forEach(function (k) { mostrar(s, k, r.aplica); });
       ultimoTramo(s, 'promo-texto', 'Ahorrás ' + R.pesos(r.ahorro));
@@ -436,14 +427,6 @@
         });
       });
     });
-    var cambiar = function (delta) {
-      return function () {
-        estado.ficha.cantidad = Math.max(1, Math.min(R.FICHA_PROMO.cantidadMaxima, estado.ficha.cantidad + delta));
-        actualizadores.forEach(function (f) { f(); });
-      };
-    };
-    s.appendChild(zona(P(d, [913, 224.5, 44, 34], [15, 459.5, 44, 34]), 'Quitar una unidad', cambiar(-1)));
-    s.appendChild(zona(P(d, [1239, 224.5, 44, 34], [331, 459.5, 44, 34]), 'Agregar una unidad', cambiar(1)));
   }
 
   // Precios del cuchillo y etiqueta «Con Personal Bank» según el cliente (carrito lateral y completo).
@@ -458,24 +441,11 @@
   // ---------------------------------------------------------------- notas para desarrollo
   var NOTAS = {
     ficha: [
-      { d: [893, 236], m: [8, 471], t: '<b>Ficha sin selector de millas.</b> Debajo del precio, un recuadro informa el <b>precio en millas</b> del producto: «Equivale a <b>N millas</b>» y, debajo, «Al finalizar la compra elegís con cuántas pagar» (sin punto final). Las millas se eligen solo en Entrega. N = ⌊precio unitario que paga este cliente × 1,92⌋: $ 375 → 720; no depende del saldo. Si el producto tiene precio Personal Bank, N sale de ese precio <i>(a confirmar con Itaú)</i>. Productos por peso y promociones por cantidad: <i>a definir</i>. Recuadro solo con tinte, sin borde: Personal Bank <code>#EFF0F3</code>, cliente común <code>#FAF3EF</code>; radio 12, 12 px de aire vertical y 14 horizontal; 12 px debajo del precio y 24 px hasta «Agregar al Carrito». «Equivale a» 14/400 <code>#464646</code>; «N millas» 17/600 <code>#000D3C</code> (Personal Bank) o <code>#943B00</code> (cliente común); aclaración 13/400 <code>#5F5F5F</code>. Por qué estos textos y colores: ver la especificación. Probalo: cambiá el cliente.' },
-      { d: [893, 150], m: [8, 385], t: 'Precio con «antes» arriba (tachado, <code>#A7A7A7</code>) y el precio actual debajo, como en el sitio. En este ejemplo no hay «sin promo»: así el recuadro de millas queda pegado al precio.' },
-      { d: [893, 327], m: [8, 562], t: '«Agregar al Carrito» solo sube el contador del ícono; el carrito lateral se abre tocando el ícono. <b>En este prototipo el aceite no aparece en la lista del carrito</b> (simplificación: el carrito del diseño tiene 3 productos).' },
-      { d: [950, 30], m: [290, 30], t: 'Desktop: menú de usuario como en el sitio, con la etiqueta «Personal», el nombre y el saldo de millas. Mobile: solo el ícono PB. <i>Supuesto, sin captura del sitio:</i> el cliente común no lleva la etiqueta ni el ícono.' }
-    ],
-    'ficha-linea': [
-      { d: [1078, 194], m: [180, 430], t: '<b>Las millas en la línea del precio, sin recuadro.</b> «$ 375» y, a 10 px, «o <b>720 millas</b>», alineado a la línea base del precio: «o» 15/400 <code>#5F5F5F</code>; «720 millas» 17/600 <code>#333333</code>, el mismo color del precio (en color se leería como un precio en promoción). N = ⌊precio unitario que paga este cliente × 1,92⌋: $ 375 → 720; no depende del saldo. Si el producto tiene precio Personal Bank, N sale de ese precio <i>(a confirmar con Itaú)</i>. Productos por peso y promociones por cantidad: <i>a definir</i>. Las millas se eligen solo al pagar (Entrega). Probalo: cambiá el diseño de la ficha en la barra.' },
-      { d: [893, 150], m: [8, 385], t: 'Precio con «antes» arriba (tachado, <code>#A7A7A7</code>) y el precio actual debajo, como en el sitio. En este ejemplo no hay «sin promo».' },
-      { d: [893, 250], m: [8, 485], t: '«Agregar al Carrito» 24 px debajo de la línea del precio. Solo sube el contador del ícono; el carrito lateral se abre tocando el ícono. <b>En este prototipo el aceite no aparece en la lista del carrito</b> (simplificación: el carrito del diseño tiene 3 productos).' },
-      { d: [1146, 287], m: [246, 522], t: '<b>Aclaración debajo del botón</b>, 10 px: ícono + «Combiná pesos y millas al pagar» (14/400 <code>#5F5F5F</code>, sin punto final). Dice qué se combina y dónde, así se entiende sola, lejos del número de millas. «Al pagar» es la palabra del sitio: el botón «Pagar» del carrito lleva al paso donde se eligen las millas. <b>Ícono</b> (26,5 × 14,5 px, 6 px antes del texto): dos círculos de 14,5 px que se solapan 2,5 px, del tamaño de los de la referencia. Pesos: fondo blanco, borde 1,2 px y «$» bold 10 px, en <code>#333333</code>. Volar: relleno del color del tirador del slider del segmento (Personal Bank <code>#000D3A</code>, cliente común <code>#FE6002</code>), aro blanco de 1,2 px que lo separa del de pesos, y los cinco puntos con «+» de la marca en blanco (la palabra «volar» a ese tamaño no se lee). Probalo: cambiá el cliente.' },
-      { d: [950, 30], m: [290, 30], t: 'Desktop: menú de usuario como en el sitio, con la etiqueta «Personal», el nombre y el saldo de millas. Mobile: solo el ícono PB. <i>Supuesto, sin captura del sitio:</i> el cliente común no lleva la etiqueta ni el ícono.' }
-    ],
-    'ficha-promo': [
-      { d: [893, 230], m: [8, 465], t: '<b>Producto ya en el carrito:</b> el botón muestra la cantidad «− 3 +». En el prototipo va de 1 a 12. <b>Probalo:</b> bajá a 2 y desaparecen la franja y el total; subí a 6 y el ahorro se duplica.' },
-      { d: [1078, 180], m: [180, 415], t: 'Millas en la línea del precio, como en la ficha sin promo: «$ 744» y, a 10 px, «o <b>1.428 millas</b>» («o» 15/400 <code>#5F5F5F</code>; «1.428 millas» 17/600 <code>#333333</code>). N = ⌊precio unitario × 1,92⌋, sobre el precio de una unidad: no cambia con la cantidad ni con la promo.' },
+      { d: [893, 230], m: [8, 465], t: '<b>Ficha sin selector de millas</b>; las millas se eligen solo al pagar (Entrega). Arranca <b>sin unidades en el carrito</b>: «Agregar al Carrito» (naranja <code>#FF6200</code>, 34 px de alto, radio 17, texto 16/400 blanco), 24 px debajo de la línea del precio. Al agregar, en el mismo lugar aparece el botón con la cantidad «− 1 +» y el contador del carrito sube de 3 a 4; con «−» en 1 vuelve «Agregar al Carrito». <i>Supuesto, sale del diseño y no de una captura del sitio:</i> el botón se convierte en «− N +» una vez agregado el producto. En el prototipo la cantidad llega a 12 y el vino no aparece en la lista del carrito (el carrito del diseño tiene 3 productos). <b>Probalo:</b> agregá y subí a 3: aparecen la franja y el total; subí a 6 y el ahorro se duplica.' },
+      { d: [1078, 180], m: [180, 415], t: '<b>Las millas en la línea del precio, sin recuadro.</b> «$ 744» y, a 10 px, «o <b>1.428 millas</b>», alineado a la línea base del precio: «o» 15/400 <code>#5F5F5F</code>; «1.428 millas» 17/600 <code>#333333</code>, el mismo color del precio (en color se leería como un precio en promoción). N = ⌊precio unitario que paga este cliente × 1,92⌋, sobre el precio de una unidad: no cambia con la cantidad ni con la promo, ni depende del saldo. Si el producto tiene precio Personal Bank, N sale de ese precio <i>(a confirmar con Itaú)</i>. Productos por peso: <i>a definir</i>.' },
       { d: [893, 290], m: [8, 525], t: '<b>Franja de la promo</b>: «Aplica promo 3x2 • Ahorrás $ 744». <b>Solo aparece en promos que se cumplen con unidades de este mismo producto</b> (lleva N y paga M, N por $ X, la N.ª al X %) y <b>recién desde las unidades que pide la promo</b> (en un 3x2, desde 3). No aparece en las promos que combinan productos distintos (el descuento va al total del carrito y no se puede atribuir a este producto), en «% OFF» o antes/después (el precio ya viene rebajado y se ve el «antes» tachado), ni en precios especiales o descuentos en millas. «Aplica promo 3x2» es el texto que ya muestra el carrito en la línea del producto, sin redactar en la ficha. «Ahorrás $ X» = precio de lista × unidades − total de la línea: lo calcula la ficha, el carrito no lo trae. Franja <code>#EEF6F0</code>, radio 8, 43 px de alto (12 arriba y abajo, 16 a los lados), del ancho de la columna y 24 px debajo del botón. Texto 14 px: «Aplica promo 3x2» 400 <code>#333333</code> (11,5:1); « • » (viñeta, no punto medio: mide 3 px y queda centrada) <code>#8A8A8A</code> con 4 px más de espacio a cada lado; «Ahorrás $ X» 700 <code>#136B33</code> (6,0:1).' },
-      { d: [893, 352], m: [8, 587], t: '<b>Total</b> 16 px debajo de la franja: rótulo 16/600 <code>#333333</code>; monto 22/700 <code>#333333</code>, alineado a la derecha; debajo, «o <b>N millas</b>» con los mismos estilos que la línea del precio. Total = unidades que se pagan × precio (3 en un 3x2 → 2 × $ 744 = $ 1.488). N = ⌊total × 1,92⌋ (1.488 → 2.856): se calcula aparte, porque el carrito no trae las millas del total. <i>A confirmar:</i> el sitio hoy redondea las millas hacia arriba, así que N puede diferir en 1. <b>Aparece y desaparece con la franja</b>: sin la promo aplicada no hay total (sin descuento sería solo unidades × precio) y la ficha queda como la del producto sin promo.' },
-      { d: [1146, 410], m: [246, 645], t: 'Aclaración 12 px debajo de las millas del total: ícono + «Combiná pesos y millas al pagar», igual que en la ficha sin promo (el círculo de Volar toma el color del segmento). «Compartir» 32 px más abajo. Sin la promo aplicada (sin franja ni total), las dos suben a las distancias de la ficha sin promo: aclaración 10 px debajo del botón y «Compartir» 48 px debajo del botón. Probalo: cambiá el cliente.' },
+      { d: [893, 352], m: [8, 587], t: '<b>Total</b> 16 px debajo de la franja: rótulo 16/600 <code>#333333</code>; monto 22/700 <code>#333333</code>, alineado a la derecha; debajo, «o <b>N millas</b>» con los mismos estilos que la línea del precio. Total = unidades que se pagan × precio (3 en un 3x2 → 2 × $ 744 = $ 1.488). N = ⌊total × 1,92⌋ (1.488 → 2.856): se calcula aparte, porque el carrito no trae las millas del total. <i>A confirmar:</i> el sitio hoy redondea las millas hacia arriba, así que N puede diferir en 1. <b>Aparece y desaparece con la franja</b>: sin la promo aplicada no hay total (sin descuento sería solo unidades × precio) y la ficha queda como la de un producto sin promo.' },
+      { d: [1146, 410], m: [246, 645], t: '<b>Aclaración</b> 10 px debajo del botón (12 px debajo de las millas del total cuando hay promo aplicada): ícono + «Combiná pesos y millas al pagar» (14/400 <code>#5F5F5F</code>, sin punto final). Dice qué se combina y dónde, así se entiende sola, lejos del número de millas. «Al pagar» es la palabra del sitio: el botón «Pagar» del carrito lleva al paso donde se eligen las millas. <b>Ícono</b> (26,5 × 14,5 px, 6 px antes del texto): dos círculos de 14,5 px que se solapan 2,5 px, del tamaño de los de la referencia. Pesos: fondo blanco, borde 1,2 px y «$» bold 10 px, en <code>#333333</code>. Volar: relleno del color del tirador del slider del segmento (Personal Bank <code>#000D3A</code>, cliente común <code>#FE6002</code>), aro blanco de 1,2 px que lo separa del de pesos, y los cinco puntos con «+» de la marca en blanco (la palabra «volar» a ese tamaño no se lee). «Compartir» 48 px debajo del botón (32 px debajo de la aclaración cuando hay promo aplicada). Probalo: cambiá el cliente.' },
       { d: [950, 30], m: [290, 30], t: 'Desktop: menú de usuario como en el sitio, con la etiqueta «Personal», el nombre y el saldo de millas. Mobile: solo el ícono PB. <i>Supuesto, sin captura del sitio:</i> el cliente común no lleva la etiqueta ni el ícono.' }
     ],
     cajon: [
@@ -497,7 +467,7 @@
       { d: [650, 411], m: [22, 502], t: '<b>Control y campo.</b> El tirador (30 px) queda siempre dentro de la pista: su centro recorre el ancho − 30 px. Tocar la pista lleva el tirador hasta ahí con animación (250 ms); al arrastrar (desde los 3 px de movimiento) sigue al puntero sin animación. El campo acepta solo dígitos, no deja pasar el máximo, vacío vale 0, Enter confirma y al salir muestra el separador de miles. Al cambiar entre retiro y domicilio, las millas elegidas se conservan. <i>A definir:</i> qué se muestra con saldo 0, y qué pasa con las millas elegidas si el cliente vuelve al carrito y cambia el pedido.' }
     ]
   };
-  var NOMBRES = { ficha: 'Ficha de producto · recuadro', 'ficha-linea': 'Ficha de producto · en la línea del precio', 'ficha-promo': 'Ficha de producto · promo 3x2', cajon: 'Carrito lateral', carrito: 'Carrito', entrega: 'Entrega' };
+  var NOMBRES = { ficha: 'Ficha de producto', cajon: 'Carrito lateral', carrito: 'Carrito', entrega: 'Entrega' };
 
   function pinesYPanel(capaPantalla, clave) {
     if (!estado.notas) return;
@@ -529,8 +499,6 @@
   // Pantalla generada que corresponde al estado: la Entrega tiene una por tipo (envío a domicilio o retiro).
   function nombrePantalla() {
     var p = estado.pantalla, v = estado.vista;
-    if (p === 'ficha' && estado.fichaProducto === 'promo') return 'ficha-promo-' + v;
-    if (p === 'ficha' && estado.fichaDiseno === 'linea') return 'ficha-linea-' + v;
     return p === 'entrega' && estado.entrega === 'retiro' ? 'entrega-retiro-' + v : p + '-' + v;
   }
   function pantallaGenerada(nombre) {
@@ -601,21 +569,11 @@
     var actualizadores = [];
     function repintarTodo() { actualizadores.forEach(function (f) { f(); }); }
 
-    if (p === 'ficha' && estado.fichaProducto === 'promo') {
+    if (p === 'ficha') {
       pintarIconoVolar(s);
       aplicarEncabezado(s);
       mostrar(s, 'pb-icono', estado.segmento === 'pb');
-      fichaPromo(s, d, actualizadores);
-      s.appendChild(zona(P(d, [1108, 18, 48, 47], [339, 8, 40, 38]), 'Abrir el carrito', function () { estado.cajon = true; render(false); }));
-      if (d) s.appendChild(zona(1243, 17.5, 70, 34, 'Pagar', function () { irA('entrega'); }));
-    } else if (p === 'ficha') {
-      var linea = estado.fichaDiseno === 'linea';
-      if (linea) pintarIconoVolar(s); else pintarPrecioEnMillas(s);
-      aplicarEncabezado(s);
-      mostrar(s, 'pb-icono', estado.segmento === 'pb');
-      actualizadores.push(function () { ponerTexto(s, 'contador', estado.ficha.agregado ? '4' : '3'); });
-      // en la variante en línea el botón sube 77 px: el recuadro ya no está entre el precio y el botón
-      s.appendChild(zona(linea ? P(d, [913, 233.4, 370, 34], [15, 468.4, 360, 34]) : P(d, [913, 310.4, 370, 34], [15, 545.4, 360, 34]), 'Agregar al Carrito', function () { estado.ficha.agregado = true; repintarTodo(); }));
+      armarFicha(s, d, actualizadores);
       s.appendChild(zona(P(d, [1108, 18, 48, 47], [339, 8, 40, 38]), 'Abrir el carrito', function () { estado.cajon = true; render(false); }));
       if (d) s.appendChild(zona(1243, 17.5, 70, 34, 'Pagar', function () { irA('entrega'); }));
     }
@@ -671,7 +629,7 @@
     }
 
     repintarTodo();
-    pinesYPanel(s, p !== 'ficha' ? p : estado.fichaProducto === 'promo' ? 'ficha-promo' : estado.fichaDiseno === 'linea' ? 'ficha-linea' : p);
+    pinesYPanel(s, p);
     return s;
   }
 
@@ -807,11 +765,6 @@
       });
     };
     marcar('#b-pasos', estado.pantalla);
-    marcar('#b-producto', estado.fichaProducto);
-    marcar('#b-diseno', estado.fichaDiseno);
-    document.getElementById('g-producto').hidden = estado.pantalla !== 'ficha'; // solo tiene sentido en la ficha
-    // el vino con promo está en un solo diseño (en la línea del precio): la elección de diseño es del aceite
-    document.getElementById('g-diseno').hidden = estado.pantalla !== 'ficha' || estado.fichaProducto === 'promo';
     marcar('#b-vista', estado.vista);
     marcar('#b-cliente', estado.segmento);
     marcar('#b-saldo', String(R.saldo()));
@@ -830,14 +783,6 @@
     var reiniciarPedido = function () { estado.pedido = { millas: null, previo: null, maxActivo: false }; };
     document.getElementById('b-pasos').addEventListener('click', function (e) { var b = e.target.closest('button'); if (b) irA(b.dataset.valor); });
     document.getElementById('b-vista').addEventListener('click', function (e) { var b = e.target.closest('button'); if (b) { estado.vista = b.dataset.valor; estado.cajon = false; render(true); } });
-    document.getElementById('b-diseno').addEventListener('click', function (e) {
-      var b = e.target.closest('button'); if (!b) return;
-      estado.fichaDiseno = b.dataset.valor; guardarDisenoEnUrl(); render(false);
-    });
-    document.getElementById('b-producto').addEventListener('click', function (e) {
-      var b = e.target.closest('button'); if (!b) return;
-      estado.fichaProducto = b.dataset.valor; guardarProductoEnUrl(); render(false);
-    });
     document.getElementById('b-cliente').addEventListener('click', function (e) {
       var b = e.target.closest('button'); if (!b) return;
       estado.segmento = b.dataset.valor; reiniciarPedido(); render(false);

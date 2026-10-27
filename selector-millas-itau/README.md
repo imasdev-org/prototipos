@@ -1,6 +1,6 @@
 # Selector de millas · Tienda Volar (Itaú)
 
-Prototipo navegable de las millas en la ficha de producto (precio en millas, sin selector, en dos diseños, y un producto con promo 3x2), el carrito y el paso de Entrega del checkout (selector de millas).
+Prototipo navegable de las millas en la ficha de producto (precio en millas, sin selector, en un vino con promo 3x2), el carrito y el paso de Entrega del checkout (selector de millas).
 
 **Abrir el prototipo:** <https://imasdev-org.github.io/selector-millas-itau/>
 
@@ -15,13 +15,13 @@ La barra de arriba controla el prototipo. Con la flecha de la derecha se pliega 
 |---|---|
 | **Vista** | Desktop o Mobile. En Entrega, «Retiro» y «Envío a domicilio» se eligen con los botones de la pantalla |
 | **Paso** | Salta a Ficha, Carrito o Entrega. También se puede recorrer tocando la pantalla (Agregar al Carrito, ícono del carrito, Pagar, Ver Carrito Completo, Proceder al Pago, Continuar). **Entrega arranca solo con la consulta de dirección**: al elegir una dirección en el selector aparecen el envío, «Tus millas», «Tu pedido» y el resto, como en el sitio |
-| **Producto** | Solo en el paso Ficha: **Sin promo** (el aceite, en los dos diseños) o **Promo 3x2** (un vino ya en el carrito: con − y + se cambia la cantidad; desde 3 aparecen la franja «Aplica promo 3x2 • Ahorrás $ X» y el total con promo; por debajo, ninguno de los dos). El link lleva el elegido: `?producto=promo` |
-| **Diseño de la ficha** | Solo en el paso Ficha, sin promo: **En la línea del precio**, la que abre por defecto («$ 375  o 720 millas» y, debajo del botón, «Combiná pesos y millas al pagar») o **Recuadro** («Equivale a 720 millas»). El link lleva el elegido: `?ficha=linea` o `?ficha=recuadro` |
 | **Cliente** | Personal Bank o cliente común |
 | **Saldo de millas** | Millas disponibles del cliente: 100.000, o 3.000 para ver en Entrega el máximo limitado por el saldo |
 | **Notas para desarrollo** | Muestra pines numerados sobre la pantalla y un panel con las reglas de cada parte |
 
 Tocando un lugar de la pantalla que no hace nada se marcan por un momento las zonas que sí responden.
+
+**Ficha con promo 3x2:** el vino arranca sin unidades en el carrito. «Agregar al Carrito» lo agrega y el botón pasa a «− 1 +»; con + se suben unidades. Desde 3 aparecen la franja «Aplica promo 3x2 • Ahorrás $ X» y el total con promo; por debajo, ninguno de los dos. Con − en 1 vuelve «Agregar al Carrito».
 
 **Salteo de Forma de pago** (millas que cubren todo con entrega sin costo): en Entrega tocá «Retiro», elegí la sucursal y tocá «Usar el máximo». La pestaña FORMA DE PAGO se oculta, CONFIRMACIÓN pasa a su lugar y el botón dice «Continuar a Confirmación». Con envío a domicilio no pasa: el envío siempre va con tarjeta.
 

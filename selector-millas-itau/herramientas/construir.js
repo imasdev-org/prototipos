@@ -9,34 +9,17 @@
 const fs = require('fs'), path = require('path'), gen = require('./gen');
 
 const PANTALLAS = {
-  'ficha-desktop': { // ficha sin selector (tablero «Propuesta · 02 …»): recuadro con tinte «Equivale a N millas»
-    omitir: ['5fd61a'],
-    marcar: { '5fd65a': 'contador', '5fd65d': 'pb-chip', '5fd65e': 'pb-chip', '5fd660': 'saldo-encabezado', '5fd692': 'millas-recuadro', '5fd693': 'millas-texto' },
-    derecha: ['5fd660']
-  },
-  'ficha-mobile': {
-    omitir: ['96edf6'],
-    marcar: { '971bcf': 'contador', '971bad': 'pb-icono', '96ee2e': 'millas-recuadro', '96ee2f': 'millas-texto' }
-  },
-  'ficha-linea-desktop': { // variante recomendada (tablero «… en la línea del precio …»): «$ 375  o 720 millas» y aclaración con ícono bajo el botón
-    omitir: ['dbbf1a'],
-    marcar: { dbbf5a: 'contador', dbbf5d: 'pb-chip', dbbf5e: 'pb-chip', dbbf60: 'saldo-encabezado', '349a18': 'icono-volar' },
-    derecha: ['dbbf60']
-  },
-  'ficha-linea-mobile': {
-    omitir: ['0ebaa7'],
-    marcar: { '0ee953': 'contador', '0ee931': 'pb-icono', '2e3998': 'icono-volar' }
-  },
-  'ficha-promo-desktop': { // vino con promo 3x2 (tablero «… promoción 3x2 … variante A2 …»): cantidad en el botón, franja de la promo y total
+  'ficha-desktop': { // vino con promo 3x2 (tablero «… promoción 3x2 … variante A2 …»): cantidad en el botón, franja de la promo y total
     omitir: ['3b8e22'],
-    marcar: { '3bf8d5': 'pb-chip', '3bf8d6': 'pb-chip', '3bf8d8': 'saldo-encabezado', '3c5fea': 'icono-volar', '3c5fe4': 'cantidad',
+    marcar: { '3bf8d2': 'contador', '3bf8d5': 'pb-chip', '3bf8d6': 'pb-chip', '3bf8d8': 'saldo-encabezado', '3c5fea': 'icono-volar',
+      '3b8e18': 'control-cantidad', '3c5fe4': 'cantidad',
       '3b8e16': 'promo-franja', '3b8e17': 'promo-texto', '3b8e19': 'total-rotulo', '3b8e1a': 'total-monto', '3b8e1e': 'total-millas',
       '3b8e1b': 'aclaracion', '3b8e1c': 'aclaracion', '3bf921': 'compartir' },
     derecha: ['3bf8d8', '3b8e1a', '3b8e1e']
   },
-  'ficha-promo-mobile': {
+  'ficha-mobile': {
     omitir: ['8f977f'],
-    marcar: { '8fce63': 'pb-icono', '8fcf32': 'icono-volar', '8fcf2c': 'cantidad',
+    marcar: { '8fce85': 'contador', '8fce63': 'pb-icono', '8fcf32': 'icono-volar', '8f9775': 'control-cantidad', '8fcf2c': 'cantidad',
       '8f9773': 'promo-franja', '8f9774': 'promo-texto', '8f9776': 'total-rotulo', '8f9777': 'total-monto', '8f977b': 'total-millas',
       '8f9778': 'aclaracion', '8f9779': 'aclaracion', '8f97d1': 'compartir' },
     derecha: ['8f9777', '8f977b']

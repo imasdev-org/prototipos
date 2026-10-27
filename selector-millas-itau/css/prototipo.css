@@ -101,6 +101,8 @@ body.barra-plegada #solapa { display: inline-flex; }
 .pantalla { position: relative; background: #fff; overflow: clip; font-family: var(--fuente-sitio); }
 .capa { position: absolute; }
 .zona { position: absolute; cursor: pointer; border-radius: 8px; background: transparent; border: 0; padding: 0; }
+/* Ficha sin unidades en el carrito: «Agregar al Carrito» con las medidas del botón del diseño de la ficha sin promo */
+.zona.boton-agregar { background: #FF6200; border-radius: 17px; color: #fff; font: 400 16px/1 var(--fuente-sitio); }
 
 /* Pantallas generadas desde Penpot (herramientas/gen.js): cajas, textos y vectores con posición absoluta */
 .pv .b, .pv .t, .pv .v { position: absolute; box-sizing: border-box; }

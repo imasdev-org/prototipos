@@ -8,7 +8,7 @@ Este documento acompaña al prototipo. El prototipo muestra **cómo se ve y se c
 
 | Lugar | Hoy | Propuesta |
 |---|---|---|
-| Ficha de producto | Control de millas con «Usar disponibles» | **Sin selector.** Dos diseños para elegir (en el prototipo, «Diseño de la ficha» en la barra): **en la línea del precio** (recomendado), «$ 375  o **720 millas**» y debajo del botón «Combiná pesos y millas al pagar»; o **recuadro**, «Equivale a **N millas**» / «Al finalizar la compra elegís con cuántas pagar». Las millas se eligen solo al pagar |
+| Ficha de producto | Control de millas con «Usar disponibles» | **Sin selector.** Las millas en la línea del precio, «$ 744  o **1.428 millas**», y debajo del botón «Combiná pesos y millas al pagar». Con una promo por cantidad del mismo producto aplicada, una franja «Aplica promo 3x2 • Ahorrás $ X» y el total con promo. Las millas se eligen solo al pagar |
 | Carrito lateral y carrito completo | Suma lo elegido en las fichas **sin tope** | **Solo pesos**: el encabezado y el Resumen no muestran millas (se eligen en Entrega) |
 | Checkout · Entrega | — | Panel nuevo **«¿Cuántas millas querés usar?»** antes de «Tu pedido»: control, campo, «Usar el máximo» y etiqueta «Ahorrás $ X» |
 | «Usar el máximo» (Entrega) | Naranja; activo con fondo durazno claro | Color del segmento (azul en Personal Bank, naranja en cliente común); activo con **tilde** y fondo más marcado |
@@ -22,7 +22,7 @@ Referencia ejecutable: [`js/reglas.js`](../js/reglas.js) (el prototipo calcula t
 | Concepto | Regla | Ejemplo del prototipo |
 |---|---|---|
 | Cotización | 1,92 millas por peso | $ 50 = 96 millas |
-| Precio en millas en la **ficha** | `floor(precio unitario que paga este cliente × 1,92)` — el precio del producto en millas; no depende del saldo. Con precio Personal Bank, N sale de ese precio *(a confirmar con Itaú)*. Productos por peso: *a definir* | $ 375 → **720** |
+| Precio en millas en la **ficha** | `floor(precio unitario que paga este cliente × 1,92)` — el precio del producto en millas; no depende del saldo. Con precio Personal Bank, N sale de ese precio *(a confirmar con Itaú)*. Productos por peso: *a definir* | $ 744 → **1.428** |
 | Ahorro de la promo en la **ficha** | precio de lista × unidades − total de la línea del carrito. Solo promos que se cumplen con unidades del mismo producto y desde las unidades que pide la promo | 3 × $ 744 en un 3x2 → **$ 744** |
 | Total en la **ficha** con promo | unidades que se pagan × precio; sus millas: `floor(total × 1,92)` | 3 en un 3x2 → **$ 1.488** · **2.856 millas** |
 | Máximo del **pedido** | `min(saldo, floor(total de productos con descuentos × 1,92))` | $ 2.532 → **4.861** (cliente común $ 2.542 → 4.880) |
@@ -64,46 +64,26 @@ En el prototipo se recorre así: Entrega → «Retiro» → elegir la sucursal �
 
 ### Ficha de producto
 
-**Sin selector de millas.** Las millas se eligen solo al pagar, en Entrega; la ficha informa cuánto vale el producto en millas. Hay **dos diseños** para que el cliente elija; en el prototipo se alternan con «Diseño de la ficha» en la barra, y el link lleva el elegido (`?ficha=linea` o `?ficha=recuadro`).
+**Sin selector de millas.** Las millas se eligen solo al pagar, en Entrega; la ficha informa cuánto vale el producto en millas. El prototipo muestra un vino con promo 3x2 que arranca sin unidades en el carrito, así se recorren el producto sin promo aplicada y la promo aplicada.
 
-#### Diseño recomendado: en la línea del precio
+Tableros «Propuesta · 02 Producto · con sesión · promoción 3x2 (gana una sola) · precio de lista fijo arriba · variante A2: franja verde con la promo; total fuera» (desktop y mobile).
 
-Tableros «Propuesta · 02 Producto · con sesión · sin selector: precio y millas en la línea del precio («Combiná pesos y millas al pagar»)» (desktop y mobile).
-
-- **Línea del precio:** «$ 375» (22/700 `#333333`) y, 10 px a la derecha y alineado a su línea base, «o **720 millas**»: «o» 15/400 `#5F5F5F`, «720 millas» 17/600 `#333333`, el mismo color del precio (en un color propio se leería como un precio en promoción: el naranja ya es el color de promociones y acciones de la ficha). N como en el recuadro: `floor(precio unitario que paga este cliente × 1,92)`.
+- **Línea del precio:** «$ 744» (22/700 `#333333`) y, 10 px a la derecha y alineado a su línea base, «o **1.428 millas**»: «o» 15/400 `#5F5F5F`, «1.428 millas» 17/600 `#333333`, el mismo color del precio (en un color propio se leería como un precio en promoción: el naranja ya es el color de promociones y acciones de la ficha). N = `floor(precio unitario que paga este cliente × 1,92)`, sobre el precio de **una** unidad: no cambia con la cantidad ni con la promo, ni depende del saldo.
 - **Sin recuadro:** las millas pegadas al precio se leen como otra forma de pagar ese precio, sin una superficie que compita con el botón. En el relevamiento de tiendas, los fondos de color se usan para lo que se gana o para precios de socio, no para el canje (ver «Fichas con precio en millas»).
-- **«Agregar al Carrito»** 24 px debajo de la línea del precio.
+- **«Agregar al Carrito»** 24 px debajo de la línea del precio: naranja `#FF6200`, 34 px de alto, radio 17, texto 16/400 blanco. Al agregar, en el mismo lugar aparece el botón con la cantidad «− 1 +» y el contador del carrito sube; con «−» en 1 vuelve «Agregar al Carrito». *Supuesto: que el botón se convierta en «− N +» una vez agregado sale del diseño, no de una captura del sitio.*
 - **Aclaración debajo del botón** (10 px), como en Miles & More Worldshop («Cash & Miles in the checkout area»): ícono + «Combiná pesos y millas al pagar» (14/400 `#5F5F5F`, sin punto final). Nombra qué se combina y dónde, así se entiende lejos del número de millas. «Al pagar» es la palabra del sitio: el botón «Pagar» del carrito lleva a Entrega, donde se eligen las millas; «checkout» no se usa en el sitio.
 - **Ícono** (26,5 × 14,5 px, 6 px antes del texto): dos círculos de 14,5 px que se solapan 2,5 px, del tamaño de los de la referencia. **Pesos:** fondo blanco, borde 1,2 px por dentro y «$» bold 10 px, en `#333333` (los pesos no son de Volar: van en neutro, como el precio). **Volar:** relleno del color del tirador del slider del segmento (Personal Bank `#000D3A`, cliente común `#FE6002`), aro blanco de 1,2 px por fuera que lo separa del de pesos, y los cinco puntos con «+» de la marca en blanco; la palabra «volar» del logo, a ese tamaño (unos 2 px de alto), no se lee. Así el cliente reconoce en la ficha el mismo símbolo que mueve en Entrega.
-- La sección suelta del diseño está en Penpot como «Variante 02f» (Personal Bank y cliente común).
-
-#### Alternativa: recuadro
-
-Tableros «Propuesta · 02 Producto · con sesión · sin selector: precio en millas («con cuántas pagar»)».
-
-- **Precio:** «antes $ 417» arriba (14 italic + 16/400 tachado, `#A7A7A7`, como hoy en el sitio) y el precio actual «$ 375» (22/700 `#333333`) debajo. En este ejemplo no hay «sin promo»: así el recuadro de millas queda pegado al precio.
-- **Recuadro de millas**, 12 px debajo del precio, a todo el ancho de la columna (370 desktop · 360 mobile), alto 66, radio 12, 12 px de aire vertical y 14 horizontal. **Solo con tinte, sin borde**: Personal Bank `#EFF0F3` (el color del segmento al 8 % con la **mitad de saturación**, 1,14:1 contra el blanco) y cliente común `#FAF3EF` (durazno al 8 % con la **mitad de saturación**, 1,10:1). Desaturados se leen como blancos apenas fríos o cálidos: marcan el segmento sin competir con el precio ni con el botón. Sin borde no se confunde con el panel de millas de Entrega, que es interactivo (crítica de la versión con borde). En cliente común el durazno va desaturado para no formar un bloque naranja con «Agregar al Carrito» ni parecerse a dos fondos que el sitio ya usa: los avisos del carrito (`.TableCartReplacementAlert`, `#fff7ec`) y las **acciones secundarias** (`$accent-light` `#FCEEE5` en `webapp/Itau/static/css/vars.sass`: `.wBtnSecondaryAction` como «Ver Carrito Completo», `.ShortcutText`, el resaltado del autocompletar y la caja del token). Diferencia de color con `#FCEEE5`: `#FFEFE6` ΔE 0,9 (casi igual), **`#FAF3EF` 3,9**, `#F8F3F1` 5,0. Se eligió `#FAF3EF` y no el más gris `#F8F3F1` (saturación 35 %) para que los dos segmentos usen la misma regla (mitad de saturación) sin perder la calidez del durazno; el fondo con borde del panel de Entrega (`#FFF7F2` / `#FFE7D9`) se descartó porque el borde hace más llamativo el recuadro. El radio 12 se mantiene: en el sitio 4–5 px son campos y avisos, 12–15 tarjetas y paneles, y la píldora, botones. Al 10 % (`#E9ECF3` / `#FFEFE6`) era la superficie más marcada de la columna; al 5 % sin borde casi no se veía (1,09 / 1,06).
-  - Primera línea: «Equivale a **N millas**»: «Equivale a» 14/400 `#464646` (8,3 / 8,6:1); «N millas» 17/600, azul marino `#000D3C` en Personal Bank (16,4:1) o naranja oscuro `#943B00` en cliente común (6,6:1; con `#A84300` se veía mucho más débil que el azul). **N = `floor(precio que se muestra × 1,92)`**: $ 375 → 720. Es el precio del producto en millas, así que es cierto tenga o no el cliente esas millas. Si el producto tiene precio Personal Bank, N sale del precio que paga ese cliente *(a confirmar con Itaú)*. Se evitó «Podés pagarlo con 720 millas»: sin «hasta» parece todo o nada, como si con menos millas no se pudiera usar ninguna.
-  - Segunda línea, 4 px debajo: «Al finalizar la compra elegís con cuántas pagar» (13/400 `#5F5F5F`, 5,6 / 5,8:1, **sin punto final**, como la ayuda del sitio «Elegí cuántos puntos ITAU canjear deslizando la barra»). Responde dónde se eligen las millas ahora que la ficha no tiene control. «Pagar» evita leer «equivale» como millas que se ganan o como pesos + millas; «con cuántas» deja claro que se puede usar menos de N. Es «pagar» y no «pagarlo» porque en el checkout las millas se eligen para todo el pedido, no por producto. *Que «equivale» no se lea como «pesos + millas» o como millas que se ganan es una hipótesis: se confirma con un test de comprensión corto (5–8 personas por segmento). Alternativa si confunde: «Precio en millas: 720 millas».*
-  - Se descartó «canjear» (el verbo que el sitio usa para los puntos): en programas de millas suele leerse como cambiar millas por un premio, no como pagar una compra.
-- **«Agregar al Carrito»**, 24 px debajo del recuadro, solo sube el contador del ícono; el carrito lateral se abre tocando el ícono (igual en los dos diseños).
-- Las variantes descartadas de esta información (lista, banda, junto al precio, separador, etc.) quedan en Penpot, columna «Ficha de producto», como secciones «Variante 01h … 01z4».
-
-#### Producto con promo por cantidad (3x2)
-
-Tableros «Propuesta · 02 Producto · con sesión · promoción 3x2 (gana una sola) · precio de lista fijo arriba · variante A2: franja verde con la promo; total fuera» (desktop y mobile). En el prototipo: «Producto: Promo 3x2» en la barra (`?producto=promo`). Parte del diseño en la línea del precio; el producto ya está en el carrito y el botón muestra la cantidad «− 3 +».
-
-- **Línea del precio:** como en el diseño en la línea del precio, sobre el precio de **una** unidad: «$ 744  o **1.428 millas**». No cambia con la cantidad ni con la promo.
 - **Franja de la promo**, 24 px debajo del botón, a todo el ancho de la columna: «Aplica promo 3x2 • Ahorrás $ 744».
   - **Cuándo aparece:** solo en promos que se cumplen con **unidades de este mismo producto** (lleva N y paga M, N por $ X, la N.ª al X %) y **recién desde las unidades que pide la promo** (en un 3x2, desde 3). Son las que el carrito ya resuelve en la línea del producto.
   - **Cuándo no:** promos que combinan productos distintos (el descuento va al total del carrito y no se puede atribuir a este producto), «% OFF» o antes/después (el precio ya viene rebajado y se ve el «antes» tachado), precios especiales y descuentos en millas.
   - **Texto:** «Aplica promo 3x2» es el que ya muestra el carrito en la línea del producto; no se redacta en la ficha. «Ahorrás $ X» = precio de lista × unidades − total de la línea: lo calcula la ficha, porque el carrito no lo trae.
   - **Estilo:** fondo `#EEF6F0`, radio 8, 43 px de alto (12 px arriba y abajo, 16 a los lados). Texto 14 px en una línea: «Aplica promo 3x2» 400 `#333333` (11,5:1 sobre la franja); « • » `#8A8A8A` (3,1:1) con 4 px más de espacio a cada lado: es la viñeta, no el punto medio «·», que a 14 px mide 2 px y agrandarlo empuja el texto hacia abajo; la viñeta mide 3 px y queda centrada; «Ahorrás $ X» 700 `#136B33` (6,0:1). El verde es el del ahorro; el texto de la promo no va en azul porque la cocarda, que es una imagen, ya es azul.
 - **Total**, 16 px debajo de la franja: «Total con promo» 16/600 `#333333` a la izquierda; monto 22/700 `#333333` a la derecha y, debajo, «o **N millas**» con los estilos de la línea del precio. Total = unidades que se pagan × precio; N = `floor(total × 1,92)`, calculado aparte porque el carrito solo trae las millas elegidas con el slider, no las del total. Va fuera de la franja para que conserve el peso y la alineación de la columna.
-- **Sin la promo aplicada** (1 o 2 unidades de un 3x2): no hay **ni franja ni total**; aparecen y desaparecen juntos, con la misma condición. La ficha queda como la del producto sin promo: aclaración 10 px debajo del botón y «Compartir» 48 px debajo del botón. Sin descuento, el total sería solo unidades × precio y ya está en el carrito. Para anunciar la promo antes de llegar a las unidades está el texto configurable de la promoción, que la ficha muestra siempre que esté cargado.
-- **Aclaración** 12 px debajo de las millas del total, como en el diseño en la línea del precio; «Compartir» 32 px más abajo.
+- **Sin la promo aplicada** (0, 1 o 2 unidades de un 3x2): no hay **ni franja ni total**; aparecen y desaparecen juntos, con la misma condición. Aclaración 10 px debajo del botón y «Compartir» 48 px debajo del botón. Sin descuento, el total sería solo unidades × precio y ya está en el carrito. Para anunciar la promo antes de llegar a las unidades está el texto configurable de la promoción, que la ficha muestra siempre que esté cargado.
+- **Con la promo aplicada:** aclaración 12 px debajo de las millas del total y «Compartir» 32 px más abajo.
 - **Redondeo** *(a confirmar)*: el prototipo redondea las millas hacia abajo, como en el resto de la propuesta; el sitio hoy las redondea hacia arriba al repartir el precio entre pesos y millas, así que puede haber 1 milla de diferencia.
 - **Solo Itaú:** se activa con una configuración nueva del canal de Itaú, sin depender de la que hoy prende el slider de la ficha (esa también está prendida en Anda). Tienda Inglesa no cambia.
+- **Alternativa que salió del prototipo: recuadro** «Equivale a **N millas**» / «Al finalizar la compra elegís con cuántas pagar». Queda en Penpot («Propuesta · 02 Producto · con sesión · sin selector: precio en millas («con cuántas pagar»)»), junto con las variantes descartadas de esta información (lista, banda, junto al precio, separador, etc.), columna «Ficha de producto», secciones «Variante 01h … 01z4». La sección suelta del diseño elegido está como «Variante 02f».
 
 #### «Usar el máximo» (componente del panel de Entrega)
 
@@ -199,8 +179,7 @@ No están en el prototipo. Les aplican el Resumen fijo y el salteo de Forma de p
 | Pista del control | `#B8BDC9` | `#FDD4B9` |
 | Relleno | degradé `#5A6380` → `#000C39` | degradé `#FE9A5A` → `#F95E00` |
 | Tirador (con logo Volar) | `#000D3A` | `#FE6002` |
-| Ficha en la línea del precio · círculo de Volar del ícono (el de pesos va en `#333333`) | `#000D3A` | `#FE6002` |
-| Ficha · recuadro «Equivale a N millas» · fondo / monto | `#EFF0F3` / `#000D3C` | `#FAF3EF` / `#943B00` |
+| Ficha · círculo de Volar del ícono (el de pesos va en `#333333`) | `#000D3A` | `#FE6002` |
 | Etiqueta de ahorro · fondo | `#223F83` al 10 % | `#FF6200` al 10 % |
 | Etiqueta de ahorro · texto / monto | `#223F83` / `#000D3C` | `#464646` / `#464646` |
 | Etiqueta de ahorro · ícono | `#223F83` | `#C75000` |
@@ -210,14 +189,14 @@ No están en el prototipo. Les aplican el Resumen fijo y el salteo de Forma de p
 | «Usar el máximo» activo · fondo / borde 2 px / texto (con tilde) | `#D3D9E6` / `#223F83` / `#223F83` | `#FFE0CC` / `#DE5500` / `#A84300` |
 | «Usar el máximo» con el mouse encima · fondo normal / fondo activo / texto | `#EDF0F5` / `#C5CDDE` / `#223F83` | `#FCF1EB` / `#F8D3BC` / `#9A3D00` |
 
-Regla: todo lo que es **de millas** toma el color del segmento: en Personal Bank, azul marino (recuadro de la ficha, control, etiqueta de ahorro, panel y «Usar el máximo»); en cliente común, naranja. El naranja sólido queda para las **acciones de la página** en ambos segmentos («Agregar al Carrito», el tipo de entrega elegido, «Continuar»). En cliente común el texto de la etiqueta es gris por contraste (`#C75000` sobre el tinte da 4,10:1).
+Regla: todo lo que es **de millas** toma el color del segmento: en Personal Bank, azul marino (ícono de la ficha, control, etiqueta de ahorro, panel y «Usar el máximo»); en cliente común, naranja. El naranja sólido queda para las **acciones de la página** en ambos segmentos («Agregar al Carrito», el tipo de entrega elegido, «Continuar»). En cliente común el texto de la etiqueta es gris por contraste (`#C75000` sobre el tinte da 4,10:1).
 
 ## 5. Accesibilidad
 
 - El control es `role="slider"` con `aria-valuemin/max/now` y `aria-valuetext` («N millas»), y se opera con teclado.
 - «Usar el máximo» es un botón con `aria-pressed`. El estado activo no depende solo del color: lleva tilde, borde de 2 px y semibold. Contraste del texto: activo 7,04:1 (Personal Bank) y 4,84:1 (cliente común); normal en Personal Bank 9,97:1. Con el mouse encima, todos los casos quedan por encima de 4,5:1 (el más bajo, activo de cliente común: 4,94:1). Foco visible con teclado: contorno 3 px `#223F83`.
 - El panel de millas de Entrega es una sección con la pregunta como nombre accesible (`aria-labelledby`).
-- Escala «0 … Máximo» del control: `#767676`, que da 4,54:1 sobre blanco y cumple WCAG AA (el `#828282` anterior daba 3,84:1). La aclaración de la ficha va en `#5F5F5F` (5,6 / 5,8:1 sobre su recuadro).
+- Escala «0 … Máximo» del control: `#767676`, que da 4,54:1 sobre blanco y cumple WCAG AA (el `#828282` anterior daba 3,84:1). La aclaración de la ficha va en `#5F5F5F` (6,4:1 sobre blanco).
 - El campo acepta solo dígitos (`inputmode="numeric"`), no deja superar el máximo, vacío vale 0, Enter confirma y al salir muestra el valor con separador de miles.
 
 ## 6. A confirmar
@@ -235,11 +214,11 @@ Regla: todo lo que es **de millas** toma el color del segmento: en Personal Bank
 
 ## 7. Simplificaciones del prototipo
 
-- Las pantallas son HTML generado desde el diseño en Penpot (`herramientas/`): textos, cajas y vectores reales en posición absoluta, como en el diseño. Las fotos y logos son las imágenes del sitio. Lo que cambia con el estado (selector, panel de millas, Resumen, totales, contador, cliente común) son componentes vivos. La ficha sale de «Propuesta · 02 Producto · con sesión · sin selector: precio y millas en la línea del precio («Combiná pesos y millas al pagar»)» (diseño recomendado) y de «Propuesta · 02 Producto · con sesión · sin selector: precio en millas («con cuántas pagar»)» (recuadro) y los carritos, de «Propuesta · 02 Carrito lateral · solo pesos» y «Propuesta · 03 Carrito completo · solo pesos». Las pantallas de Entrega salen de los tableros «Alternativa · 04 Checkout · Entrega (domicilio) · millas parcial · pregunta + panel» y «Alternativa · 04 Checkout · Entrega (retiro) · millas parcial · pregunta + panel» de Penpot (desktop y mobile).
+- Las pantallas son HTML generado desde el diseño en Penpot (`herramientas/`): textos, cajas y vectores reales en posición absoluta, como en el diseño. Las fotos y logos son las imágenes del sitio. Lo que cambia con el estado (selector, panel de millas, Resumen, totales, contador, cliente común) son componentes vivos. La ficha sale de «Propuesta · 02 Producto · con sesión · promoción 3x2 (gana una sola) · precio de lista fijo arriba · variante A2: franja verde con la promo; total fuera» y los carritos, de «Propuesta · 02 Carrito lateral · solo pesos» y «Propuesta · 03 Carrito completo · solo pesos». Las pantallas de Entrega salen de los tableros «Alternativa · 04 Checkout · Entrega (domicilio) · millas parcial · pregunta + panel» y «Alternativa · 04 Checkout · Entrega (retiro) · millas parcial · pregunta + panel» de Penpot (desktop y mobile).
 - Desktop y mobile recorren **envío a domicilio** (Gastos de Envío $ 150; dirección de ejemplo «Bv. Artigas 1234») y **retiro** (Gastos de Preparación $ 0; sucursal de ejemplo «Pickup Itau - Avenida Italia 5821»). El salteo de Forma de pago se recorre con retiro y «Usar el máximo». Los tableros de retiro en Penpot: desktop Personal Bank parcial y al máximo, cliente común parcial; mobile Personal Bank parcial. El cliente común usa el mismo tablero con los colores de su segmento.
 - Desktop ocupa todo el ancho de la ventana con el contenido en 1200 px centrados, como el sitio. Con ventanas de menos de 1232 px el prototipo achica la pantalla proporcionalmente en vez de reacomodarla.
 - En el carrito completo, la columna del Resumen llega hasta el pie para que se vea el efecto fijo con solo 3 productos.
-- El aceite agregado desde la ficha **no aparece** en la lista del carrito (el carrito del diseño tiene 3 productos). Tampoco el vino de la ficha con promo: su cantidad (de 1 a 12) solo cambia la franja y el total de la ficha.
+- El vino agregado desde la ficha **no aparece** en la lista del carrito (el carrito del diseño tiene 3 productos): su cantidad (de 0 a 12) solo cambia la ficha y el contador del ícono.
 - El recorrido termina en Entrega.
 - Las direcciones del selector de Entrega son de ejemplo y las dos dan el mismo envío ($ 150). En retiro hay una sola sucursal, sin costo.
 - El control «Saldo de millas: 3.000» muestra en Entrega el máximo limitado por el saldo.
