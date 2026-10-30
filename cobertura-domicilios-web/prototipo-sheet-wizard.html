@@ -2915,11 +2915,11 @@
           mGeo=new google.maps.Geocoder();
           mGMap=new google.maps.Map(gdiv, { center:{lat:-34.9011,lng:-56.1645}, zoom:16, disableDefaultUI:true, keyboardShortcuts:false, clickableIcons:false, gestureHandling:'greedy', styles:window.__GMAP_STYLE });
           mMarker=new google.maps.Marker({ map:mGMap, icon:{ url:'data:image/svg+xml;charset=UTF-8,'+encodeURIComponent(PIN_SVG), scaledSize:new google.maps.Size(36,40), anchor:new google.maps.Point(18,34) } });
-          mGMap.addListener('click', function(e){ animatePin(e.latLng); mGMap.panTo(e.latLng); reverse(e.latLng); });   // SOLO el click mueve el pin: se desliza al punto (transicion), centra el mapa y recalcula la direccion
+          mGMap.addListener('click', function(e){ animatePin(e.latLng); mGMap.panTo(e.latLng); if(window.__mPend){ window.__mPend=false; window.__mSetMsg(''); } else reverse(e.latLng); });   // tras el aviso, marcar el punto conserva lo escrito   // SOLO el click mueve el pin: se desliza al punto (transicion), centra el mapa y recalcula la direccion
           mCenter(curAddr());
         });
         if(miUbi){ miUbi.style.cursor='pointer'; miUbi.style.zIndex='6'; miUbi.addEventListener('click',function(e){ e.stopPropagation();
-          if(navigator.geolocation){ navigator.geolocation.getCurrentPosition(function(pos){ var ll=new google.maps.LatLng(pos.coords.latitude,pos.coords.longitude); setPin(ll); if(mGMap){ mGMap.panTo(ll); mGMap.setZoom(16); } reverse(ll); }, function(){ mCenter(curAddr()); }, {enableHighAccuracy:true,timeout:8000}); } else { mCenter(curAddr()); }
+          if(navigator.geolocation){ navigator.geolocation.getCurrentPosition(function(pos){ var ll=new google.maps.LatLng(pos.coords.latitude,pos.coords.longitude); setPin(ll); if(mGMap){ mGMap.panTo(ll); mGMap.setZoom(16); } if(window.__mPend){ window.__mPend=false; window.__mSetMsg(''); } else reverse(ll); }, function(){ mCenter(curAddr()); }, {enableHighAccuracy:true,timeout:8000}); } else { mCenter(curAddr()); }
         }); }   // "mi ubicación": GPS -> mueve el pin y actualiza la direccion (fallback: el punto del caso)
       })();
       // SOLO el contenido del Paso 2 se desliza sobre el contenido del Paso 1; header y botón quedan fijos (cambian de texto)
@@ -3026,9 +3026,21 @@
       var demoCases=[
         {key:'con',   label:'Con cobertura',  map:'mapa-con-cobertura_Feliciano-Rodriguez-3109.jpeg', addr:'Feliciano Rodríguez 3109', cob:true,  fuera:false},
         {key:'sin',   label:'Sin cobertura',  map:'mapa-con-cobertura_Feliciano-Rodriguez-3109.jpeg', addr:'Juan Jacobo Rousseau 4505', cob:false, fuera:false},
-        {key:'fuera', label:'Fuera de zona',  map:'mapa-con-cobertura_Feliciano-Rodriguez-3109.jpeg', addr:'Av. 8 de Octubre 4200',    cob:false, fuera:true}
+        {key:'fuera', label:'Fuera de zona',  map:'mapa-con-cobertura_Feliciano-Rodriguez-3109.jpeg', addr:'Av. 8 de Octubre 4200',    cob:false, fuera:true},
+        {key:'noenc', label:'No encontrada',  map:'mapa-con-cobertura_Feliciano-Rodriguez-3109.jpeg', addr:'Manuel R. Alonso y 4 de Julio', pinAddr:'Feliciano Rodríguez 3109', cob:true, fuera:false, noenc:true}
       ];
       var activeCase=demoCases[0];
+      // Dirección no encontrada: Google no ubica lo escrito -> aviso, el pin NO se mueve y no se agrega hasta que el cliente marque el punto en el mapa (lo escrito se conserva)
+      var M_AVISO='Dirección no encontrada. Marcala en el mapa.', M_BLOQUEO='Marcá tu dirección en el mapa para continuar.';
+      window.__mPend=false;
+      // error EN LÍNEA bajo Dirección (paso 1, con el mapa a la vista), como la validación del alta real: borde rojo + texto rojo 13px debajo del campo
+      var mInColor=dirInput?getComputedStyle(dirInput).borderColor:'';
+      var mErr=document.createElement('div'); mErr.className='__merr'; mErr.setAttribute('role','alert');
+      mErr.style.cssText='display:none;position:absolute;z-index:2;color:#b3261e;font:400 13px/18px "Open Sans",system-ui,sans-serif';
+      if(dirInput&&dirInput.parentElement) dirInput.parentElement.insertBefore(mErr, dirInput.nextSibling);
+      // como en el sitio (mapa de alto fijo y botón fijo abajo): el error ocupa el aire entre el campo y el botón, sin empujar el campo ni achicar el mapa
+      window.__mSetMsg=function(t){ mErr.textContent=t||''; mErr.style.display=t?'block':'none'; if(dirInput){ var pr=dirInput.parentElement; if(getComputedStyle(pr).position==='static') pr.style.position='relative'; mErr.style.top=(dirInput.offsetTop+dirInput.offsetHeight+6)+'px'; mErr.style.left=dirInput.offsetLeft+'px'; mErr.style.width=dirInput.offsetWidth+'px'; dirInput.style.borderColor=t?'#ED2F48':mInColor; dirInput.style.boxShadow=t?'inset 0 0 0 1px #ED2F48':'none'; } };
+      window.addEventListener('message', function(e){ var k=e.data&&e.data.demoCase; if(!k) return; var b=document.querySelector('button[data-key="'+k+'"]'); if(b) b.click(); });   // escenario elegido desde el picker externo de la Vista mobile
       // campos Departamento + Localidad: solo aparecen cuando el geopoint queda FUERA de zona
       var fueraFields=document.createElement('div');
       fueraFields.style.cssText='display:none;flex-direction:column;gap:5px;padding:4px 15px 0;width:100%;box-sizing:border-box;font-family:"Open Sans",system-ui,sans-serif';
@@ -3042,8 +3054,9 @@
       function setFueraFields(on){ fueraFields.style.display=on?'flex':'none'; }
       function applyCase(c){
         activeCase=c;
-        if(window.__setMobileMapAddr) window.__setMobileMapAddr(c.addr);   // mapa real: recentra por geocoding de la direccion del caso
+        if(window.__setMobileMapAddr) window.__setMobileMapAddr(c.pinAddr||c.addr);   // mapa real: recentra por geocoding de la direccion del caso (no encontrada: el pin queda en el punto anterior)
         if(inpAddrEl) inpAddrEl.textContent=c.addr;
+        window.__mPend=!!c.noenc; window.__mSetMsg(c.noenc?M_AVISO:'');
         if(chipAddrEl) chipAddrEl.textContent=c.addr;
         if(cartel){ cartel.style.display=(c.cob||c.fuera)?'none':'flex'; if(cartelTxt) cartelTxt.textContent='No hay cobertura para Súper en esta ubicación'; var vcb=cartel.querySelector('[data-pencil-name="Btnvercobertura"]'); if(vcb) vcb.style.display='flex'; }   // fuera de zona: sin advertencia
         setFueraFields(c.fuera);
@@ -3225,7 +3238,7 @@
         if(t.closest('[data-pencil-name="Btnvercobertura"]')){ cov(!coverOpen); return; }
         if(t.closest('[data-pencil-name="atras"]')){ if(coverOpen){ cov(false); return; } if(cur===2) show(1); else closeSheet(); return; }
         var cb=t.closest('[data-pencil-name="Agregar Domicilio"]');
-        if(cb){ var txt=cb.textContent||''; if(coverOpen||/Ir al mapa/.test(txt)){ cov(false); return; } if(/Continuar/.test(txt)){ show(2); return; } if(/Agregar Domicilio/.test(txt)){ var nc=addCard(activeCase); closeSheet(); setTimeout(function(){ if(nc){ if(nc.scrollIntoView) nc.scrollIntoView({block:'center',behavior:'smooth'}); requestAnimationFrame(function(){ nc.style.opacity='1'; }); } }, 380); return; } return; }   // tras cerrar el sheet: scrollea a la card nueva y ahi recien la funde (para que se vea)
+        if(cb){ var txt=cb.textContent||''; if(coverOpen||/Ir al mapa/.test(txt)){ cov(false); return; } if(/Continuar/.test(txt)){ if(window.__mPend){ window.__mSetMsg(M_BLOQUEO); return; } show(2); return; } if(/Agregar Domicilio/.test(txt)){ if(window.__mPend){ show(1); window.__mSetMsg(M_BLOQUEO); return; } var nc=addCard(activeCase); closeSheet(); setTimeout(function(){ if(nc){ if(nc.scrollIntoView) nc.scrollIntoView({block:'center',behavior:'smooth'}); requestAnimationFrame(function(){ nc.style.opacity='1'; }); } }, 380); return; } return; }   // tras cerrar el sheet: scrollea a la card nueva y ahi recien la funde (para que se vea)
         var f=t.closest('[data-pencil-name="input"]')||t.closest('[data-pencil-name="textarea"]');
         if(f){ openKb(f, isTel(f)?'tel':'text'); return; }
       }, true);

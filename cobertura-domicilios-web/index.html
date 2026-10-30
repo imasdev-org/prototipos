@@ -1990,9 +1990,20 @@
       var dCases=[
         {key:'con',   label:'Con cobertura', map:'mapa-con-cobertura_Feliciano-Rodriguez-3109.jpeg', addr:'Feliciano Rodríguez 3109', cob:true,  fuera:false},
         {key:'sin',   label:'Sin cobertura', map:'mapa-con-cobertura_Feliciano-Rodriguez-3109.jpeg', addr:'Juan Jacobo Rousseau 4505', cob:false, fuera:false},
-        {key:'fuera', label:'Fuera de zona', map:'mapa-con-cobertura_Feliciano-Rodriguez-3109.jpeg', addr:'Av. 8 de Octubre 4200',    cob:false, fuera:true}
+        {key:'fuera', label:'Fuera de zona', map:'mapa-con-cobertura_Feliciano-Rodriguez-3109.jpeg', addr:'Av. 8 de Octubre 4200',    cob:false, fuera:true},
+        {key:'noenc', label:'Dirección no encontrada', map:'mapa-con-cobertura_Feliciano-Rodriguez-3109.jpeg', addr:'Manuel R. Alonso y 4 de Julio', pinAddr:'Feliciano Rodríguez 3109', cob:true, fuera:false, noenc:true}
       ];
       var dActive=dCases[0];
+      // Dirección no encontrada: Google no ubica lo escrito -> aviso, el pin NO se mueve y no se confirma hasta que el cliente marque el punto en el mapa (lo escrito se conserva)
+      var D_AVISO='Dirección no encontrada. Marcala en el mapa.', D_BLOQUEO='Marcá tu dirección en el mapa para continuar.';
+      window.__dPend=false;
+      // error EN LÍNEA bajo Dirección, como la validación del alta real ("Ingresá el domicilio": borde rojo + texto rojo 13px debajo del campo):
+      // ocupa ~24px dentro del form y no depende de que quede espacio libre arriba del botón
+      var dInBox=card?card.querySelector('[data-pencil-name="input dir"]'):null, dInColor=dInBox?getComputedStyle(dInBox).borderColor:'';
+      var dErr=document.createElement('div'); dErr.className='__derr'; dErr.setAttribute('role','alert');
+      dErr.style.cssText='display:none;color:#b3261e;font:400 13px/18px "Open Sans",system-ui,sans-serif;margin-top:6px';
+      if(dInBox) dInBox.parentElement.insertBefore(dErr, dInBox.nextSibling);
+      window.__dSetMsg=function(t){ dErr.textContent=t||''; dErr.style.display=t?'block':'none'; if(dInBox){ dInBox.style.borderColor=t?'#ED2F48':dInColor; dInBox.style.boxShadow=t?'inset 0 0 0 1px #ED2F48':'none'; } };
       // Departamento + Localidad: SOLO cuando el geopoint queda fuera de polígono
       var dCampos=card?card.querySelector('[data-pencil-name="campos"]'):null;
       var dCampoDir=card?card.querySelector('[data-pencil-name="campo Direccion"]'):null;
@@ -2004,8 +2015,9 @@
       function dApply(c){
         dActive=c;
         if(typeof setCov==='function') setCov(false);
-        if(window.__setDesktopMapAddr) window.__setDesktopMapAddr(c.addr);   // mapa real: recentra por geocoding de la direccion del caso
+        if(window.__setDesktopMapAddr) window.__setDesktopMapAddr(c.pinAddr||c.addr);   // mapa real: recentra por geocoding de la direccion del caso (no encontrada: el pin queda en el punto anterior)
         if(dAddr) dAddr.textContent=c.addr;
+        window.__dPend=!!c.noenc; window.__dSetMsg(c.noenc?D_AVISO:'');
         if(dCartel) dCartel.style.display=(c.cob||c.fuera)?'none':'flex';   // fuera de zona: sin advertencia
         if(dTxt) dTxt.textContent='No hay cobertura para Súper en esta ubicación';
         if(typeof verCob!=='undefined'&&verCob) verCob.style.display=c.fuera?'none':'flex';   // 'flex' (no '') para no borrar el display inline y descentrar el texto del botón
@@ -2065,7 +2077,7 @@
       if(dList){ [].slice.call(dList.children).forEach(function(cd){ if(getComputedStyle(cd).display!=='none'){ if(!cd.dataset.addr && cd.getAttribute('data-pencil-name')) cd.dataset.addr=cd.getAttribute('data-pencil-name'); cd.style.border='1.5px solid #e5e7eb'; dWireCard(cd); } }); }   // borde base uniforme 2px
       if(dBulevar){ if(!dBulevar.dataset.addr) dBulevar.dataset.addr='Bulevar Artigas 1183'; dWireCard(dBulevar); dSelectCard(dBulevar); }   // seleccionado inicial visible
       var dConfirm=card?card.querySelector('[data-pencil-name="Agregar Domicilio"]'):null;
-      if(dConfirm){ dConfirm.style.cursor='pointer'; dConfirm.addEventListener('click', function(){ dAdd(dActive); setModal(false); }); }
+      if(dConfirm){ dConfirm.style.cursor='pointer'; dConfirm.addEventListener('click', function(){ if(window.__dPend){ window.__dSetMsg(D_BLOQUEO); if(dInBox&&dInBox.scrollIntoView) dInBox.scrollIntoView({block:'nearest',behavior:'smooth'}); return; } dAdd(dActive); setModal(false); }); }   // sin punto marcado tras el aviso no confirma: el error queda bajo Dirección (a la vista aunque el form scrollee)
       // El botón "Nuevo domicilio" venía del diseño muy a la derecha (margen der. < izq.).
       // 1) lo corro a una posición SIMÉTRICA con el margen izquierdo; 2) alineo la grilla a ese borde.
       function alignGrid(){
@@ -2221,11 +2233,11 @@
           dGeo=new google.maps.Geocoder();
           dGMap=new google.maps.Map(gdiv, { center:{lat:-34.9011,lng:-56.1645}, zoom:16, disableDefaultUI:true, keyboardShortcuts:false, clickableIcons:false, gestureHandling:'greedy', styles:window.__GMAP_STYLE });
           dMarker=new google.maps.Marker({ map:dGMap, icon:{ url:'data:image/svg+xml;charset=UTF-8,'+encodeURIComponent(D_PIN_SVG), scaledSize:new google.maps.Size(36,40), anchor:new google.maps.Point(18,34) } });
-          dGMap.addListener('click', function(e){ dAnimatePin(e.latLng); dGMap.panTo(e.latLng); dReverse(e.latLng); });   // SOLO el click mueve el pin: se desliza al punto (transicion), centra el mapa y recalcula la direccion
+          dGMap.addListener('click', function(e){ dAnimatePin(e.latLng); dGMap.panTo(e.latLng); if(window.__dPend){ window.__dPend=false; window.__dSetMsg(''); } else dReverse(e.latLng); });   // tras el aviso, marcar el punto conserva lo escrito   // SOLO el click mueve el pin: se desliza al punto (transicion), centra el mapa y recalcula la direccion
           dCenter(dActive.addr);
         });
         var miUbi=card&&card.querySelector('[data-pencil-name="Mi ubicacion"]'); if(miUbi){ miUbi.style.cursor='pointer'; miUbi.style.zIndex='6'; miUbi.addEventListener('click',function(e){ e.stopPropagation();
-          if(navigator.geolocation){ navigator.geolocation.getCurrentPosition(function(pos){ var ll=new google.maps.LatLng(pos.coords.latitude,pos.coords.longitude); dSetPin(ll); if(dGMap){ dGMap.panTo(ll); dGMap.setZoom(16); } dReverse(ll); }, function(){ dCenter(dActive.addr); }, {enableHighAccuracy:true,timeout:8000}); } else { dCenter(dActive.addr); }
+          if(navigator.geolocation){ navigator.geolocation.getCurrentPosition(function(pos){ var ll=new google.maps.LatLng(pos.coords.latitude,pos.coords.longitude); dSetPin(ll); if(dGMap){ dGMap.panTo(ll); dGMap.setZoom(16); } if(window.__dPend){ window.__dPend=false; window.__dSetMsg(''); } else dReverse(ll); }, function(){ dCenter(dActive.addr); }, {enableHighAccuracy:true,timeout:8000}); } else { dCenter(dActive.addr); }
         }); }   // "mi ubicación": GPS -> mueve el pin y actualiza la direccion (fallback: el punto del caso)
       }
     })();
@@ -2253,7 +2265,7 @@
       // picker EXTERNO vertical, a la izquierda del device: maneja el escenario del iframe (que trae su picker oculto por ctx=device)
       var extPicker=document.createElement('div');
       extPicker.style.cssText='position:absolute;left:24px;top:50%;transform:translateY(-50%);z-index:6100;display:none;flex-direction:column;gap:6px;background:rgba(20,24,33,.92);border-radius:16px;padding:6px;box-shadow:0 6px 18px rgba(0,0,0,.4);font:600 12px Inter,system-ui,sans-serif';
-      [{k:'con',l:'Con cobertura'},{k:'sin',l:'Sin cobertura'},{k:'fuera',l:'Fuera de zona'}].forEach(function(c){ var b=document.createElement('button'); b.textContent=c.l; b.dataset.k=c.k; b.style.cssText='border:0;background:transparent;color:#c7ccd3;padding:8px 14px;border-radius:12px;cursor:pointer;font:inherit;white-space:nowrap;text-align:left'; b.addEventListener('click',function(){ try{ var d=frameEl.contentDocument; var btn=d&&d.querySelector('button[data-key="'+c.k+'"]'); if(btn) btn.click(); }catch(e){} extHi(c.k); }); extPicker.appendChild(b); });
+      [{k:'con',l:'Con cobertura'},{k:'sin',l:'Sin cobertura'},{k:'fuera',l:'Fuera de zona'},{k:'noenc',l:'Dirección no encontrada'}].forEach(function(c){ var b=document.createElement('button'); b.textContent=c.l; b.dataset.k=c.k; b.style.cssText='border:0;background:transparent;color:#c7ccd3;padding:8px 14px;border-radius:12px;cursor:pointer;font:inherit;white-space:nowrap;text-align:left'; b.addEventListener('click',function(){ try{ frameEl.contentWindow.postMessage({demoCase:c.k},'*'); }catch(e){} extHi(c.k); }); extPicker.appendChild(b); });   // postMessage (no contentDocument): abierto como archivo local el iframe es de otro origen y el acceso directo fallaba en silencio
       ov.appendChild(extPicker);
       extPicker.__tag = window.__mkDemoTag ? window.__mkDemoTag(6099, ov) : null;   // tag DEMO detras del extPicker (dentro del velo)
       function extHi(k){ [].slice.call(extPicker.children).forEach(function(b){ var on=b.dataset.k===k; b.style.background=on?'#ffffff':'transparent'; b.style.color=on?'#111827':'#c7ccd3'; }); }
