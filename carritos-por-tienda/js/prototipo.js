@@ -47,10 +47,6 @@
     return html.replace(/icons\/supermercado\/([A-Za-z0-9_.-]+\.svg)/g, function (m, archivo) { return lista.indexOf(archivo) >= 0 ? 'icons/' + estado.tienda + '/' + archivo : m; });
   }
   function cantidad(n) { return n + (n === 1 ? ' producto' : ' productos'); }
-  // Pantalla de atrás de la confirmación del cambio de tienda: la del aviso desde el que se abrió (el carrito lateral si
-  // se llegó desde la barra del prototipo).
-  var desdeCambio = null;
-  function pasoBase(e) { return e.paso === 'cambio' ? desdeCambio || 'lateral' : e.paso; }
   var hojaAbierta = true; // lista de tiendas que abre el logo (mobile), abierta en el paso «Lista de tiendas»
   // carrito lateral de desktop, abierto en el paso «Carrito lateral»; cerrado, queda la home (desktop no tiene un paso
   // para la home sola)
@@ -110,7 +106,7 @@
     // cabecera: el carrito abre el lateral (con el lateral ya abierto no hace nada, así que tocarlo muestra la pista),
     // «Pagar» va directo al checkout, el logo de mobile abre y cierra la lista de tiendas (su flecha apunta para arriba
     // con la lista abierta)
-    var lateralVisible = pasoBase(estado) === 'lateral' && (estado.vista === 'mobile' || lateralAbierto);
+    var lateralVisible = estado.paso === 'lateral' && (estado.vista === 'mobile' || lateralAbierto);
     [doc.getElementById('MPW0019W0019TBLCART'), cab].forEach(function (n) { if (n && !lateralVisible) tocable(n, 'Abrir el carrito', function () { lateralAbierto = true; P.ir('paso', 'lateral'); }); });
     var pagar = doc.getElementById('MPW0019W0019BTNCHECKOUT');
     if (pagar) tocable(pagar, 'Pagar', function () { P.ir('paso', 'checkout'); });
@@ -121,13 +117,13 @@
     var menu = doc.getElementById('vMENUIMG_MPAGE');
     if (menu) tocable(menu, 'Abrir el menú', function () { P.ir('paso', 'menu'); });
   }
-  // Cambiar de tienda desde el selector (la lista del logo, el menú lateral o la barra de desktop): es el camino habitual,
-  // cambia directo.
-  function cambioDirecto(t) { fueraDelPrototipo('Ir a ' + t.nombre, 'Cambia a ' + t.nombre + ' directo, sin confirmación: es el selector de tiendas.'); }
-  // Ir al carrito de otra tienda desde el aviso de los otros carritos: no es el camino habitual para cambiar de tienda
-  // y puede no ser una decisión consciente, así que antes se confirma (paso «Confirmar cambio de tienda», sobre la
-  // pantalla del aviso).
-  function irAlCarrito(t) { desdeCambio = P.estado().paso; P.estado().destino = t.id; P.ir('paso', 'cambio'); }
+  // Cambiar de tienda es directo por cualquier camino, sin confirmación: el carrito de la tienda actual queda guardado y
+  // se vuelve con un toque. Desde el selector (la lista del logo, el menú lateral o la barra de desktop), a la home de esa
+  // tienda; desde las fichas del aviso de los otros carritos, a su carrito.
+  function cambioDirecto(t) { fueraDelPrototipo('Ir a ' + t.nombre, 'Cambia a ' + t.nombre + ' directo, sin confirmación.'); }
+  function irAlCarrito(t) {
+    fueraDelPrototipo('Carrito de ' + t.nombre, 'Cambia a ' + t.nombre + ' directo, sin confirmación, y abre su carrito' + (t.carrito ? ' (<code>' + t.carrito + '</code>)' : '') + '; el de ' + actual().nombre + ' queda guardado. Ahí, el aviso «Tenés otro carrito en ' + actual().nombre + '» ofrece la vuelta.');
+  }
   // Aviso de los otros carritos: «Tenés otro carrito en» con una ficha por tienda que lleva a su carrito. Sin fondo en la
   // página del carrito (debajo de la fila del título en desktop; entre el título y «Vaciar Carrito» en mobile), en el
   // carrito lateral; en el checkout, en un bloque recto con el color claro de la tienda debajo del resumen. Cada ficha
@@ -204,39 +200,6 @@
     P.render();
   }
 
-  // Confirmación antes de cambiar de tienda (paso «Confirmar cambio de tienda»), con el estilo del popup del sitio:
-  // diálogo centrado en desktop y hoja inferior en mobile, sobre la pantalla del aviso desde el que se abrió. Ahí el
-  // cliente ya sabe que la tienda actual tiene productos (lo dice el carrito): solo se le avisa que cambia de tienda.
-  // Cancelar vuelve a esa pantalla.
-  function quedarse() { P.ir('paso', desdeCambio || 'lateral'); }
-  function dialogoCambio(doc, estado) {
-    var destino = porId(estado.destino);
-    var capa = doc.createElement('div');
-    capa.className = 'CambioCapa';
-    capa.innerHTML = '<div class="CambioFondo" tabindex="-1" aria-hidden="true"></div>' +
-      '<div class="CambioDialogo" role="alertdialog" aria-modal="true" aria-labelledby="CambioTitulo" aria-describedby="CambioTexto">' +
-      '<div class="CambioTitulo" id="CambioTitulo">¿Ir a <span class="SinCorte">' + destino.nombre + '</span>?</div>' +
-      '<div class="CambioTexto" id="CambioTexto">Tu carrito de <span class="SinCorte">' + actual().nombre + '</span> queda guardado.</div>' +
-      '<div class="CambioBotones"><button type="button" class="wButtonActionDefualt CambioBoton CambioIr">Ir a ' + destino.nombre + '</button>' +
-      '<button type="button" class="wBtnSecondaryAction CambioBoton CambioCancelar">Cancelar</button></div></div>';
-    doc.body.appendChild(capa);
-    tocable(capa.querySelector('.CambioFondo'), 'Cancelar', quedarse);
-    tocable(capa.querySelector('.CambioCancelar'), 'Cancelar', quedarse);
-    tocable(capa.querySelector('.CambioIr'), 'Ir a ' + destino.nombre, function () {
-      fueraDelPrototipo('Carrito de ' + destino.nombre, 'Cambia a ' + destino.nombre + ' y abre su carrito' + (destino.carrito ? ' (<code>' + destino.carrito + '</code>)' : '') + '; el de ' + actual().nombre + ' queda guardado.');
-    });
-    // Esc cancela; Tab no sale del diálogo
-    capa.addEventListener('keydown', function (ev) {
-      if (ev.key === 'Escape') { quedarse(); return; }
-      if (ev.key !== 'Tab') return;
-      var b = capa.querySelectorAll('.CambioDialogo button'), primero = b[0], ultimo = b[b.length - 1];
-      if (ev.shiftKey && doc.activeElement === primero) { ev.preventDefault(); ultimo.focus(); }
-      else if (!ev.shiftKey && doc.activeElement === ultimo) { ev.preventDefault(); primero.focus(); }
-    });
-    // el foco arranca en Cancelar: la confirmación está para atajar un cambio sin querer
-    capa.querySelector('.CambioCancelar').focus({ preventScroll: true });
-  }
-
   // Menú lateral (mobile) sobre la home: tiene la misma lista de tiendas, con las pastillas.
   function menuLateral(doc, estado) {
     if (estado.vista !== 'mobile') return;
@@ -304,14 +267,14 @@
   }
 
   function pantalla(estado) {
-    var mobile = estado.vista === 'mobile', paso = pasoBase(estado);
+    var mobile = estado.vista === 'mobile', paso = estado.paso;
     // la home (lista de tiendas, menú y carrito lateral) se capturó en desktop y en un teléfono: su JavaScript la arma
     // distinto según el ancho al cargar
     var base = paso === 'carrito' ? PANT.carrito : paso === 'checkout' ? PANT.checkout : mobile ? PANT.inicioMovil : PANT.inicio;
     return {
       cabeza: conTema(conIconos(CABEZA, estado), estado),
       html: conIconos(base.cuerpo, estado),
-      claseHtml: base.claseHtml + (estado.paso === 'tiendas' && mobile && hojaAbierta ? ' ChannelSheetOpen' : '') + (estado.paso === 'cambio' ? ' CambioAbierto' : ''),
+      claseHtml: base.claseHtml + (estado.paso === 'tiendas' && mobile && hojaAbierta ? ' ChannelSheetOpen' : ''),
       claseCuerpo: base.claseCuerpo,
       despues: function (doc) {
         comun(doc, estado);
@@ -320,7 +283,6 @@
         if (paso === 'lateral' && (mobile || lateralAbierto)) lateral(doc, estado);
         if (paso === 'carrito') paginaCarrito(doc, estado);
         if (paso === 'checkout') checkout(doc, estado);
-        if (estado.paso === 'cambio') dialogoCambio(doc, estado);
         // El ícono del pie de las listas de tiendas es una máscara: lo pone css/prototipo.css, embebido. Con el archivo
         // que trae el HTML, la primera vista (antes de que cargue esa hoja) lo pediría y abierto en local eso falla.
         Array.prototype.forEach.call(doc.querySelectorAll('.ChannelSelectorFootIcon'), function (e) { e.style.removeProperty('--ch-foot-icon'); });
@@ -335,7 +297,7 @@
   // Notas de la ficha. enMobile: si los pines van también en mobile; sobreColor: en el checkout, sobre el color claro.
   function notasFicha(enMobile, sobreColor) {
     function pin(s, t) { return { d: s, m: enMobile ? s : null, t: t }; }
-    var lleva = 'Lleva al carrito de esa tienda (<code>/farmacia/carrito</code>, <code>/express/carrito</code>; <i>a confirmar:</i> que con sesión abra el carrito de esa tienda), <b>después de confirmar el cambio de tienda</b> (paso «Confirmar cambio de tienda»). Etiqueta para lectores de pantalla: «Carrito de TiendaFarma, 2 productos» (singular: «1 producto»). Con el teclado, contorno de 2 px del color de la tienda a 2 px de la ficha.';
+    var lleva = 'Lleva al carrito de esa tienda (<code>/farmacia/carrito</code>, <code>/express/carrito</code>; <i>a confirmar:</i> que con sesión abra el carrito de esa tienda), <b>directo, sin confirmación</b>: el cliente acaba de elegir ir a ese carrito, no pierde nada (el de la tienda actual queda guardado) y en el carrito de destino el aviso le ofrece la vuelta. Ningún camino a otra tienda pide confirmación (ni el selector, ni las fichas, ni banners o enlaces). Etiqueta para lectores de pantalla: «Carrito de TiendaFarma, 2 productos» (singular: «1 producto»). Con el teclado, contorno de 2 px del color de la tienda a 2 px de la ficha.';
     var borde = 'borde 1 px: <b>toma el tono de la superficie donde está la ficha</b>. Sobre blanco (la página del carrito y el carrito lateral), gris <code>#BFBFBF</code> (<code>--colors_line</code>, 1,84:1). Sobre el color claro de la tienda (checkout), el color de la tienda al 30 % (<code>--accent-hover-light</code>: <code>#0047954D</code> en Super, <code>#D9443B4D</code> en Express; TiendaFarma no lo tiene en su configuración y va <code>#25509E4D</code>): un gris sobre una superficie de color quedaba ajeno. No es el color de la tienda saturado: no mezcla la tienda actual con la ficha de otra. Alcanza con que se vea: la ficha se reconoce por el relleno blanco, el nombre y el isotipo. Al pasar el mouse, el mismo tono más intenso: sobre blanco, <code>#5F6062</code> (<code>--colors_darkgrey_header</code>); sobre el color claro, el color de hover de la tienda (<code>--accent-hover</code>: <code>#0056B2</code> en Super, <code>#C13A32</code> en Express, <code>#3F6DB7</code> en TiendaFarma).' + (sobreColor ? ' <b>Acá, sobre el color claro: el tono de la tienda al 30 %.</b>' : ' <b>Acá, sobre blanco: gris.</b>');
     return [
       pin('.Ficha', '<b>Ficha.</b> Radio 999, padding 3/4/3/3; isotipo de 24 px en círculo (padding 2), nombre y pastilla, separados 6 px. <b>El nombre va en el color de texto del sitio</b> (<code>#333</code>, 12,6:1 sobre blanco), no en el de la tienda: la ficha es de otra tienda, y con el color de la tienda actual quedaría, por ejemplo, «Super» en el rojo de Express; su isotipo ya la identifica. Nombre en <b>seminegrita</b>: la familia «Open Sans Semibold» (600). No alcanza con <code>font-weight: 600</code> sobre «Open Sans»: en el sitio esa familia solo trae el 400 y el navegador simularía la negrita. Fondo blanco, ' + borde + ' ' + lleva),
@@ -348,7 +310,7 @@
   // Cabecera desktop: en desktop no hay lista de tiendas ni menú lateral, así que estas notas van con la página del
   // carrito, donde la cabecera se ve entera.
   var NOTAS_CABECERA_DESKTOP = [
-    { d: ['a[aria-label="Farma"][data-tooltip]', 140, 17], m: null, t: '<b>En desktop el selector de tiendas no cambia</b> (sin pastillas). Al tocar otra tienda cambia directo, sin confirmación: el selector es el camino habitual para cambiar de tienda. El aviso de los otros carritos va en el carrito (lateral y página) y en el checkout.' },
+    { d: ['a[aria-label="Farma"][data-tooltip]', 140, 17], m: null, t: '<b>En desktop el selector de tiendas no cambia</b> (sin pastillas). Al tocar otra tienda cambia directo, sin confirmación, como cualquier camino a otra tienda. El aviso de los otros carritos va en el carrito (lateral y página) y en el checkout.' },
     { d: '#MPW0019W0019CARTCOUNT', m: null, t: 'El contador de la cabecera cuenta <b>productos distintos</b>, no unidades: es el mismo número del título del carrito y el que se usa en las pastillas y los avisos.' },
     { d: '#MPW0019W0019BTNCHECKOUT', m: null, t: '«Pagar» de la cabecera lleva directo al checkout, sin pasar por el carrito: por eso el aviso también va en el checkout. En mobile la cabecera no tiene «Pagar».' }
   ];
@@ -364,7 +326,6 @@
   // ---------------------------------------------------------------- dónde hace algo cada control
   // La barra muestra cada control y cada opción solo donde cambia algo de la pantalla (mostrar). Sin otras tiendas con
   // productos no hay aviso, y el checkout en mobile no lo lleva.
-  function hayOtras(e) { return Number(e.otras) > 0; }
   // la lista de tiendas y el menú lateral son solo de mobile
   function enMobile(e) { return e.vista === 'mobile'; }
 
@@ -377,20 +338,16 @@
     mobile: { ancho: 390 },
     estilos: ['css/prototipo.css'],
     controles: [
-      { id: 'paso', nombre: 'Paso', reiniciaScroll: true, alCambiar: function (v) { if (v === 'tiendas') hojaAbierta = true; if (v === 'lateral') lateralAbierto = true; if (v !== 'cambio') desdeCambio = null; },
+      { id: 'paso', nombre: 'Paso', reiniciaScroll: true, alCambiar: function (v) { if (v === 'tiendas') hojaAbierta = true; if (v === 'lateral') lateralAbierto = true; },
         opciones: [['tiendas', 'Lista de tiendas', enMobile], ['menu', 'Menú lateral', enMobile], ['lateral', 'Carrito lateral'], ['carrito', 'Página del carrito'],
-          ['checkout', 'Checkout'], ['cambio', 'Confirmar cambio de tienda', hayOtras]] },
+          ['checkout', 'Checkout']] },
       // la tienda en la que está el cliente: cambian el título, las otras tiendas, los colores y los logos
       { id: 'tienda', nombre: 'Tienda actual', inicial: 'supermercado', reiniciaScroll: true,
         opciones: [['supermercado', 'Super'], ['express', 'Express'], ['farmacia', 'TiendaFarma']] },
-      // las tiendas de las fichas que hay en el aviso
-      { id: 'destino', nombre: 'Tienda a la que cambia', inicial: 'express', mostrar: function (e) { return e.paso === 'cambio'; },
-        opciones: TIENDAS.map(function (t) { return [t.id, t.nombre, function (e) { return otras(e).indexOf(t) >= 0; }]; }) },
-      // en desktop la lista de tiendas y el menú no cambian; en mobile, el checkout no lleva aviso (en la confirmación del
-      // cambio de tienda, según la pantalla de atrás)
+      // en desktop la lista de tiendas y el menú no cambian; en mobile, el checkout no lleva aviso
       { id: 'otras', nombre: 'Otras tiendas con productos', inicial: '1',
-        mostrar: function (e) { var p = pasoBase(e); return e.vista === 'mobile' ? p !== 'checkout' : p !== 'tiendas' && p !== 'menu'; },
-        opciones: [['0', '0', function (e) { return e.paso !== 'cambio'; }], ['1', '1'], ['2', '2']] }
+        mostrar: function (e) { var p = e.paso; return e.vista === 'mobile' ? p !== 'checkout' : p !== 'tiendas' && p !== 'menu'; },
+        opciones: [['0', '0'], ['1', '1'], ['2', '2']] }
     ],
     pantalla: pantalla,
     // Notas para desarrollo, por paso. d / m: el elemento donde va el pin en desktop / mobile (selector CSS o
@@ -403,7 +360,7 @@
         { d: null, m: ['.ChannelSelectorSheet .ChannelSelectorItem:not(.ChannelSelectorItemCurrent) .ChannelSelectorBadge.ConCarrito', 0, 0], t: 'El ícono es el del carrito de cada tienda, el mismo de su cabecera (<code>/static/icons/&lt;tienda&gt;/ico_cart.svg</code>), en blanco: Super carrito, TiendaFarma bolsa con cruz, Express canasta.' },
         { d: null, m: ['.ChannelSelectorSheet .ChannelSelectorItem:not(.ChannelSelectorItemCurrent) .ChannelSelectorBadge.ConCarrito', 40, 24], t: 'Pastilla: fondo <code>#008a08</code> (fuera de la paleta: es el verde del contador de la cabecera, <code>#00a80a</code>, oscurecido hasta llegar a AA, 4,53:1 con el blanco). Ícono de 16 px y 5 px de separación; el resto, como la pastilla del sitio: 10 px, 700, padding 4/8, radio 999.' },
         { d: null, m: ['.ChannelSelectorSheet .ChannelSelectorList', 14, 0], t: 'Los datos ya existen: la lista de tiendas tiene un campo para la pastilla (<code>ChannelBadge</code>) que hoy no se carga, y <code>LoadChannelCarts</code> devuelve la cantidad de productos y el total del carrito de cada otra tienda (hoy la web no lo usa).' },
-        { d: null, m: ['.ChannelSelectorSheet [data-tienda="express"]', 14, 0], t: '<b>Al tocar otra tienda, cambia directo</b>, sin confirmación: el selector es el camino habitual para cambiar de tienda. En demo esta lista muestra solo Super y Farma: se armó con Super, Express y TiendaFarma (los nombres y el orden de producción).' }
+        { d: null, m: ['.ChannelSelectorSheet [data-tienda="express"]', 14, 0], t: '<b>Al tocar otra tienda, cambia directo</b>, sin confirmación, como cualquier camino a otra tienda. En demo esta lista muestra solo Super y Farma: se armó con Super, Express y TiendaFarma (los nombres y el orden de producción).' }
       ],
       menu: [
         { d: null, m: '.ChannelSelectorMenu .ChannelSelectorItemCurrent .ChannelSelectorBadge', t: '<b>El menú lateral tiene la misma lista de tiendas</b> que la que abre el logo: van las mismas pastillas, con la misma regla.' },
@@ -411,13 +368,6 @@
         { d: null, m: ['.ChannelSelectorMenu .ChannelSelectorItem:not(.ChannelSelectorItemCurrent) .ChannelSelectorBadge.ConCarrito', 0, 0], t: 'Hoy el CSS del sitio oculta la pastilla en el menú (<code>.ChannelSelectorMenu .ChannelSelectorBadge { display: none }</code>, en <code>hanoi.min.css</code>): hay que mostrarla.' },
         { d: null, m: ['.ChannelSelectorMenu .ChannelSelectorItem:not(.ChannelSelectorItemCurrent) .ChannelSelectorBadge.ConCarrito', 40, 24], t: 'En el menú las otras tiendas no llevan flecha (el sitio la oculta), pero su lugar quedaba y con él la separación de 15 px a la derecha de la pastilla. Hay que sacar ese lugar (<code>.ChannelSelectorState { display: none }</code>, igual que en la lista del logo): así todas las pastillas terminan en el mismo lugar, al final de la fila.' },
         { d: null, m: ['.ChannelSelectorMenu [data-tienda="express"]', 14, 0], t: 'Al tocar otra tienda, cambia directo, sin confirmación, como en la lista del logo. En demo el menú muestra Super y Express (con un ícono de prueba): se armó con Super, Express y TiendaFarma (los nombres y el orden de producción).' }
-      ],
-      cambio: [
-        { d: ['.CambioDialogo', 150, -12], m: ['.CambioDialogo', 150, -12], t: '<b>Confirmación del cambio de tienda fuera del selector.</b> Aparece al tocar otra tienda desde el aviso de los otros carritos (las fichas del carrito lateral, de la página del carrito y del checkout) y desde cualquier otro lugar que lleve a otra tienda (banners, enlaces), <b>solo si el carrito de la tienda actual tiene productos</b>: fuera del selector, cambiar de tienda puede no ser una decisión consciente. <b>No aparece</b> en el selector de tiendas de la cabecera (la lista del logo en mobile, la barra en desktop) ni en el menú lateral: son el camino habitual y cambian directo. Se muestra sobre la pantalla desde la que se tocó. Como ahí el cliente ya sabe que la tienda actual tiene productos, solo le avisa que cambia de tienda.' },
-        { d: ['.CambioDialogo', 190, -12], m: ['.CambioDialogo', 190, -12], t: 'Estilo del popup del sitio (<code>wcPopupBig</code>): fondo <code>rgba(0,0,0,.3)</code>; caja blanca, radio 10, sombra <code>1px 1px 5px rgba(0,0,0,.15)</code>. <b>Desktop:</b> centrado, 400 px de ancho, padding 28. <b>Mobile:</b> hoja inferior a todo el ancho, padding 16 (abajo, por lo menos el área segura del iPhone), radio 10 solo arriba.' },
-        { d: '.CambioTitulo', m: '.CambioTitulo', t: 'Título: «¿Ir a &lt;tienda destino&gt;?», Open Sans 18 px, 400, <code>#333</code>, interlineado 143 %. Debajo, a 8 px: «Tu carrito de &lt;tienda actual&gt; queda guardado.», 14 px, 400, <code>#5F6062</code>. <b>Los dos textos centrados</b>, en desktop y en mobile: son de un renglón y así quedan en el mismo eje que los botones, que ocupan todo el ancho (en mobile, los popups del sitio ya centran el título y el texto). Ningún texto nombra a las tiendas como tales («tienda», «mundo»): el título ya dice adónde se va y el texto, qué pasa con el carrito actual. Los nombres de las tiendas no se cortan en dos renglones. <i>A confirmar:</i> el texto.' },
-        { d: '.CambioIr', m: '.CambioIr', t: 'A 24 px, los botones a todo el ancho, separados 8 px: «Ir a &lt;tienda destino&gt;» (primario, <code>wButtonActionDefualt</code>) cambia de tienda y abre el carrito de esa tienda; «Cancelar» (secundario, <code>wBtnSecondaryAction</code>) cierra y deja todo como estaba. Toman el color de la tienda actual (<code>--accent-color</code> y <code>--accent-color-light</code>). <b>En Express, el texto de «Cancelar» va en <code>#C13A32</code></b> (el hover de Express): con su rojo daba 3,73:1 sobre su color claro y con <code>#C13A32</code> da 4,61:1. Es un problema del botón secundario del sitio en Express en general (y el blanco sobre el rojo del primario da 4,34:1): conviene resolverlo en el sistema de diseño, con un color de texto para Express.' },
-        { d: '.CambioCancelar', m: '.CambioCancelar', t: 'También cancelan Esc y un toque en el fondo; en mobile, deslizar la hoja hacia abajo. Sin ✕: «Cancelar» ya está a la vista. Accesibilidad: <code>role=&quot;alertdialog&quot;</code> y <code>aria-modal</code>, con el título como etiqueta y el texto como descripción; al abrir, el foco va a «Cancelar» (la confirmación está para atajar un cambio sin querer) y no sale del diálogo con Tab; al cerrar vuelve a la ficha tocada; la página de atrás no se desplaza.' }
       ],
       get lateral() { return notasLateral(); },
       // página del carrito: en desktop el aviso va debajo de la fila del título; en mobile, entre el título y «Vaciar Carrito»

@@ -81,30 +81,6 @@ html[data-tienda="farmacia"] .wTxtTabActiveMedium { background-color: var(--acce
 html[data-tienda="farmacia"] .wTxtSplitTitle { color: var(--accent-text); }
 html[data-tienda="farmacia"] .wButtonSplit { border-color: var(--accent-text); color: var(--accent-text); }
 
-/* ---------- Confirmación del cambio de tienda: el popup del sitio (wcPopupBig); hoja inferior en mobile ---------- */
-html.CambioAbierto, html.CambioAbierto body { overflow: hidden; }
-.CambioCapa {
-  position: fixed; inset: 0; z-index: 10000; display: flex; align-items: center; justify-content: center;
-  font-family: 'Open Sans', sans-serif; text-align: left;
-}
-.CambioFondo { position: absolute; inset: 0; background: rgba(0,0,0,.3); }
-.CambioDialogo {
-  position: relative; box-sizing: border-box; width: 400px; max-width: calc(100% - 32px); padding: 28px;
-  background: #fff; border-radius: 10px; box-shadow: 1px 1px 5px rgba(0,0,0,.15);
-}
-/* los dos textos centrados: son de un renglón y quedan en el eje de los botones, que ocupan todo el ancho */
-.CambioTitulo { font-size: 18px; font-weight: 400; line-height: 1.43; color: #333; text-align: center; }
-.CambioTexto { margin-top: 8px; font-size: 14px; font-weight: 400; line-height: 1.43; color: #5F6062; text-align: center; }
-.SinCorte { white-space: nowrap; }
-.CambioBotones { display: flex; flex-direction: column; gap: 8px; margin-top: 24px; }
-.CambioBoton { width: 100%; margin: 0 !important; }
-/* texto del secundario en el color de texto de la tienda: en Express, #C13A32 (con su rojo no llegaba a AA) */
-.CambioDialogo .CambioCancelar, .CambioDialogo .CambioCancelar:hover, .CambioDialogo .CambioCancelar:focus { color: var(--accent-text) !important; }
-@media (max-width: 767px) {
-  .CambioCapa { align-items: flex-end; }
-  .CambioDialogo { width: 100%; max-width: none; padding: 16px 16px max(16px, env(safe-area-inset-bottom)); border-radius: 10px 10px 0 0; }
-}
-
 /* ---------- Lista de tiendas (mobile): pastilla con el ícono del carrito de cada tienda y la cantidad ---------- */
 .ChannelSelectorBadge.ConCarrito { display: inline-flex; align-items: center; gap: 5px; background: #008a08; }
 /* El menú lateral tiene la misma lista: el sitio hoy oculta ahí la pastilla (.ChannelSelectorMenu .ChannelSelectorBadge) */
