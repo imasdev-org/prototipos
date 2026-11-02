@@ -1,41 +1,43 @@
-# Plantilla de prototipos
+# Carritos por tienda · Tienda Inglesa (web)
 
-Base para armar prototipos navegables de una feature, con el mismo funcionamiento que el del selector de millas.
+Prototipo navegable para que el cliente sepa que cada tienda (Super, Express, TiendaFarma) tiene su propio carrito (WI-13898). El carrito dice de qué tienda es y avisa si hay productos en las otras («Tenés otro carrito en…»). Si el cliente va a otra tienda desde ese aviso, se le pide confirmar el cambio. La lista de tiendas de mobile muestra cuántos productos tiene el carrito de cada una.
 
-**Verla andando:** abrir `index.html` en el navegador (no necesita build ni servidor).
+**Abrir el prototipo:** <https://imasdev-org.github.io/carritos-por-tienda/>
 
-## Qué trae
+**Reglas para desarrollo:** en el prototipo, con «Notas para desarrollo» (pines numerados sobre cada pantalla).
 
-| Parte | Qué hace |
+## Cómo se usa
+
+La barra de arriba controla el prototipo. Con la flecha de la derecha se pliega a una solapa chica; tocando la solapa vuelve. Cada control aparece solo en las pantallas donde cambia algo.
+
+| Control | Qué hace |
 |---|---|
-| **Barra de control** | Negra, arriba. Con la flecha de la derecha se pliega a una solapa chica; tocando la solapa vuelve. Recuerda si quedó plegada. |
-| **Vista** | Primer control de la barra, siempre: Desktop o Mobile. |
-| **Controles de la feature** | Después de Vista: el paso del recorrido y lo que necesite la feature (cliente, saldo, etc.). |
-| **Título** | El nombre de la feature, en la barra y en la pestaña. |
-| **Notas para desarrollo** | Pines numerados sobre la pantalla y un panel con las reglas de cada paso. El botón aparece solo si el prototipo tiene notas. |
-| **Zonas tocables** | Tocando un lugar que no hace nada se marcan por un momento las zonas que sí responden. |
-| **Desktop y mobile** | Desktop ocupa todo el ancho, con el contenido centrado y achicado si la ventana no le da lugar. Mobile, con el ancho de un teléfono y sin barra de desplazamiento: se desplaza con el dedo, la rueda o arrastrando con el mouse. |
+| **Vista** | Desktop o Mobile |
+| **Paso** | Lista de tiendas y Menú lateral (solo mobile), Carrito lateral, Página del carrito, Checkout y Confirmar cambio de tienda. También se recorre tocando la pantalla: el logo, el ícono del carrito, Ver Carrito Completo, Pagar, Proceder al Pago y las fichas del aviso |
+| **Tienda actual** | Super, Express o TiendaFarma: cambian los colores, los logos y los íconos de la cabecera |
+| **Tienda a la que cambia** | En la confirmación, a qué tienda se va (una de las del aviso) |
+| **Otras tiendas con productos** | 0, 1 o 2. Con Super como tienda actual se suma primero Express y después TiendaFarma |
+| **Notas para desarrollo** | Muestra pines numerados sobre la pantalla y un panel con las reglas de cada parte |
 
-## Cómo arrancar un prototipo nuevo
+Tocando un lugar de la pantalla que no hace nada se marcan por un momento las zonas que sí responden.
 
-1. Clonar esta plantilla en una carpeta con el nombre de la feature:
-   `git clone C:\Users\nberriel\Documents\GitHub\plantilla-prototipos C:\Users\nberriel\Documents\GitHub\<feature>`
-2. En el clon, activar el hook de versión: `git config core.hooksPath .githooks`.
-3. Completar `js/prototipo.js`: título, controles, pantallas y notas. Las instrucciones detalladas están en [`CLAUDE.md`](CLAUDE.md).
-4. Reemplazar `css/prototipo.css` con los estilos de la feature, y poner el nombre en el `<title>` de `index.html`.
-5. Si el prototipo se publica (por ejemplo en GitHub Pages), apuntar el clon a su propio repositorio remoto.
+## Qué muestra
+
+- **Carrito lateral y página del carrito:** el título «Tu carrito de &lt;tienda&gt;» y, si otra tienda tiene productos, «Tenés otro carrito en» (o «otros carritos») con una ficha por tienda: isotipo, nombre y cantidad de productos. La ficha lleva al carrito de esa tienda, después de confirmar.
+- **Checkout (desktop):** el mismo aviso, en un bloque con el color claro de la tienda debajo del resumen. El checkout mobile no lo lleva.
+- **Confirmación del cambio de tienda:** «¿Ir a &lt;tienda&gt;?», «Vas a cambiar de tienda. Tu carrito de &lt;tienda actual&gt; queda guardado.», con «Ir a &lt;tienda&gt;» y «Cancelar». Diálogo en desktop y hoja inferior en mobile. Desde el selector de tiendas (cabecera, lista del logo o menú) el cambio es directo, sin confirmación.
+- **Lista de tiendas y menú lateral (mobile):** una pastilla con el ícono del carrito de cada tienda y su cantidad de productos. La tienda actual lleva el ✓ sobre el ícono, el nombre en negrita y el borde del ícono, igual en las dos listas.
+
+Las pantallas son capturas del ambiente de demo, con datos de ejemplo.
 
 ## Estructura
 
 | Archivo | Contenido |
 |---|---|
-| `index.html` | Página: carga el núcleo y el prototipo |
-| `js/nucleo.js` | Barra, solapa, vista, notas y pista de zonas (no se edita) |
-| `css/nucleo.css` | Estilos del núcleo (no se edita) |
-| `js/prototipo.js` | Configuración, pantallas y notas de la feature (ejemplo) |
-| `css/prototipo.css` | Estilos de la feature (ejemplo) |
-| `herramientas/subir-version.js` y `.githooks/` | Versión `?v=` en cada commit, para que un sitio publicado no sirva archivos viejos desde la caché |
-
-## Cambios al núcleo
-
-Si algo de la barra, las notas o las zonas tiene que cambiar, se cambia acá y se lleva a los prototipos que lo necesiten (por ejemplo, `git pull` desde la plantilla en cada clon).
+| `index.html` | La página del prototipo |
+| `js/prototipo.js` | Las pantallas, los controles y las notas para desarrollo |
+| `css/prototipo.css` | Los estilos nuevos (aviso, fichas, confirmación, pastillas) |
+| `pantallas/` | Las pantallas capturadas de demo |
+| `sitio/` | Hojas de estilo, imágenes, íconos y fuentes del sitio que usan las pantallas |
+| `js/nucleo.js`, `css/nucleo.css` | La barra, el marco de la pantalla, las notas y la pista de zonas (de la plantilla de prototipos) |
+| `herramientas/` | La captura de las pantallas de demo y el número de versión de los archivos |
