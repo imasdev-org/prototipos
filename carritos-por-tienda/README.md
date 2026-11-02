@@ -25,7 +25,7 @@ Tocando un lugar de la pantalla que no hace nada se marcan por un momento las zo
 
 - **Carrito lateral y página del carrito:** el título «Tu carrito de &lt;tienda&gt;» y, si otra tienda tiene productos, «Tenés otro carrito en» (o «otros carritos») con una ficha por tienda: isotipo, nombre y cantidad de productos. La ficha lleva al carrito de esa tienda, después de confirmar.
 - **Checkout (desktop):** el mismo aviso, en un bloque con el color claro de la tienda debajo del resumen. El checkout mobile no lo lleva.
-- **Confirmación del cambio de tienda:** «¿Ir a &lt;tienda&gt;?», «Vas a cambiar de tienda. Tu carrito de &lt;tienda actual&gt; queda guardado.», con «Ir a &lt;tienda&gt;» y «Cancelar». Diálogo en desktop y hoja inferior en mobile. Desde el selector de tiendas (cabecera, lista del logo o menú) el cambio es directo, sin confirmación.
+- **Confirmación del cambio de tienda:** «¿Ir a &lt;tienda&gt;?» y «Tu carrito de &lt;tienda actual&gt; queda guardado.», con «Ir a &lt;tienda&gt;» y «Cancelar». Diálogo en desktop y hoja inferior en mobile. Desde el selector de tiendas (cabecera, lista del logo o menú) el cambio es directo, sin confirmación.
 - **Lista de tiendas y menú lateral (mobile):** una pastilla con el ícono del carrito de cada tienda y su cantidad de productos. La tienda actual lleva el ✓ sobre el ícono, el nombre en negrita y el borde del ícono, igual en las dos listas.
 
 Las pantallas son capturas del ambiente de demo, con datos de ejemplo.
