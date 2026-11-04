@@ -1,0 +1,844 @@
+/*
+ * Prototipo del selector de millas.
+ * Las pantallas son HTML real generado desde el diseño en Penpot (pantallas/*.js, ver herramientas/).
+ * Lo que cambia con esta propuesta o con el estado (recuadro de millas de la ficha, panel de millas de Entrega,
+ * Resumen, botón Continuar, totales del carrito, contador, cliente común) son componentes vivos.
+ */
+(function () {
+  'use strict';
+  // Versión que se cargó (la pone herramientas/subir-version.js como ?v= en index.html): se ve en el título de la pestaña
+  // para saber a simple vista si el navegador trajo la última publicación o una guardada en caché.
+  var VERSION = (function () { var s = document.currentScript, m = s && /[?&]v=([0-9-]+)/.exec(s.src); return m ? m[1] : 'local'; })();
+  var R = window.Reglas;
+
+  // ---------------------------------------------------------------- utilidades
+  function el(tag, attrs, contenido) {
+    var n = document.createElement(tag);
+    if (attrs) Object.keys(attrs).forEach(function (k) {
+      if (k === 'class') n.className = attrs[k];
+      else if (k === 'html') n.innerHTML = attrs[k];
+      else if (k === 'style') n.style.cssText = attrs[k];
+      else n.setAttribute(k, attrs[k]);
+    });
+    if (contenido != null) n.appendChild(typeof contenido === 'string' ? document.createTextNode(contenido) : contenido);
+    return n;
+  }
+  function pos(n, x, y, w, h) {
+    n.style.left = x + 'px'; n.style.top = y + 'px';
+    if (w != null) n.style.width = w + 'px';
+    if (h != null) n.style.height = h + 'px';
+    return n;
+  }
+  function texto(t, clase, x, y, estilo) {
+    return pos(el('div', { class: 'txt ' + (clase || ''), style: estilo || '' }, t), x, y);
+  }
+  // zona(x, y, w, h, etiqueta, accion) o zona([x, y, w, h], etiqueta, accion): área tocable sobre la pantalla
+  function zona(x, y, w, h, etiqueta, accion) {
+    if (Array.isArray(x)) { etiqueta = y; accion = w; var a = x; x = a[0]; y = a[1]; w = a[2]; h = a[3]; }
+    var z = pos(el('button', { class: 'zona', type: 'button', 'aria-label': etiqueta, title: etiqueta }), x, y, w, h);
+    z.addEventListener('click', accion);
+    return z;
+  }
+  function P(d, a, b) { return d ? a : b; }
+  // Nodos marcados al generar la pantalla (data-k): se les cambia el texto o se ocultan según el estado.
+  function marca(raiz, clave) { return raiz.querySelector('[data-k="' + clave + '"]'); }
+  function ponerTexto(raiz, clave, valor) { var n = marca(raiz, clave); if (n) n.querySelector('span').textContent = valor; }
+  // Posición horizontal de un nodo generado dentro de la pantalla (suma los left de sus contenedores).
+  function izquierdaEnPantalla(n, raiz) {
+    var x = 0;
+    for (; n && n !== raiz; n = n.parentElement) x += parseFloat(n.style.left) || 0;
+    return x;
+  }
+  function mostrar(raiz, clave, visible) {
+    Array.prototype.forEach.call(raiz.querySelectorAll('[data-k="' + clave + '"]'), function (n) { n.style.visibility = visible ? '' : 'hidden'; });
+  }
+
+  var ICONO_CHANCHITO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 17h3v2a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-3a3.16 3.16 0 0 0 2-2h1a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1h-1a5 5 0 0 0-2-4V3a4 4 0 0 0-3.2 1.6l-.3.4H11a6 6 0 0 0-6 6v1a5 5 0 0 0 2 4v3a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1z"/><circle cx="16" cy="10" r="1" fill="currentColor" stroke="none"/><path d="M2 8v1a2 2 0 0 0 2 2h1"/></svg>';
+  var CHEVRON = '<svg class="chevron" viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="#9AA3B8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+  // Colores por segmento (Personal Bank = azul marino; cliente común = naranja).
+  // panel*: fondo y borde del panel de millas de Entrega; divisoria = color de la pista.
+  // boton*: «Usar el máximo» (inactivo: borde y texto; activo: fondo, borde de 2 px y texto, con tilde).
+  // botonHover*: con el mouse encima, fondo = color del texto al 8 % sobre el fondo del estado (capa de Material 3);
+  // en cliente común el texto se oscurece para no bajar de 4,5:1.
+  var COLORES = {
+    pb: { pista: '#B8BDC9', relleno: 'linear-gradient(90deg,#5A6380,#000C39)', tirador: '#000D3A',
+      etiquetaFondo: 'rgba(34,63,131,.10)', etiquetaTexto: '#223F83', etiquetaMonto: '#000D3C', icono: '#223F83',
+      panelFondo: '#F4F5F9', panelBorde: '#DEE2EC', divisoria: '#B8BDC9',
+      botonBorde: '#223F83', botonTexto: '#223F83', botonActivoFondo: '#D3D9E6', botonActivoBorde: '#223F83', botonActivoTexto: '#223F83',
+      botonHoverFondo: '#EDF0F5', botonHoverTexto: '#223F83', botonHoverActivoFondo: '#C5CDDE', botonHoverActivoTexto: '#223F83' },
+    comun: { pista: '#FDD4B9', relleno: 'linear-gradient(90deg,#FE9A5A,#F95E00)', tirador: '#FE6002',
+      etiquetaFondo: 'rgba(255,98,0,.10)', etiquetaTexto: '#464646', etiquetaMonto: '#464646', icono: '#C75000',
+      panelFondo: '#FFF7F2', panelBorde: '#FFE7D9', divisoria: '#FDD4B9',
+      botonBorde: '#FF6200', botonTexto: '#DE5500', botonActivoFondo: '#FFE0CC', botonActivoBorde: '#DE5500', botonActivoTexto: '#A84300',
+      botonHoverFondo: '#FCF1EB', botonHoverTexto: '#9A3D00', botonHoverActivoFondo: '#F8D3BC', botonHoverActivoTexto: '#9A3D00' }
+  };
+
+  // ---------------------------------------------------------------- estado
+  var estado;
+  function estadoInicial(previo) {
+    return {
+      vista: previo ? previo.vista : (anchoVentana() < 700 ? 'mobile' : 'desktop'),
+      pantalla: 'ficha',
+      cajon: false,
+      segmento: previo ? previo.segmento : 'pb',
+      notas: previo ? previo.notas : false,
+      ficha: { cantidad: R.FICHA.cantidadInicial }, // unidades del vino en el carrito (0 = «Agregar al Carrito»)
+      pedido: { millas: null, previo: null, maxActivo: false },
+      facturaRut: false,
+      entrega: previo ? previo.entrega : 'domicilio', // Entrega: 'domicilio' o 'retiro' (se elige con los botones de la pantalla)
+      direccion: '' // Entrega: dirección elegida (vacío = todavía no eligió; las secciones de abajo están ocultas)
+    };
+  }
+  function maximoPedido() { return R.maximoPedido(estado.segmento); }
+  function millasIniciales() { return R.valorInicialPedido(estado.segmento); }
+  function millasPedido() {
+    if (estado.pedido.millas == null) estado.pedido.millas = millasIniciales();
+    return estado.pedido.millas;
+  }
+  function resumenActual() {
+    var r = R.resumen(estado.segmento, estado.entrega, millasPedido());
+    if (estado.pantalla === 'entrega' && !estado.direccion) {
+      // Sin dirección elegida todavía no hay envío en el Resumen: ni fila de envío ni «más el envío es gratis».
+      var c = {}; Object.keys(r).forEach(function (k) { c[k] = r[k]; });
+      c.entrega = 0; c.rotuloEntrega = null; c.total = r.subtotal - r.descuento; c.salteaPago = false;
+      return c;
+    }
+    return r;
+  }
+
+  // Lógica del selector de Entrega: campo, control y botón sincronizados.
+  function cambiarMillas(obj, valor, maximo) {
+    obj.millas = R.acotar(valor, maximo);
+    obj.maxActivo = false; // mover el control o editar el campo desactiva "Usar el máximo"
+  }
+  function alternarMaximo(obj, maximo) {
+    if (!obj.maxActivo) { obj.previo = obj.millas; obj.millas = maximo; obj.maxActivo = true; }
+    else { obj.millas = obj.previo == null ? obj.millas : obj.previo; obj.maxActivo = false; }
+  }
+
+  // ---------------------------------------------------------------- componentes
+  function crearControl(o) {
+    var c = pos(el('div', { class: 'control', role: 'slider', tabindex: '0', 'aria-label': o.etiqueta, 'aria-valuemin': '0' }), o.x, o.y, o.ancho, 44);
+    var pista = el('div', { class: 'pista' }), relleno = el('div', { class: 'relleno' });
+    var tirador = el('div', { class: 'tirador', html: '<img src="assets/icons/volar.svg" alt="">' });
+    pista.appendChild(relleno); c.appendChild(pista); c.appendChild(tirador);
+    // El tirador (30 px) queda SIEMPRE dentro del track: con el valor mínimo su borde izquierdo coincide con el inicio del
+    // track y con el máximo su borde derecho coincide con el final. Su centro recorre solo el tramo útil (ancho − 30 px),
+    // así que el mínimo y el máximo no coinciden con los extremos del track.
+    var TIRADOR = 30, MITAD = TIRADOR / 2, UTIL = o.ancho - TIRADOR;
+    var st = { valor: 0, maximo: 1 };
+    function pintar() {
+      var fraccion = st.maximo ? st.valor / st.maximo : 0;
+      relleno.style.width = (MITAD + fraccion * UTIL) + 'px'; // el relleno llega hasta el centro del tirador
+      tirador.style.left = (fraccion * UTIL) + 'px';
+      c.setAttribute('aria-valuemax', st.maximo); c.setAttribute('aria-valuenow', st.valor);
+      c.setAttribute('aria-valuetext', R.miles(st.valor) + ' millas');
+    }
+    function desdeEvento(ev) {
+      var r = c.getBoundingClientRect(), z = r.width / o.ancho; // z: zoom con el que se achica la pantalla en desktop
+      return R.acotar(((ev.clientX - r.left) / z - MITAD) / UTIL * st.maximo, st.maximo);
+    }
+    // Tocar el track lleva el tirador a ese punto con animación (la transición está en el css). Recién cuando el puntero
+    // se mueve más de 3 px empieza el arrastre: la clase «arrastrando» apaga la transición y el tirador sigue al puntero.
+    var inicioX = null;
+    c.addEventListener('pointerdown', function (ev) {
+      ev.preventDefault(); c.setPointerCapture(ev.pointerId); c.focus({ preventScroll: true });
+      inicioX = ev.clientX;
+      o.alCambiar(desdeEvento(ev));
+    });
+    c.addEventListener('pointermove', function (ev) {
+      if (!c.hasPointerCapture(ev.pointerId)) return;
+      if (!c.classList.contains('arrastrando')) { if (Math.abs(ev.clientX - inicioX) < 3) return; c.classList.add('arrastrando'); }
+      o.alCambiar(desdeEvento(ev));
+    });
+    c.addEventListener('pointerup', function () { c.classList.remove('arrastrando'); inicioX = null; });
+    c.addEventListener('pointercancel', function () { c.classList.remove('arrastrando'); inicioX = null; });
+    c.addEventListener('keydown', function (ev) {
+      var v = st.valor, paso = ev.shiftKey ? 100 : 10, decimo = Math.round(st.maximo / 10);
+      var mapa = { ArrowRight: v + paso, ArrowUp: v + paso, ArrowLeft: v - paso, ArrowDown: v - paso, Home: 0, End: st.maximo, PageUp: v + decimo, PageDown: v - decimo };
+      if (!(ev.key in mapa)) return;
+      ev.preventDefault(); o.alCambiar(R.acotar(mapa[ev.key], st.maximo));
+    });
+    return {
+      nodo: c,
+      set: function (valor, maximo, colores) {
+        st.valor = valor; st.maximo = maximo;
+        pista.style.background = colores.pista; relleno.style.background = colores.relleno; tirador.style.background = colores.tirador;
+        pintar();
+      }
+    };
+  }
+
+  function crearCampo(o) {
+    var c = pos(el('label', { class: 'campo' }), o.x, o.y, o.w, o.h);
+    if (o.borde) c.style.setProperty('--borde', o.borde); // como variable, para que el foco pueda cambiarlo
+    if (o.radio != null) c.style.borderRadius = o.radio + 'px';
+    var input = el('input', { type: 'text', inputmode: 'numeric', autocomplete: 'off', 'aria-label': 'Millas a usar' });
+    c.appendChild(input); c.appendChild(el('span', null, 'millas'));
+    var actual = 0;
+    input.addEventListener('input', function () {
+      var dig = input.value.replace(/\D/g, '');
+      var v = dig === '' ? 0 : parseInt(dig, 10);
+      var acotado = R.acotar(v, o.maximo());
+      if (acotado !== v) input.value = R.miles(acotado); // no deja escribir más que el máximo
+      o.alCambiar(acotado);
+    });
+    input.addEventListener('blur', function () { input.value = R.miles(actual); });
+    input.addEventListener('keydown', function (ev) { if (ev.key === 'Enter') input.blur(); });
+    return {
+      nodo: c,
+      set: function (v) { actual = v; if (document.activeElement !== input) input.value = R.miles(v); }
+    };
+  }
+
+  // «Usar el máximo»: interruptor con los colores del segmento; activo lleva una tilde (Lucide check, ISC) antes del texto.
+  // La tilde va en una ranura que se abre de 0 a 21 px (16 + 5 de separación) al activarse: el texto se desliza 10,5 px
+  // a la derecha y tilde y texto quedan centrados juntos, como el botón segmentado de Material 3 (ver css).
+  var TILDE = '<svg class="tilde" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  function crearBotonMax(o) {
+    var b = pos(el('button', { class: 'boton-max', type: 'button', 'aria-pressed': 'false' }), o.x, o.y, o.w, o.h);
+    b.innerHTML = '<span class="ranura"><span>' + TILDE + '</span></span><span class="frase">Usar el máximo</span>';
+    b.style.borderRadius = o.radio + 'px';
+    b.addEventListener('click', o.alTocar);
+    return {
+      nodo: b,
+      set: function (activo, c) {
+        b.setAttribute('aria-pressed', activo ? 'true' : 'false');
+        b.style.setProperty('--bm-borde', c.botonBorde); b.style.setProperty('--bm-texto', c.botonTexto);
+        b.style.setProperty('--bm-activo-fondo', c.botonActivoFondo); b.style.setProperty('--bm-activo-borde', c.botonActivoBorde);
+        b.style.setProperty('--bm-activo-texto', c.botonActivoTexto);
+        b.style.setProperty('--bm-hover-fondo', c.botonHoverFondo); b.style.setProperty('--bm-hover-texto', c.botonHoverTexto);
+        b.style.setProperty('--bm-hover-activo-fondo', c.botonHoverActivoFondo); b.style.setProperty('--bm-hover-activo-texto', c.botonHoverActivoTexto);
+      }
+    };
+  }
+
+  // Etiqueta «Ahorrás $ X»: se adapta al contenido y, al ganar o perder cifras, cada cifra (y el punto de los miles) entra o
+  // sale animando su ancho y su opacidad (grid-template-columns 0fr ↔ 1fr), así el ícono desliza en lugar de saltar.
+  // El número se compara desde la derecha: las cifras que siguen cambian de valor sin animarse (los dígitos son tabulares).
+  // No se mide nada con JS. Un texto solo para lectores de pantalla evita que se lean las cifras sueltas.
+  function crearEtiquetaAhorro() {
+    var e = el('div', { class: 'etiqueta-ahorro', role: 'status' });
+    var icono = el('span', { class: 'ico' }); icono.innerHTML = ICONO_CHANCHITO;
+    var lector = el('span', { class: 'solo-lectores' });
+    var visual = el('span', { 'aria-hidden': 'true' }, 'Ahorrás ');
+    var monto = el('b', { class: 'monto' }, '$ '), cifras = el('span', { class: 'cifras' });
+    monto.appendChild(cifras); visual.appendChild(monto);
+    e.appendChild(icono); e.appendChild(lector); e.appendChild(visual);
+    var slots = [];
+    function poner(num, animar) {
+      lector.textContent = 'Ahorrás $ ' + num;
+      var cs = num.split('').reverse(), n = Math.max(cs.length, slots.length);
+      for (var i = 0; i < n; i++) {
+        var s = slots[i];
+        if (i < cs.length) {
+          if (!s) {
+            var d = el('span', { class: 'dig' + (animar ? '' : ' sin-transicion') }), t = el('span', null, cs[i]);
+            d.appendChild(t);
+            s = slots[i] = { el: d, t: t, ch: cs[i], saliendo: false, id: 0 };
+            cifras.insertBefore(d, slots[i - 1] ? slots[i - 1].el : null);
+            void d.offsetWidth; // fija el estado inicial (ancho 0, transparente) antes de animar
+            d.classList.add('on');
+            if (!animar) { void d.offsetWidth; d.classList.remove('sin-transicion'); }
+          } else {
+            if (s.saliendo) { s.saliendo = false; clearTimeout(s.id); s.el.style.transitionDelay = ''; s.el.classList.add('on'); }
+            if (s.ch !== cs[i]) { s.ch = cs[i]; s.t.textContent = cs[i]; }
+          }
+        } else if (s && !s.saliendo) {
+          s.saliendo = true;
+          // la opacidad arranca ya avanzada para que no se vea un instante el número equivocado
+          s.el.style.transitionDelay = '0s, -175ms';
+          s.el.classList.remove('on');
+          (function (s) { s.id = setTimeout(function () { if (s.saliendo) { s.el.remove(); var k = slots.indexOf(s); if (k >= 0) slots.splice(k, 1); } }, 310); })(s);
+        }
+      }
+    }
+    function pintar(colores) {
+      e.style.background = colores.etiquetaFondo; e.style.color = colores.etiquetaTexto;
+      icono.style.color = colores.icono; monto.style.color = colores.etiquetaMonto;
+    }
+    return { nodo: e, poner: poner, pintar: pintar };
+  }
+
+  // Encabezado desktop (menú de usuario del diseño): «Personal» solo para Personal Bank y el saldo vigente.
+  function aplicarEncabezado(raiz) {
+    mostrar(raiz, 'pb-chip', estado.segmento === 'pb');
+    ponerTexto(raiz, 'saldo-encabezado', R.miles(R.saldo()) + ' millas');
+  }
+
+  // Panel de millas del checkout (Entrega): la pregunta es la cabecera, adentro y sin banda; fondo y borde según el
+  // segmento. Desktop: pregunta y etiqueta en la primera fila, «Millas disponibles» 8 px debajo y 20 px hasta el control.
+  function crearTarjeta(vista, repintarTodo, y) {
+    var d = vista === 'desktop';
+    var t = el('section', { class: 'tarjeta-millas', 'aria-labelledby': 'pregunta-millas' });
+    if (d) pos(t, 125, y, 883, 162); else pos(t, 20, y, 350, 265);
+    var pregunta = texto('¿Cuántas millas querés usar?', 'pregunta', 15, 16); pregunta.id = 'pregunta-millas';
+    t.appendChild(pregunta);
+    var saldo = texto('', 'saldo', 15, d ? 50 : 60); saldo.innerHTML = 'Millas disponibles: <b>' + R.miles(R.saldo()) + '</b>';
+    t.appendChild(saldo);
+    var cajaEtiqueta = el('div', { class: 'capa', style: 'right:15px;top:' + (d ? 16 : 56) + 'px' });
+    t.appendChild(cajaEtiqueta);
+    var etiqueta = crearEtiquetaAhorro(), etiquetaLista = false;
+    etiqueta.nodo.style.position = 'relative'; cajaEtiqueta.appendChild(etiqueta.nodo);
+    var ancho = d ? 470 : 320; // mobile: de margen a margen de la tarjeta (alineado con el campo y «Usar el máximo»)
+    var obj = estado.pedido;
+    var control = crearControl({ x: 15, y: d ? 84 : 95, ancho: ancho, etiqueta: 'Millas del pedido',
+      alCambiar: function (v) { cambiarMillas(obj, v, maximoPedido()); repintarTodo(); } });
+    t.appendChild(control.nodo);
+    var escala = pos(el('div', { class: 'txt escala', style: 'display:flex;justify-content:space-between' }), 15, d ? 126 : 137, ancho);
+    var escalaMax = el('span');
+    escala.appendChild(el('span', null, '0')); escala.appendChild(escalaMax);
+    t.appendChild(escala);
+    var campo = crearCampo(Object.assign(d ? { x: 524, y: 89, w: 166, h: 34 } : { x: 15, y: 170, w: 154, h: 34 }, {
+      maximo: maximoPedido,
+      alCambiar: function (v) { cambiarMillas(obj, v, maximoPedido()); repintarTodo(); } }));
+    var boton = crearBotonMax(Object.assign(d ? { x: 702, y: 89, w: 166, h: 34 } : { x: 181, y: 170, w: 154, h: 34 }, { radio: 4,
+      alTocar: function () { alternarMaximo(obj, maximoPedido()); repintarTodo(); } }));
+    t.appendChild(campo.nodo); t.appendChild(boton.nodo);
+    var totalValor;
+    if (!d) {
+      t.appendChild(pos(el('div', { class: 'divisoria' }), 15, 220, 320));
+      var fila = pos(el('div', { class: 'txt total', style: 'display:flex;justify-content:space-between;align-items:baseline' }), 15, 230, 320);
+      totalValor = el('span', { class: 'total-monto' });
+      fila.appendChild(el('span', null, 'Total a pagar')); fila.appendChild(totalValor);
+      t.appendChild(fila);
+    }
+    return {
+      nodo: t,
+      actualizar: function () {
+        var c = COLORES[estado.segmento], m = millasPedido(), max = maximoPedido(), r = resumenActual();
+        t.style.setProperty('--panel-fondo', c.panelFondo); t.style.setProperty('--panel-borde', c.panelBorde);
+        t.style.setProperty('--panel-divisoria', c.divisoria);
+        control.set(m, max, c);
+        campo.set(m);
+        boton.set(obj.maxActivo, c);
+        escalaMax.textContent = 'Máximo para este pedido: ' + R.miles(max);
+        etiqueta.pintar(c); etiqueta.poner(R.miles(R.ahorro(m)), etiquetaLista); etiquetaLista = true;
+        if (totalValor) totalValor.textContent = R.pesos(r.total);
+      }
+    };
+  }
+
+  // Resumen de compra del checkout (desktop): caja fija al hacer scroll.
+  function pintarResumen(caja, r) {
+    var filas = [{ t: 'SubTotal', v: R.pesos(r.subtotal), c: '#5F6062' }];
+    if (r.mostrarDescuento) filas.push({ t: 'Descuentos', v: R.pesos(-r.descuento), c: '#223F83', chevron: true });
+    if (r.rotuloEntrega) filas.push({ t: r.rotuloEntrega, v: R.pesos(r.entrega), c: '#5F6062' });
+    filas.push({ t: 'Millas aplicadas', v: R.miles(r.millas), c: '#223F83' });
+    // Título centrado en la franja de 38 px que cierra la línea gris. Con envío a domicilio, el sitio muestra
+    // cuánto falta para el envío gratis en lugar de «RESUMEN».
+    var falta = r.faltaEnvioGratis;
+    var titulo = r.entrega > 0 && falta > 0
+      ? '<div class="titulo envio" style="top:9px;line-height:20px">Con ' + R.pesos(falta) + ' más el envío es gratis</div>'
+      : '<div class="titulo" style="top:9px;line-height:20px">RESUMEN</div>';
+    var h = titulo + '<div class="hr"></div>';
+    filas.forEach(function (f, i) {
+      var y = 51 + i * 33;
+      if (f.chevron) h += '<div style="position:absolute;left:9px;top:' + (y + 14) + 'px;width:10px;height:6px">' + CHEVRON + '</div>';
+      h += '<div class="fila" style="left:' + (f.chevron ? 26 : 21) + 'px;top:' + y + 'px;color:' + f.c + '">' + f.t + '</div>';
+      h += '<div class="fila" style="right:21px;top:' + y + 'px;color:' + f.c + '">' + f.v + '</div>';
+    });
+    var sep = 51 + filas.length * 33;
+    h += '<div class="sep" style="left:21px;width:236px;top:' + sep + 'px"></div>';
+    h += '<div class="fila" style="left:21px;top:' + (sep + 11) + 'px;font-weight:700;color:#464646">Total</div>';
+    h += '<div class="fila" style="right:21px;top:' + (sep + 11) + 'px;font-weight:700;color:#464646">' + R.pesos(r.total) + '</div>';
+    caja.innerHTML = h;
+    caja.style.height = (sep + 11 + 34 + 16) + 'px';
+  }
+  function columnaResumen(altoPantalla) {
+    var col = pos(el('div', { class: 'columna-resumen' }), 1043, 96, 278, altoPantalla - 96 - 24);
+    var caja = el('aside', { class: 'resumen', 'aria-label': 'Resumen de compra' });
+    caja.style.top = ((altoBarra + 16) / zoomActual) + 'px'; // queda fijo debajo de la barra del prototipo
+    col.appendChild(caja);
+    return { nodo: col, caja: caja };
+  }
+
+  // Filas del Resumen del carrito completo: solo pesos (las millas se eligen recién en Entrega), sin entrega.
+  // origen: esquina de la caja que las contiene, en coordenadas de la pantalla.
+  function filasResumenCarrito(d, origen) {
+    var r = R.resumenCarrito(estado.segmento, 0);
+    var X = d ? { izq: 1056, der: 1292, y: 588, det: [1072, 1299], chev: 1044 } : { izq: 35, der: 356, y: 1440, det: [50, 362], chev: 23 };
+    var g = el('div', { class: 'capa', style: 'left:' + (-origen[0]) + 'px;top:' + (-origen[1]) + 'px' });
+    function fila(t, v, y, estilo, izq, der, alto) {
+      var f = pos(el('div', { class: 'fila-resumen', style: estilo }), izq || X.izq, y, (der || X.der) - (izq || X.izq), alto || 34);
+      f.appendChild(el('span', null, t)); f.appendChild(el('span', null, v));
+      g.appendChild(f);
+    }
+    var y = X.y;
+    fila('SubTotal', R.pesos(r.subtotal), y, 'color:#5F6062'); y += 36;
+    if (r.mostrarDescuento) {
+      g.appendChild(pos(el('div', { class: 'capa', style: 'width:10px;height:6px;transform:rotate(180deg)', html: CHEVRON }), X.chev, y + 13));
+      fila('Descuentos', R.pesos(-r.descuento), y, 'color:#223F83', X.izq + 5); y += 33;
+      fila('10%OFF-Personal Bank', R.pesos(-r.descuento), y, 'color:#223F83;font-size:11px', X.det[0], X.det[1], 21); y += 16;
+    }
+    g.appendChild(pos(el('div', { class: 'separador-resumen' }), X.izq, y + 7, X.der - X.izq));
+    fila('Total', R.pesos(r.total), y + 21, 'color:#464646;font-weight:700');
+    return g;
+  }
+
+  // Ficha: el círculo de Volar del ícono de la aclaración toma el color del tirador del segmento
+  // (Personal Bank azul marino, cliente común naranja); el círculo de pesos queda en gris oscuro, como el precio.
+  function pintarIconoVolar(raiz) {
+    var c = marca(raiz, 'icono-volar');
+    if (c) c.style.background = COLORES[estado.segmento].tirador;
+  }
+
+  // Ficha del vino con promo 3x2. Arranca sin unidades en el carrito: «Agregar al Carrito» (como en el diseño de la ficha
+  // sin promo) en el mismo lugar que el botón con la cantidad. Al agregar, el botón pasa a «− 1 +» y el contador del
+  // carrito sube de 3 a 4; con «−» en 1 vuelve «Agregar al Carrito». Desde 3 unidades aparecen juntos la franja
+  // «Aplica promo 3x2 • Ahorrás $ X» y el «Total con promo». Por debajo no hay ni franja ni total: la aclaración sube
+  // hasta ~10 px del botón y «Compartir» hasta 48 px (las distancias del diseño de la ficha sin promo, en Penpot).
+  var SUBE_SIN_PROMO = { aclaracion: 135.4, compartir: 149 };
+  function ultimoTramo(raiz, clave, valor) {
+    var n = marca(raiz, clave); if (!n) return;
+    var tramos = n.querySelectorAll('span span');
+    (tramos.length ? tramos[tramos.length - 1] : n.querySelector('span')).textContent = valor;
+  }
+  // Cocarda de la promo según el cliente, como hoy en el sitio (ConvertPromoBadgeToDiscountTextDisplay):
+  // Personal Bank .wPromoTextInProductDisplayPB #000D3C; cliente común .wPromoTextInProductDisplay #FF6200.
+  function pintarCocarda(raiz) {
+    var c = marca(raiz, 'cocarda');
+    if (c) c.style.background = estado.segmento === 'pb' ? '#000D3C' : '#FF6200';
+  }
+
+  // El nombre del producto ocupa dos líneas en Penpot (Source Sans 3) y una con Myriad Pro, la fuente del sitio, si está
+  // instalada. Con la pantalla ya dibujada se mide cuántas líneas ocupa; si sobra alto en su caja, lo que está debajo
+  // del nombre en la columna del producto sube esa diferencia (con «translate», que se suma al «transform» de la ficha).
+  function cerrarHuecoDelTitulo(pantalla) {
+    var t = marca(pantalla, 'titulo'); if (!t) return;
+    var caja = t.getBoundingClientRect(), texto = t.querySelector('span').getBoundingClientRect();
+    var sobra = parseFloat(t.style.height) * (1 - texto.height / caja.height);
+    if (sobra < 2) return;
+    var d = estado.vista === 'desktop';
+    function enPantalla(n, prop) { var v = 0; for (; n && n !== pantalla; n = n.parentElement) v += parseFloat(n.style[prop]) || 0; return v; }
+    var abajo = enPantalla(t, 'top') + parseFloat(t.style.height), desdeX = d ? 880 : 0, hastaY = d ? 940 : 960;
+    var mueve = function (n) {
+      var y = enPantalla(n, 'top');
+      // los importes anclados a la derecha (sin left) son todos de la columna del producto
+      return y >= abajo - 1 && y < hastaY && (enPantalla(n, 'left') >= desdeX || (!n.style.left && !!n.style.right));
+    };
+    Array.prototype.forEach.call(pantalla.querySelectorAll('.b, .t, .v, .g, .zona, .pin'), function (n) {
+      if (!mueve(n)) return;
+      for (var p = n.parentElement; p && p !== pantalla; p = p.parentElement) if (p.matches('.b, .t, .v, .g') && mueve(p)) return;
+      n.style.translate = '0 ' + (-sobra) + 'px';
+    });
+  }
+
+  function armarFicha(s, d, actualizadores) {
+    var c = marca(s, 'cantidad');
+    if (c) { c.style.left = '0px'; c.style.width = c.parentElement.style.width; c.style.textAlign = 'center'; }
+    var cambiar = function (delta) {
+      return function () {
+        estado.ficha.cantidad = Math.max(0, Math.min(R.FICHA.cantidadMaxima, estado.ficha.cantidad + delta));
+        actualizadores.forEach(function (f) { f(); });
+      };
+    };
+    var quitar = zona(P(d, [913, 224.5, 44, 34], [15, 459.5, 44, 34]), 'Quitar una unidad', cambiar(-1));
+    var sumar = zona(P(d, [1239, 224.5, 44, 34], [331, 459.5, 44, 34]), 'Agregar una unidad', cambiar(1));
+    var agregar = zona(P(d, [913, 224.5, 370, 34], [15, 459.5, 360, 34]), 'Agregar al Carrito', cambiar(1));
+    agregar.classList.add('boton-agregar');
+    agregar.removeAttribute('title');
+    agregar.textContent = 'Agregar al Carrito';
+    s.appendChild(quitar); s.appendChild(sumar); s.appendChild(agregar);
+    actualizadores.push(function () {
+      var cant = estado.ficha.cantidad, r = R.fichaPromo(cant), enCarrito = cant > 0;
+      mostrar(s, 'control-cantidad', enCarrito);
+      quitar.hidden = !enCarrito; sumar.hidden = !enCarrito; agregar.hidden = enCarrito;
+      ponerTexto(s, 'contador', enCarrito ? '4' : '3');
+      ponerTexto(s, 'cantidad', String(cant));
+      ['promo-franja', 'promo-texto', 'total-rotulo', 'total-monto', 'total-millas'].forEach(function (k) { mostrar(s, k, r.aplica); });
+      ultimoTramo(s, 'promo-texto', 'Ahorrás ' + R.pesos(r.ahorro));
+      ponerTexto(s, 'total-monto', R.pesos(r.total));
+      ultimoTramo(s, 'total-millas', R.miles(r.millasTotal) + ' millas');
+      Object.keys(SUBE_SIN_PROMO).forEach(function (k) {
+        Array.prototype.forEach.call(s.querySelectorAll('[data-k="' + k + '"]'), function (n) {
+          n.style.transform = r.aplica ? '' : 'translateY(' + (-SUBE_SIN_PROMO[k]) + 'px)';
+        });
+      });
+    });
+  }
+
+  // Precios del cuchillo y etiqueta «Con Personal Bank» según el cliente (carrito lateral y completo).
+  function aplicarCliente(raiz) {
+    var pb = estado.segmento === 'pb', p = R.PRECIO_CUCHILLO[estado.segmento];
+    ponerTexto(raiz, 'cuchillo-unidad', '1 x ' + R.pesos(p));
+    ponerTexto(raiz, 'cuchillo-total', R.pesos(p));
+    mostrar(raiz, 'pb-etiqueta', pb);
+    mostrar(raiz, 'pb-icono', pb);
+  }
+
+  // ---------------------------------------------------------------- notas para desarrollo
+  var NOTAS = {
+    ficha: [
+      { d: [893, 230], m: [8, 465], t: '<b>Ficha sin selector de millas</b>; las millas se eligen solo al pagar (Entrega). Arranca <b>sin unidades en el carrito</b>: «Agregar al Carrito» (naranja <code>#FF6200</code>, 34 px de alto, radio 17, texto 16/400 blanco), 24 px debajo de la línea del precio. Al agregar, en el mismo lugar aparece el botón con la cantidad «− 1 +» y el contador del carrito sube de 3 a 4; con «−» en 1 vuelve «Agregar al Carrito». <i>Supuesto, sale del diseño y no de una captura del sitio:</i> el botón se convierte en «− N +» una vez agregado el producto. En el prototipo la cantidad llega a 12 y el vino no aparece en la lista del carrito (el carrito del diseño tiene 3 productos). <b>Probalo:</b> agregá y subí a 3: aparecen la franja y el total; subí a 6 y el ahorro se duplica.' },
+      { d: [1078, 180], m: [180, 415], t: '<b>Las millas en la línea del precio, sin recuadro.</b> «$ 744» y, a 10 px, «o <b>1.428 millas</b>», alineado a la línea base del precio: «o» 15/400 <code>#5F5F5F</code>; «1.428 millas» 17/600 <code>#333333</code>, el mismo color del precio (en color se leería como un precio en promoción). N = ⌊precio unitario que paga este cliente × 1,92⌋, sobre el precio de una unidad: no cambia con la cantidad ni con la promo, ni depende del saldo. Si el producto tiene precio Personal Bank, N sale de ese precio <i>(a confirmar con Itaú)</i>. Productos por peso: <i>a definir</i>.' },
+      { d: [893, 290], m: [8, 525], t: '<b>Franja de la promo</b>: «Aplica promo 3x2 • Ahorrás $ 744». <b>Solo aparece en promos que se cumplen con unidades de este mismo producto</b> (lleva N y paga M, N por $ X, la N.ª al X %) y <b>recién desde las unidades que pide la promo</b> (en un 3x2, desde 3). No aparece en las promos que combinan productos distintos (el descuento va al total del carrito y no se puede atribuir a este producto), en «% OFF» o antes/después (el precio ya viene rebajado y se ve el «antes» tachado), ni en precios especiales o descuentos en millas. «Aplica promo 3x2» es el texto que ya muestra el carrito en la línea del producto, sin redactar en la ficha. «Ahorrás $ X» = precio de lista × unidades − total de la línea: lo calcula la ficha, el carrito no lo trae. Franja <code>#EEF6F0</code>, radio 8, 43 px de alto (12 arriba y abajo, 16 a los lados), del ancho de la columna y 24 px debajo del botón. Texto 14 px: «Aplica promo 3x2» 400 <code>#333333</code> (11,5:1); « • » (viñeta, no punto medio: mide 3 px y queda centrada) <code>#8A8A8A</code> con 4 px más de espacio a cada lado; «Ahorrás $ X» 700 <code>#136B33</code> (6,0:1).' },
+      { d: [893, 352], m: [8, 587], t: '<b>Total</b> 16 px debajo de la franja: rótulo 16/600 <code>#333333</code>; monto 22/700 <code>#333333</code>, alineado a la derecha; debajo, «o <b>N millas</b>» con los mismos estilos que la línea del precio. Total = unidades que se pagan × precio (3 en un 3x2 → 2 × $ 744 = $ 1.488). N = ⌊total × 1,92⌋ (1.488 → 2.856): se calcula aparte, porque el carrito no trae las millas del total. <i>A confirmar:</i> el sitio hoy redondea las millas hacia arriba, así que N puede diferir en 1. <b>Aparece y desaparece con la franja</b>: sin la promo aplicada no hay total (sin descuento sería solo unidades × precio) y la ficha queda como la de un producto sin promo.' },
+      { d: [1146, 410], m: [246, 645], t: '<b>Aclaración</b> 10 px debajo del botón (12 px debajo de las millas del total cuando hay promo aplicada): ícono + «Combiná pesos y millas al pagar» (14/400 <code>#5F5F5F</code>, sin punto final). Dice qué se combina y dónde, así se entiende sola, lejos del número de millas. «Al pagar» es la palabra del sitio: el botón «Pagar» del carrito lleva al paso donde se eligen las millas. <b>Ícono</b> (26,5 × 14,5 px, 6 px antes del texto): dos círculos de 14,5 px que se solapan 2,5 px, del tamaño de los de la referencia. Pesos: fondo blanco, borde 1,2 px y «$» bold 10 px, en <code>#333333</code>. Volar: relleno del color del tirador del slider del segmento (Personal Bank <code>#000D3A</code>, cliente común <code>#FE6002</code>), aro blanco de 1,2 px que lo separa del de pesos, y los cinco puntos con «+» de la marca en blanco (la palabra «volar» a ese tamaño no se lee). «Compartir» 48 px debajo del botón (32 px debajo de la aclaración cuando hay promo aplicada). Probalo: cambiá el cliente.' },
+      { d: [950, 30], m: [290, 30], t: 'Desktop: menú de usuario como en el sitio, con la etiqueta «Personal», el nombre y el saldo de millas. Mobile: solo el ícono PB. <i>Supuesto, sin captura del sitio:</i> el cliente común no lleva la etiqueta ni el ícono.' },
+      { d: [108, 128], m: [0, 104], t: '<b>Cocarda de la promo</b> sobre la foto, como hoy en el sitio: una sola, la de la promo que gana, y su color depende del cliente: Personal Bank <code>#000D3C</code> (<code>.wPromoTextInProductDisplayPB</code>), cliente común <code>#FF6200</code> (<code>.wPromoTextInProductDisplay</code>), texto blanco. Probalo: cambiá el cliente.' }
+    ],
+    cajon: [
+      { d: [190, 99], m: [175, 99], t: 'Encabezado <b>solo en pesos</b>: el total del carrito ($ 2.532 Personal Bank, $ 2.542 cliente común). Sin selector en la ficha, el carrito no muestra millas: se eligen al finalizar la compra, en Entrega.' },
+      { d: [10, 420], m: [10, 420], t: 'Sin millas por producto en las líneas del carrito.' }
+    ],
+    carrito: [
+      { d: [1030, 605], m: [12, 1533], t: 'Resumen del carrito completo <b>solo en pesos</b>: SubTotal, Descuentos (solo si hay descuento; en cliente común no hay) y Total, sin la fila «Millas aplicadas» (las millas se eligen en Entrega). En desktop queda <b>fijo al hacer scroll</b>, como en el checkout: <b>hoy no lo está</b> (<code>wCartFull</code>, <code>wCartFullWC</code> y <code>wCartSummary</code> no tienen ninguna regla sticky). Título «RESUMEN» centrado en su franja: hoy queda bajo y la línea gris lo corta.' }
+    ],
+    entrega: [
+      { d: [1015, 258], m: [372, 266], t: '<b>El paso se muestra por etapas</b>, como en el sitio. Al entrar solo están el tipo de entrega y la consulta de <b>dirección</b> (en retiro, la sucursal); lo de abajo está oculto. Hoy, en <code>wCheckoutStart2</code>, con la dirección sin elegir <code>HIDETABLES</code> oculta <code>Gridshipments</code>, <code>Tblalternativeshipments</code>, <code>Tablealternatives</code>, <code>Tabletaxfree</code> y <code>Tableactions</code>; al elegirla se refrescan los envíos y <code>SHOWTABLES</code> vuelve a mostrar <code>Gridshipments</code>, <code>Tablealternatives</code> y <code>Tableactions</code>. <b>Lo nuevo:</b> el panel de millas entra en ese mismo mecanismo (se oculta y se muestra con esas tablas) y el Resumen suma el envío. Así el selector de millas nunca aparece antes de conocer el envío. <i>A verificar en el WebForm: si la fecha y la factura ya quedan cubiertas por esas tablas. Qué muestra el Resumen antes de elegir la dirección es un supuesto.</i> Probalo: elegí una dirección en el selector (o tocá «Retiro» y elegí la sucursal).' },
+      { d: [125, 321], m: [20, 330], t: 'Panel <b>«¿Cuántas millas querés usar?»</b> antes de «Tu pedido». La pregunta es la cabecera, <b>adentro del panel y sin banda</b> (18 px, semibold, <code>#464646</code>), así no se lee como otra tarjeta de envío. Fondo y borde (1 px, interior) según el segmento: Personal Bank <code>#F4F5F9</code> / <code>#DEE2EC</code>; cliente común <code>#FFF7F2</code> / <code>#FFE7D9</code>. Radio 15, sin sombra. Desktop: pregunta y etiqueta en la primera fila, «Millas disponibles» 8 px debajo (se lee como subtítulo) y 20 px hasta el control. 30 px desde el selector de dirección y hasta «Tu pedido» (32 en mobile). Se elige después del tipo de entrega y la sucursal o dirección: ahí el monto a pagar ya es definitivo.' },
+      { d: [125, 410], m: [22, 422], t: 'Valor inicial = <b>la mitad del máximo del pedido, redondeada hacia abajo</b> (4.861 → 2.430), como arranca hoy el slider de la ficha. Máximo del pedido = ⌊total de productos con descuentos × 1,92⌋, nunca más que el saldo. Las millas se aplican después de los descuentos (así no se usan de más) y <b>no cubren el envío</b>.' },
+      { d: [1008, 411], m: [372, 502], t: 'Control, campo y «Usar el máximo» sincronizados; el valor es un entero entre 0 y el máximo del pedido. <b>«Usar el máximo» es un interruptor:</b> al activarlo guarda el valor actual y pone el máximo; al tocarlo otra vez vuelve a ese valor. Mover el control o editar el campo lo desactiva, aunque el valor quede en el máximo. Teclado en el control: flechas ±10, Shift+flechas ±100, RePág/AvPág ±10 % del máximo, Inicio/Fin.' },
+      { d: [846, 334], m: [372, 380], t: 'Ahorro = millas ÷ 1,92, redondeado al peso; es el mismo valor que se descuenta del SubTotal. Se muestra una sola vez. Etiqueta: azul en Personal Bank (fondo <code>#223F83</code> al 10 %), naranja suave en cliente común (fondo <code>#FF6200</code> al 10 %, texto gris por contraste). Monto en <code>font-weight: 600</code>. Ícono: Lucide piggy-bank (ISC). <b>Se adapta al contenido</b> (anclada a la derecha del panel): al ganar o perder cifras, cada cifra y el punto de los miles entran o salen animando su ancho y su opacidad (~250 ms), así el ícono desliza en lugar de saltar. En mobile comparte fila con «Millas disponibles»: si entre ambas quedan menos de 16 px, la etiqueta baja a su propia línea, alineada a la derecha (flex-wrap, column-gap 16 px); en el prototipo no se ve porque el ancho mobile es fijo. Se anima siempre: no depende del ajuste de animaciones del sistema (no condicionarla a «reducir movimiento»).' },
+      { d: [1043, 110], m: null, t: '<b>Resumen fijo al hacer scroll</b> (<code>position: sticky</code>) en los pasos del checkout, desktop. Título «RESUMEN» centrado en su franja. SubTotal = productos antes de descuentos − valor en pesos de las millas (el mismo «Ahorrás $ X»); los descuentos van en su propia fila. Fila «Millas aplicadas» con la cantidad (hoy dice «millas»). Total = SubTotal − Descuentos + entrega. Con todo cubierto: SubTotal $ 0 y sin fila de Descuentos. Con envío a domicilio, el título dice «Con $ X más el envío es gratis», como hoy en el sitio; X = $ 3.000 − SubTotal <b>antes de las millas</b>, así usar millas no hace perder el envío gratis <i>(umbral y base del cálculo: a confirmar con Itaú)</i>.' },
+      { d: [792, 40], m: null, t: 'Si las millas cubren todo y la entrega cuesta $ 0 (retiro sin costo o envío gratis), se saltea Forma de pago como hoy: <code>wCheckout</code> pone la clase <code>PaymentTabHidden</code>, la pestaña FORMA DE PAGO se oculta, CONFIRMACIÓN pasa a su lugar y el botón dice «Continuar a Confirmación». Las millas <b>cubren todo</b> cuando su valor en pesos alcanza el total de productos con descuentos; con el máximo del pedido (si el saldo no lo limita) siempre pasa, aunque el máximo se redondee hacia abajo <i>(a confirmar con Itaú)</i>. Con envío a domicilio <b>con costo</b> no se saltea: el envío no se paga con millas y va con tarjeta. <b>Probalo</b> (con saldo 100.000): tocá «Retiro», elegí la sucursal y tocá «Usar el máximo».' },
+      { d: null, m: [22, 557], t: 'En mobile el Resumen no está en este paso (la columna es <code>hidden-xs hidden-sm</code>): el panel muestra «Total a pagar» = el Total del Resumen (SubTotal − Descuentos + envío; ya incluye el envío). Rótulo 14/700 <code>#464646</code>, monto 16/700. La divisoria de arriba toma el color de la pista del slider del segmento (Personal Bank <code>#B8BDC9</code>, cliente común <code>#FDD4B9</code>). Con envío a domicilio con costo no se saltea Forma de pago. Con la entrega sin costo y las millas cubriendo todo, «Total a pagar» queda en $ 0 y el botón pasa a «Continuar a Confirmación» (probalo con saldo 100.000: «Retiro», sucursal y «Usar el máximo»).' },
+      { d: [650, 411], m: [22, 502], t: '<b>Control y campo.</b> El tirador (30 px) queda siempre dentro de la pista: su centro recorre el ancho − 30 px. Tocar la pista lleva el tirador hasta ahí con animación (250 ms); al arrastrar (desde los 3 px de movimiento) sigue al puntero sin animación. El campo acepta solo dígitos, no deja pasar el máximo, vacío vale 0, Enter confirma y al salir muestra el separador de miles. Al cambiar entre retiro y domicilio, las millas elegidas se conservan. <i>A definir:</i> qué se muestra con saldo 0, y qué pasa con las millas elegidas si el cliente vuelve al carrito y cambia el pedido.' }
+    ]
+  };
+  var NOMBRES = { ficha: 'Ficha de producto', cajon: 'Carrito lateral', carrito: 'Carrito', entrega: 'Entrega' };
+
+  function pinesYPanel(capaPantalla, clave) {
+    if (!estado.notas) return;
+    var lista = (NOTAS[clave] || []).filter(function (n) { return n[estado.vista === 'desktop' ? 'd' : 'm']; });
+    var panel = el('aside', { class: 'panel-notas', 'aria-label': 'Notas para desarrollo' });
+    panel.appendChild(el('header', null, 'Notas para desarrollo · ' + NOMBRES[clave]));
+    var ol = el('ol');
+    lista.forEach(function (n, i) {
+      var p = n[estado.vista === 'desktop' ? 'd' : 'm'];
+      var g = clave === 'entrega' ? geoEntrega() : null, py = p[1] + (g && p[1] >= 240 ? g.bajar : 0);
+      var pin = pos(el('button', { class: 'pin', type: 'button', 'aria-expanded': 'false', 'aria-label': 'Nota ' + (i + 1) }, String(i + 1)), p[0], py);
+      if (g && py >= g.corte) pin.classList.add('tras-direccion'); // se ocultan con las secciones de abajo
+      var li = el('li', { html: '<b class="n">' + (i + 1) + '</b><div>' + n.t + '</div>' });
+      pin.addEventListener('click', function () {
+        Array.prototype.forEach.call(ol.children, function (x) { x.classList.remove('resaltada'); });
+        Array.prototype.forEach.call(document.querySelectorAll('.pin'), function (x) { x.setAttribute('aria-expanded', 'false'); });
+        li.classList.add('resaltada'); pin.setAttribute('aria-expanded', 'true'); li.scrollIntoView({ block: 'nearest' });
+      });
+      capaPantalla.appendChild(pin); ol.appendChild(li);
+    });
+    if (!lista.length) ol.appendChild(el('li', { html: '<b class="n">·</b><div>Sin notas en esta pantalla.</div>' }));
+    panel.appendChild(ol);
+    var capa = document.getElementById('notas-capa');
+    capa.innerHTML = ''; // con el carrito lateral abierto, el panel muestra solo sus notas
+    capa.appendChild(panel);
+  }
+
+  // ---------------------------------------------------------------- pantallas
+  // Pantalla generada que corresponde al estado: la Entrega tiene una por tipo (envío a domicilio o retiro).
+  function nombrePantalla() {
+    var p = estado.pantalla, v = estado.vista;
+    return p === 'entrega' && estado.entrega === 'retiro' ? 'entrega-retiro-' + v : p + '-' + v;
+  }
+  function pantallaGenerada(nombre) {
+    var p = window.PANTALLAS[nombre];
+    var s = el('div', { class: 'pantalla pv' });
+    s.style.width = p.w + 'px'; s.style.height = p.h + 'px';
+    s.innerHTML = p.html;
+    return s;
+  }
+  function irA(p) { estado.pantalla = p; estado.cajon = false; if (p === 'entrega') estado.direccion = ''; render(true); }
+
+  // Entrega por etapas, como en el sitio (wCheckoutStart2): al entrar solo están el tipo de entrega y la consulta de
+  // dirección. Con la dirección sin elegir (id ≤ 0) la subrutina HIDETABLES oculta «Tu pedido», las alternativas y las
+  // acciones; al elegirla se refrescan los envíos y SHOWTABLES los muestra. Acá, además, aparecen el panel de millas, la fecha y
+  // la factura, y el Resumen suma el envío. Todo lo que está debajo del selector (corte) se oculta por su posición.
+  var DIRECCIONES = [['', 'Seleccioná una dirección'], ['artigas', 'Bv. Artigas 1234'], ['italia', 'Av. Italia 5821']];
+  var SUCURSALES = [['', 'Seleccioná una sucursal'], ['italia', 'Pickup Itau - Avenida Italia 5821']];
+  // Medidas de la pantalla de Entrega según el tipo (tableros «Alternativa · … pregunta + panel» de Penpot). En retiro, lo que
+  // está debajo de la consulta baja 67 px (desktop) o 66 px (mobile): recuadro «Retira en Pick Up Center» y «Sucursal *».
+  function geoEntrega() {
+    var d = estado.vista === 'desktop', r = estado.entrega === 'retiro';
+    return d
+      ? { panelY: r ? 372 : 305, select: r ? [125, 307.7, 883, 34] : [125, 241, 883, 34], corte: r ? 352 : 285, continuar: r ? [735, 1005, 278, 34] : [735, 958, 278, 34], bajar: r ? 67 : 0,
+          retiro: [125, 116, 426, 40], domicilio: [581.3, 116, 426, 40] }
+      : { panelY: r ? 381 : 315, select: r ? [20, 314.7, 350, 34] : [20, 249, 350, 34], corte: r ? 361 : 295, continuar: r ? [22.5, 1179.4, 345, 34] : [22.5, 1067.7, 345, 34], bajar: r ? 66 : 0,
+          retiro: [20, 80, 350, 40], domicilio: [20, 130, 350, 40] };
+  }
+  function etapasEntrega(raiz, d, tarjeta, continuar, repintar) {
+    var g = geoEntrega(), corte = g.corte, retiro = estado.entrega === 'retiro', OPCIONES = retiro ? SUCURSALES : DIRECCIONES;
+    function topEnPantalla(n) { var y = 0; for (; n && n !== raiz; n = n.parentElement) y += parseFloat(n.style.top) || 0; return y; }
+    Array.prototype.forEach.call(raiz.querySelectorAll('.b, .t, .v'), function (n) { if (topEnPantalla(n) >= corte) n.classList.add('tras-direccion'); });
+    tarjeta.classList.add('tras-direccion'); continuar.classList.add('tras-direccion');
+    var valor = marca(raiz, 'valor-direccion'), colorOriginal = valor ? valor.style.color : '';
+    var sel = el('select', { 'aria-label': retiro ? 'Sucursal de retiro' : 'Dirección de entrega' });
+    OPCIONES.forEach(function (o) { sel.appendChild(el('option', { value: o[0] }, o[1])); });
+    sel.value = estado.direccion;
+    var caja = g.select;
+    var zonaSel = pos(el('div', { class: 'zona sel-direccion' }), caja[0], caja[1], caja[2], caja[3]);
+    zonaSel.appendChild(sel); raiz.appendChild(zonaSel);
+    function aplicar() {
+      var v = estado.direccion, o = OPCIONES.filter(function (x) { return x[0] === v; })[0] || OPCIONES[0];
+      raiz.classList.toggle('sin-direccion', !v);
+      if (valor) { valor.querySelector('span').textContent = o[1]; valor.style.color = v ? colorOriginal : '#767676'; }
+    }
+    sel.addEventListener('change', function () { estado.direccion = sel.value; aplicar(); repintar(); });
+    aplicar();
+  }
+
+  // «Necesito factura con RUT»: la etiqueta generada pasa a ser un <label> y el dibujo de Penpot se cambia
+  // por el checkbox nativo del navegador en el mismo lugar (en el sitio es el nativo, sin estilo propio).
+  function casillaRut(raiz) {
+    var etiqueta = marca(raiz, 'rut'), dibujo = marca(raiz, 'casilla-rut');
+    if (!etiqueta || !dibujo) return;
+    var lbl = el('label', { class: 'b etiqueta-rut', style: etiqueta.getAttribute('style') });
+    while (etiqueta.firstChild) lbl.appendChild(etiqueta.firstChild);
+    etiqueta.parentNode.replaceChild(lbl, etiqueta);
+    var check = pos(el('input', { type: 'checkbox' }), parseFloat(dibujo.style.left), parseFloat(dibujo.style.top));
+    check.checked = estado.facturaRut;
+    check.addEventListener('change', function () { estado.facturaRut = check.checked; });
+    lbl.replaceChild(check, dibujo);
+  }
+
+  function construirPantalla() {
+    var v = estado.vista, d = v === 'desktop', p = estado.pantalla;
+    var nombre = nombrePantalla();
+    var s = pantallaGenerada(nombre);
+    var alto = window.PANTALLAS[nombre].h;
+    var actualizadores = [];
+    function repintarTodo() { actualizadores.forEach(function (f) { f(); }); }
+
+    if (p === 'ficha') {
+      pintarIconoVolar(s);
+      pintarCocarda(s);
+      aplicarEncabezado(s);
+      mostrar(s, 'pb-icono', estado.segmento === 'pb');
+      armarFicha(s, d, actualizadores);
+      s.appendChild(zona(P(d, [1108, 18, 48, 47], [339, 8, 40, 38]), 'Abrir el carrito', function () { estado.cajon = true; render(false); }));
+      if (d) s.appendChild(zona(1243, 17.5, 70, 34, 'Pagar', function () { irA('entrega'); }));
+    }
+
+    if (p === 'carrito') {
+      aplicarCliente(s);
+      var proceder = function () { irA('entrega'); };
+      if (d) {
+        aplicarEncabezado(s);
+        s.appendChild(zona(1243, 17.5, 70, 34, 'Pagar', proceder));
+        // Resumen fijo al hacer scroll: la caja del diseño pasa a una columna con position: sticky
+        var caja = marca(s, 'resumen-carrito');
+        var colCarrito = pos(el('div', { class: 'columna-resumen' }), 1035, 537, 277.5, 1020 - 24 - 537);
+        caja.style.position = 'sticky'; caja.style.left = 'auto';
+        caja.style.top = ((altoBarra + 16) / zoomActual) + 'px';
+        colCarrito.appendChild(caja); s.appendChild(colCarrito);
+        caja.appendChild(filasResumenCarrito(d, [1035, 537]));
+        caja.appendChild(zona(22, 213, 234, 34, 'Proceder al Pago', proceder));
+      } else {
+        s.appendChild(filasResumenCarrito(d, [0, 0]));
+        s.appendChild(zona(35, 1603, 320, 34, 'Proceder al Pago', proceder));
+      }
+    }
+
+    if (p === 'entrega') {
+      var ge = geoEntrega();
+      var tj = crearTarjeta(v, repintarTodo, ge.panelY); s.appendChild(tj.nodo); actualizadores.push(tj.actualizar);
+      // Retiro / Envío a domicilio: tocar el otro tipo cambia la pantalla (la consulta vuelve a empezar; las millas se conservan)
+      [['retiro', 'Retiro'], ['domicilio', 'Envío a domicilio']].forEach(function (t) {
+        if (estado.entrega === t[0]) return;
+        s.appendChild(zona(ge[t[0]], t[1], function () { estado.entrega = t[0]; estado.direccion = ''; render(false); }));
+      });
+      casillaRut(s);
+      if (d) {
+        var col = columnaResumen(alto); s.appendChild(col.nodo);
+        actualizadores.push(function () { pintarResumen(col.caja, resumenActual()); });
+        var tabPago = marca(s, 'tab-pago'), tabConf = marca(s, 'tab-confirmacion');
+        // al ocultar FORMA DE PAGO, CONFIRMACIÓN pasa a su lugar (como en el sitio)
+        var centro = function (n) { return izquierdaEnPantalla(n, s) + parseFloat(n.style.width) / 2; };
+        var corrimiento = centro(tabPago) - centro(tabConf);
+        actualizadores.push(function () {
+          var r = resumenActual();
+          tabPago.style.display = r.salteaPago ? 'none' : '';
+          tabConf.style.transform = r.salteaPago ? 'translateX(' + corrimiento + 'px)' : '';
+        });
+      }
+      // «Continuar» vivo en desktop y mobile: pasa a «Continuar a Confirmación» cuando se saltea Forma de pago
+      var btn = pos(el('button', { class: 'boton-continuar', type: 'button' }), ge.continuar[0], ge.continuar[1], ge.continuar[2], ge.continuar[3]);
+      btn.addEventListener('click', finDelRecorrido);
+      s.appendChild(btn);
+      actualizadores.push(function () { btn.textContent = resumenActual().salteaPago ? 'Continuar a Confirmación' : 'Continuar'; });
+      etapasEntrega(s, d, tj.nodo, btn, repintarTodo);
+    }
+
+    repintarTodo();
+    pinesYPanel(s, p);
+    return s;
+  }
+
+  function construirCajon(contenedor, telefono) {
+    var d = estado.vista === 'desktop';
+    var fondo = el('div', { class: 'cajon-fondo' });
+    fondo.addEventListener('click', function () { estado.cajon = false; render(false); });
+    var nombre = 'cajon-' + estado.vista, ancho = window.PANTALLAS[nombre].w;
+    var c = el('div', { class: 'cajon', role: 'dialog', 'aria-label': 'Carrito' });
+    c.style.width = (telefono ? ancho : ancho * zoomActual) + 'px';
+    if (!telefono && estado.notas && anchoVentana() > 900) c.style.right = '384px'; // deja ver el panel de notas
+    var cont = el('div', { class: 'contenido' });
+    if (telefono) cont.style.zoom = 1;
+    var s = pantallaGenerada(nombre);
+    aplicarCliente(s);
+    // Encabezado solo en pesos: las millas se eligen recién en Entrega
+    var r = R.resumenCarrito(estado.segmento, 0);
+    var enc = pos(el('div', { class: 'total-cajon' }), 15, 81.5);
+    enc.appendChild(el('span', { class: 'importe' }, R.pesos(r.total)));
+    s.appendChild(enc);
+    s.appendChild(zona(d ? 245 : 220, 82, d ? 140 : 116, 34, 'Pagar', function () { irA('entrega'); }));
+    s.appendChild(zona(15, 22, d ? 203 : 175, 34, 'Ver Carrito Completo', function () { irA('carrito'); }));
+    s.appendChild(zona(d ? 355 : 306, 25, 30, 30, 'Cerrar el carrito', function () { estado.cajon = false; render(false); }));
+    pinesYPanel(s, 'cajon');
+    cont.appendChild(s); c.appendChild(cont);
+    contenedor.appendChild(fondo); contenedor.appendChild(c);
+  }
+
+  function finDelRecorrido() {
+    var r = resumenActual();
+    var f = el('div', { class: 'modal-fondo' });
+    var m = el('div', { class: 'modal', role: 'dialog', 'aria-label': 'Fin del recorrido' });
+    m.innerHTML = '<h2>Fin del recorrido</h2><p>' + (r.salteaPago
+      ? 'Las millas cubren todo el pedido: en el sitio se pasa directo a Confirmación.'
+      : 'En el sitio sigue Forma de pago.') + ' Forma de pago y Confirmación no forman parte de este prototipo.</p>';
+    var b1 = el('button', { type: 'button' }, 'Volver a empezar'), b2 = el('button', { type: 'button', class: 'secundario' }, 'Cerrar');
+    b1.addEventListener('click', function () { f.remove(); estado = estadoInicial(estado); render(true); });
+    b2.addEventListener('click', function () { f.remove(); });
+    m.appendChild(b1); m.appendChild(b2); f.appendChild(m); document.body.appendChild(f);
+    b2.focus();
+  }
+
+  // Vista mobile sin barra de desplazamiento: con el mouse se desplaza arrastrando, como con el dedo.
+  function arrastrarParaDesplazar(cont) {
+    var inicio = null, movido = false;
+    cont.addEventListener('pointerdown', function (ev) {
+      if (ev.pointerType !== 'mouse' || ev.button !== 0) return;
+      if (ev.target.closest('input, textarea, select, .control')) return; // el control y el campo conservan su arrastre
+      inicio = { y: ev.clientY, top: cont.scrollTop, id: ev.pointerId }; movido = false;
+    });
+    cont.addEventListener('pointermove', function (ev) {
+      if (!inicio || ev.pointerId !== inicio.id) return;
+      var dy = ev.clientY - inicio.y;
+      if (!movido && Math.abs(dy) < 5) return;
+      if (!movido) { movido = true; cont.setPointerCapture(ev.pointerId); cont.classList.add('arrastrando'); }
+      cont.scrollTop = inicio.top - dy;
+    });
+    function fin() {
+      if (!inicio) return;
+      inicio = null; cont.classList.remove('arrastrando');
+      if (!movido) return;
+      // un arrastre no es un toque: se descarta el clic que sigue
+      var cancelar = function (e) { e.stopPropagation(); e.preventDefault(); };
+      cont.addEventListener('click', cancelar, true);
+      setTimeout(function () { cont.removeEventListener('click', cancelar, true); }, 0);
+    }
+    cont.addEventListener('pointerup', fin);
+    cont.addEventListener('pointercancel', fin);
+  }
+
+  // ---------------------------------------------------------------- render, barra y solapa
+  var zoomActual = 1, altoBarra = 56, barraPlegada = false;
+  function anchoVentana() { return document.documentElement.clientWidth || window.innerWidth || 1440; }
+  var CONTENIDO = 1200, MARGEN = 16; // el contenido del sitio ocupa 1200 px centrados
+  function leerPreferencia() { try { return localStorage.getItem('selector-millas:barra') === 'plegada'; } catch (e) { return false; } }
+  function guardarPreferencia() { try { localStorage.setItem('selector-millas:barra', barraPlegada ? 'plegada' : 'abierta'); } catch (e) { /* sin almacenamiento */ } }
+  // La barra puede ocupar dos renglones en pantallas angostas; plegada no ocupa lugar.
+  function medirBarra() {
+    document.body.classList.toggle('barra-plegada', barraPlegada);
+    altoBarra = barraPlegada ? 0 : document.getElementById('barra').offsetHeight;
+    document.documentElement.style.setProperty('--barra', altoBarra + 'px');
+  }
+  function render(irArriba) {
+    pintarBarra();
+    medirBarra();
+    var esc = document.getElementById('escenario');
+    var scrollPrevio = irArriba ? 0 : (estado.vista === 'desktop' ? window.scrollY : (esc.querySelector('.scroll') || {}).scrollTop || 0);
+    esc.innerHTML = ''; document.getElementById('notas-capa').innerHTML = '';
+    esc.className = estado.vista;
+    var p = estado.pantalla, m = window.PANTALLAS[nombrePantalla()], ancho = anchoVentana();
+    var conPanel = estado.notas && ancho > 900; // en pantallas angostas el panel de notas va abajo
+    if (estado.vista === 'desktop') {
+      // La página ocupa todo el ancho: las franjas de fondo llegan a los bordes y el contenido
+      // (1200 px, centrado) se achica proporcionalmente solo si la ventana no le da lugar.
+      var disponible = ancho - (conPanel ? 384 : 0);
+      zoomActual = Math.max(0.2, Math.min(1, disponible / (CONTENIDO + 2 * MARGEN)));
+      document.documentElement.style.setProperty('--z', zoomActual);
+      var anchoLienzo = disponible / zoomActual;
+      var lienzo = el('div', { class: 'lienzo' });
+      lienzo.style.width = anchoLienzo + 'px'; lienzo.style.height = m.h + 'px';
+      (m.bandas || []).forEach(function (b) { lienzo.appendChild(el('div', { class: 'banda', style: 'top:' + b[0] + 'px;height:' + b[1] + 'px;background:' + b[2] })); });
+      var pantalla = construirPantalla();
+      var izquierda = (anchoLienzo - m.w) / 2;
+      pantalla.style.left = izquierda + 'px';
+      // lo que en el diseño está fuera de la columna de 1200 px (logo del checkout) queda pegado al borde de la ventana
+      Array.prototype.forEach.call(pantalla.querySelectorAll('[data-k="ancla-izquierda"]'), function (n) { n.style.transform = 'translateX(' + (-izquierda) + 'px)'; });
+      lienzo.appendChild(pantalla);
+      esc.appendChild(lienzo);
+      cerrarHuecoDelTitulo(pantalla);
+      if (estado.cajon) construirCajon(esc, false);
+      window.scrollTo(0, scrollPrevio);
+    } else {
+      zoomActual = 1;
+      document.documentElement.style.setProperty('--z', 1);
+      var tel = el('div', { class: 'telefono' }), sc = el('div', { class: 'scroll' });
+      var pant = construirPantalla();
+      if (ancho < 390) pant.style.zoom = ancho / 390;
+      sc.appendChild(pant); tel.appendChild(sc);
+      if (conPanel) tel.style.marginLeft = Math.max(16, (ancho - 384 - 390) / 2) + 'px';
+      esc.appendChild(tel);
+      cerrarHuecoDelTitulo(pant);
+      if (estado.cajon) construirCajon(tel, true);
+      arrastrarParaDesplazar(sc);
+      var cajonTel = tel.querySelector('.cajon'); if (cajonTel) arrastrarParaDesplazar(cajonTel);
+      sc.scrollTop = scrollPrevio;
+      window.scrollTo(0, 0);
+    }
+    pintarBarra();
+  }
+
+  function pintarBarra() {
+    var marcar = function (sel, valor) {
+      Array.prototype.forEach.call(document.querySelectorAll(sel + ' button'), function (b) {
+        b.setAttribute('aria-pressed', b.dataset.valor === valor ? 'true' : 'false');
+      });
+    };
+    marcar('#b-pasos', estado.pantalla);
+    marcar('#b-vista', estado.vista);
+    marcar('#b-cliente', estado.segmento);
+    marcar('#b-saldo', String(R.saldo()));
+    document.getElementById('b-notas').setAttribute('aria-pressed', estado.notas ? 'true' : 'false');
+  }
+
+  function plegar(valor) {
+    barraPlegada = valor; guardarPreferencia(); render(false);
+    document.getElementById(valor ? 'solapa' : 'b-plegar').focus({ preventScroll: true });
+  }
+
+  function iniciar() {
+    document.title = 'Selector de millas · prototipo · v' + VERSION;
+    barraPlegada = leerPreferencia();
+    estado = estadoInicial();
+    var reiniciarPedido = function () { estado.pedido = { millas: null, previo: null, maxActivo: false }; };
+    document.getElementById('b-pasos').addEventListener('click', function (e) { var b = e.target.closest('button'); if (b) irA(b.dataset.valor); });
+    document.getElementById('b-vista').addEventListener('click', function (e) { var b = e.target.closest('button'); if (b) { estado.vista = b.dataset.valor; estado.cajon = false; render(true); } });
+    document.getElementById('b-cliente').addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (!b) return;
+      estado.segmento = b.dataset.valor; reiniciarPedido(); render(false);
+    });
+    document.getElementById('b-saldo').addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (!b) return;
+      R.fijarSaldo(+b.dataset.valor); reiniciarPedido(); render(false);
+    });
+    document.getElementById('b-notas').addEventListener('click', function () { estado.notas = !estado.notas; render(false); });
+    document.getElementById('b-plegar').addEventListener('click', function () { plegar(true); });
+    document.getElementById('solapa').addEventListener('click', function () { plegar(false); });
+    var t; window.addEventListener('resize', function () { clearTimeout(t); t = setTimeout(function () { render(false); }, 120); });
+    // Tocar un lugar que no hace nada marca por un momento las zonas que sí responden
+    var esc = document.getElementById('escenario'), pista;
+    esc.addEventListener('click', function (ev) {
+      if (ev.target.closest('button, a, input, label, select, textarea, [role="slider"], .cajon-fondo')) return;
+      esc.classList.remove('ver-zonas'); void esc.offsetWidth; esc.classList.add('ver-zonas');
+      clearTimeout(pista); pista = setTimeout(function () { esc.classList.remove('ver-zonas'); }, 700);
+    });
+    render(true);
+    // el alto del nombre depende de la fuente: se vuelve a dibujar cuando terminan de cargar
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { render(false); });
+  }
+  document.addEventListener('DOMContentLoaded', iniciar);
+})();
