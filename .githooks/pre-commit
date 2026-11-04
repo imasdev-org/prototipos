@@ -1,0 +1,11 @@
+#!/bin/sh
+# Antes de cada commit le pone una versión nueva (?v=fecha-hora) a los archivos que carga el index.html de cada
+# prototipo tocado en el commit, para que GitHub Pages no sirva versiones viejas desde la caché del navegador.
+# Corre el herramientas/subir-version.js de cada carpeta que lo tenga. Se activa una vez por clon:
+#   git config core.hooksPath .githooks
+git diff --cached --name-only | cut -d/ -f1 | sort -u | while read -r carpeta; do
+  if [ -f "$carpeta/herramientas/subir-version.js" ]; then
+    node "$carpeta/herramientas/subir-version.js" >/dev/null 2>&1 && git add "$carpeta/index.html"
+  fi
+done
+exit 0

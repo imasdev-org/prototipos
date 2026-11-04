@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prototipos · Imasdev</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 16 16%27%3E%3Crect width=%2716%27 height=%2716%27 rx=%273%27 fill=%27%231F2430%27/%3E%3Crect x=%274%27 y=%275%27 width=%278%27 height=%276%27 rx=%271%27 fill=%27%23FF6200%27/%3E%3C/svg%3E">
+<style>
+  :root {
+    --fondo: #E9EBEF;
+    --barra: #1F2430;
+    --tarjeta: #FFFFFF;
+    --texto: #333A47;
+    --suave: #6B7383;
+    --borde: #D5D9E1;
+    --acento: #FF6200;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--fondo); color: var(--texto); font-family: 'Source Sans 3', system-ui, sans-serif; }
+  header { background: var(--barra); color: #fff; padding: 28px 16px 24px; }
+  header .ancho, main { max-width: 960px; margin: 0 auto; }
+  h1 { margin: 0 0 6px; font-size: 26px; font-weight: 700; }
+  header p { margin: 0; color: #AEB4C2; font-size: 15px; }
+  main { padding: 24px 16px 48px; }
+  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--suave); margin: 8px 0 12px; }
+  .lista { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-bottom: 32px; }
+  a.tarjeta { display: flex; flex-direction: column; gap: 8px; padding: 18px; background: var(--tarjeta); border: 1px solid var(--borde); border-radius: 10px; color: inherit; text-decoration: none; transition: border-color .15s, box-shadow .15s; }
+  a.tarjeta:hover, a.tarjeta:focus-visible { border-color: var(--acento); box-shadow: 0 4px 14px rgba(31, 36, 48, .08); outline: none; }
+  .tarjeta h3 { margin: 0; font-size: 18px; }
+  .tarjeta p { margin: 0; font-size: 14px; line-height: 1.45; color: var(--suave); flex: 1; }
+  .etiquetas { display: flex; flex-wrap: wrap; gap: 6px; }
+  .etiquetas span { font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 99px; background: #F1F3F6; color: var(--suave); }
+  .etiquetas span.wi { background: #FFEFE5; color: #B84700; }
+  .vacio { font-size: 14px; color: var(--suave); margin: 0 0 32px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="ancho">
+    <h1>Prototipos</h1>
+    <p>Prototipos navegables de las features en diseño. Cada uno vive en su carpeta de este repositorio.</p>
+  </div>
+</header>
+<main>
+  <h2>En diseño o desarrollo</h2>
+  <div class="lista" id="activos"></div>
+  <h2>Archivo (ya implementados)</h2>
+  <div class="lista" id="archivo"></div>
+</main>
+<script>
+  // Para sumar un prototipo: agregar una entrada acá. "archivo: true" lo pasa a la sección de implementados.
+  const PROTOTIPOS = [
+    { carpeta: 'carritos-por-tienda', titulo: 'Carritos por tienda', wi: 'WI-13898', canal: 'Tienda Inglesa · web',
+      descripcion: 'Cada tienda tiene su propio carrito, aviso de los otros carritos y cambio de tienda.' },
+    { carpeta: 'selector-millas-itau', titulo: 'Selector de millas', canal: 'Tienda Volar (Itaú) · web',
+      descripcion: 'Millas en la ficha de producto, el carrito y el paso de Entrega del checkout.' },
+    { carpeta: 'cobertura-domicilios-web', titulo: 'Alta de domicilio', wi: 'WI-12790', canal: 'Tienda Inglesa · web',
+      descripcion: 'Alta de domicilio con chequeo de cobertura.' },
+  ];
+
+  function tarjeta(p) {
+    const a = document.createElement('a');
+    a.className = 'tarjeta';
+    a.href = p.carpeta + '/';
+    const h3 = document.createElement('h3'); h3.textContent = p.titulo;
+    const d = document.createElement('p'); d.textContent = p.descripcion;
+    const et = document.createElement('div'); et.className = 'etiquetas';
+    if (p.wi) { const s = document.createElement('span'); s.className = 'wi'; s.textContent = p.wi; et.append(s); }
+    if (p.canal) { const s = document.createElement('span'); s.textContent = p.canal; et.append(s); }
+    a.append(h3, d, et);
+    return a;
+  }
+
+  for (const [id, enArchivo] of [['activos', false], ['archivo', true]]) {
+    const cont = document.getElementById(id);
+    const items = PROTOTIPOS.filter(p => !!p.archivo === enArchivo);
+    if (items.length) items.forEach(p => cont.append(tarjeta(p)));
+    else cont.outerHTML = '<p class="vacio">Todavía no hay ninguno.</p>';
+  }
+</script>
+</body>
+</html>
