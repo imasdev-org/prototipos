@@ -2,7 +2,7 @@
 
 Prototipo navegable de las millas en la ficha de producto (precio en millas, sin selector, en un vino con promo 3x2), el carrito y el paso de Entrega del checkout (selector de millas).
 
-**Abrir el prototipo:** <https://imasdev-org.github.io/selector-millas-itau/>
+**Abrir el prototipo:** <https://imasdev-org.github.io/prototipos/selector-millas-itau/>
 
 **Reglas para desarrollo:** [docs/especificacion.md](docs/especificacion.md)
 

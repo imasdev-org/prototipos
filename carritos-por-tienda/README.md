@@ -2,7 +2,7 @@
 
 Prototipo navegable para que el cliente sepa que cada tienda (Super, Express, TiendaFarma) tiene su propio carrito (WI-13898). El carrito dice de qué tienda es y avisa si hay productos en las otras («Tenés otro carrito en…»). Desde ese aviso se va directo al carrito de la otra tienda: ningún camino a otra tienda pide confirmación. La lista de tiendas de mobile muestra cuántos productos tiene el carrito de cada una.
 
-**Abrir el prototipo:** <https://imasdev-org.github.io/carritos-por-tienda/>
+**Abrir el prototipo:** <https://imasdev-org.github.io/prototipos/carritos-por-tienda/>
 
 **Reglas para desarrollo:** en el prototipo, con «Notas para desarrollo» (pines numerados sobre cada pantalla).
 

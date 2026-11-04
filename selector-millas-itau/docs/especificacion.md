@@ -1,6 +1,6 @@
 # Selector de millas · Tienda Volar (Itaú) — especificación para desarrollo
 
-Prototipo navegable: <https://imasdev-org.github.io/selector-millas-itau/>
+Prototipo navegable: <https://imasdev-org.github.io/prototipos/selector-millas-itau/>
 
 Este documento acompaña al prototipo. El prototipo muestra **cómo se ve y se comporta**; acá están las **reglas** con sus fórmulas. Lo que figura como *a confirmar* todavía no está decidido.
 
