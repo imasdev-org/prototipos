@@ -8,6 +8,7 @@ Cada prototipo vive en su carpeta y se abre en `https://imasdev-org.github.io/pr
 
 | Carpeta | Prototipo |
 |---|---|
+| [`suscripciones`](suscripciones/) | Suscripciones · Tienda Inglesa web y app (WI-14058) |
 | [`carritos-por-tienda`](carritos-por-tienda/) | Carritos por tienda · Tienda Inglesa web (WI-13898) |
 | [`selector-millas-itau`](selector-millas-itau/) | Selector de millas · Tienda Volar (Itaú) |
 | [`cobertura-domicilios-web`](cobertura-domicilios-web/) | Alta de domicilio · Tienda Inglesa web (WI-12790) |
