@@ -10,7 +10,7 @@
   var P = window.Prototipo, tocable = P.tocable, PANT = window.PANTALLAS;
 
   // ---------------------------------------------------------------- datos de ejemplo
-  var PUNTOS = { desde: '12/03/2021', documento: '1.234.567-8', pais: 'Uruguay' };
+  var PUNTOS = { desde: '12/03/2021', documento: '1.234.567-8' };
   var DESDE = ['05/05/2022', '18/06/2026']; // membresías: en el orden en que las muestra el sitio
   var APPS = [
     { id: 'margarita', nombre: 'Margarita', conectada: '21/10/2026', ultimo: 'Hace 2 días',
@@ -96,8 +96,8 @@
       var tp = tarjeta(doc, molde, adherido
         ? { id: 'tarjeta-puntos', nombre: 'Adherido', descripcion: 'Desde el ' + (hecho.desde || PUNTOS.desde) + ' · <button type="button" class="SusEnlace" id="ver-bases">Ver bases</button>', boton: 'Salir del programa', idBoton: 'salir-puntos', gris: gris }
         : { id: 'tarjeta-puntos', nombre: 'No estás adherido', descripcion: '', boton: 'Unirme', claseBoton: 'wButtonActionDefualt', idBoton: 'unirme', gris: gris });
-      // adherido: documento y país, de solo lectura como hoy, ya no en Información personal
-      if (adherido) q(tp, '.TxtMarginLeft15').appendChild(nuevo(doc, 'dl', { class: 'SusDetalle', id: 'detalle-puntos' }, '<dt>Documento</dt><dd>' + PUNTOS.documento + ' · ' + PUNTOS.pais + '</dd>'));
+      // adherido: documento, de solo lectura como hoy, ya no en Información personal
+      if (adherido) q(tp, '.TxtMarginLeft15').appendChild(nuevo(doc, 'dl', { class: 'SusDetalle', id: 'detalle-puntos' }, '<dt>Documento</dt><dd>' + PUNTOS.documento + '</dd>'));
       bp.appendChild(tp);
       bloques.appendChild(bp);
       if (adherido) {
@@ -346,7 +346,7 @@
     if (estado.puntos !== 'sinprograma') {
       h += '<div class="seccion">Programa Puntos</div>';
       h += estado.puntos === 'adherido'
-        ? tarjetaApp({ id: 'bloque-puntos', titulo: 'Adherido', des: 'Desde el ' + (hecho.desde || PUNTOS.desde) + ' · <button type="button" class="lnk" id="ver-bases">Ver bases</button>', extra: '<dl class="detalle" id="detalle-puntos"><dt>Documento</dt><dd>' + PUNTOS.documento + ' · ' + PUNTOS.pais + '</dd></dl>', boton: 'Salir del programa', idBoton: 'salir-puntos', gris: gris })
+        ? tarjetaApp({ id: 'bloque-puntos', titulo: 'Adherido', des: 'Desde el ' + (hecho.desde || PUNTOS.desde) + ' · <button type="button" class="lnk" id="ver-bases">Ver bases</button>', extra: '<dl class="detalle" id="detalle-puntos"><dt>Documento</dt><dd>' + PUNTOS.documento + '</dd></dl>', boton: 'Salir del programa', idBoton: 'salir-puntos', gris: gris })
         : tarjetaApp({ id: 'bloque-puntos', titulo: 'No estás adherido', des: '', boton: 'Unirme', idBoton: 'unirme', claseBoton: 'btn-primario', gris: gris });
     }
     // una sección sin contenido no aparece
@@ -447,7 +447,7 @@
       { d: '#TBLMYGROUPS', m: '#TBLMYGROUPS', t: '<b>Después de confirmar:</b> el diálogo se cierra y la pantalla se actualiza. Ese cambio es la confirmación: sin mensajes ni avisos flotantes. Una sola espera: el botón del diálogo queda esperando hasta que la lista se actualice, sin un segundo indicador. Si la acción falla, el error aparece dentro del diálogo. En web, al abrir un diálogo el foco queda adentro, Escape lo cierra, y al cerrar vuelve al control que lo abrió; las salidas muestran el foco.' },
       { d: '#TBLMYGROUPS', m: '#TBLMYGROUPS', t: '<b>«Membresías» pasa a llamarse «Suscripciones»</b> y suma el Programa Puntos y las apps conectadas. «Preferencias» deja de existir: la baja de Puntos viene acá y «Borrar mi cuenta» va a Información personal.' },
       { d: '#TBLMYGROUPS', m: '#TBLMYGROUPS', t: 'La pestaña se muestra <b>siempre</b>, aunque el cliente no tenga nada: solo aparecen las secciones con contenido y, si no hay ninguna, un único aviso. Hoy «Membresías» depende de una configuración y «Preferencias», de que la tienda muestre el programa de fidelidad en el perfil.' },
-      { d: '#bloque-puntos', m: '#bloque-puntos', t: '<b>Programa Puntos.</b> Solo en las tiendas con el programa en el perfil (la misma configuración que hoy muestra «Preferencias»). La tarjeta es la de las membresías. Una sola fecha: en el formulario de hoy, adherirse y aceptar las bases son el mismo acto. Documento y país, de solo lectura como hoy, vienen de Información personal. <i>A confirmar:</i> de qué dato sale; «CustomerPointsDateTime» no sirve, es la última actualización de puntos.' },
+      { d: '#bloque-puntos', m: '#bloque-puntos', t: '<b>Programa Puntos.</b> Solo en las tiendas con el programa en el perfil (la misma configuración que hoy muestra «Preferencias»). La tarjeta es la de las membresías. Una sola fecha: en el formulario de hoy, adherirse y aceptar las bases son el mismo acto. El documento, de solo lectura como hoy, viene de Información personal; el país de emisión no se muestra acá, se pide solo en el alta porque la validación lo usa. <i>A confirmar:</i> de qué dato sale; «CustomerPointsDateTime» no sirve, es la última actualización de puntos.' },
       { d: '#salir-puntos', m: '#salir-puntos', t: '«Salir del programa» reemplaza al check «Deseo darme de baja del Programa Puntos de Tienda Inglesa» y al botón CONFIRMAR. <b>Todas las salidas son acciones de texto:</b> rojo #C91411 (5,85:1 sobre blanco; el #ED2F48 de hoy da 4,12:1), 14 px, sin relleno, subrayado solo al pasar el mouse. A la derecha de la fila en desktop y al final de la tarjeta en mobile, con 44 px de alto para tocar. Abre una confirmación con el aviso de hoy; al confirmar hace lo mismo que hoy (aviso a Fidelidad para la baja y el borrado de datos del programa).' },
       { d: '#unirme', m: '#unirme', t: 'Sin adhesión: «Unirme» abre el alta acá mismo, sin ir a Información personal.' },
       { d: '#bloque-membresias', m: '#bloque-membresias', t: '<b>Membresías:</b> la grilla de hoy (solo los grupos de tipo membresía), con cuatro cambios: borde gris #CCC en lugar del dorado; la estrella pasa junto al nombre en desktop y arriba a la derecha en mobile, donde la acción baja y deja libre esa esquina, como en la app (hoy solo la tiene la membresía activa, y con el borde gris es su única marca visual); «Cancelar membresía» como acción de texto, alineada con las demás salidas, y «Miembro desde el …» = fecha en que se aprobó la membresía (cambia solo si cambia la aprobación), en lugar de «Subscripción activa».' },
