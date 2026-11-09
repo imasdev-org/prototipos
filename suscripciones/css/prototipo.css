@@ -215,3 +215,30 @@ body.app { margin: 0; background: #F5F5F5; font-family: "Open Sans", sans-serif;
 
 /* Paneles y velo del sitio (carrito, menú, selector de tiendas): cerrados, sin la animación que se vería en cada redibujado */
 .gx-call-target, .ChannelSheetOverlay { transition: none !important; }
+
+/* ---- propuestas */
+[id^="membresia-"] .wTxtRegularGreenGroups { display: block; margin: 0; padding: 0; line-height: inherit; }
+#sus-vacio .wTxtDescriptionGray3 { color: #5f6062; }
+/* el lugar del error está reservado: que aparezca no mueve el botón */
+.SusErrorSlot { min-height: 18px; margin-top: 4px; }
+.SusError { display: block; font-size: 13px; line-height: 18px; color: #c91411; }
+.SusErrorSlot + .SusOpcion { margin-top: 6px; }
+.SusEnlaceTexto { display: inline; }
+/* tarjeta sin adhesión: sin descripción, y «Unirme» con aire para tocarlo cómodo */
+.SusBloque .wTxtDescriptionGray3:empty { display: none; }
+.app .grupo .des:empty { display: none; }
+#tarjeta-puntos #unirme { min-width: 132px; padding: 0 32px !important; } /* desktop: el alto de 37 px del sistema */
+@media (max-width: 767px) { #tarjeta-puntos #unirme { min-height: 44px; } }
+/* desktop, sin adhesión: una sola línea de texto, centrada con el botón */
+@media (min-width: 768px) { #tarjeta-puntos:has(#unirme) > .row:first-child { display: flex; align-items: center; } }
+.form-control.SusCampoError { border-color: #c91411; }
+.SusDialogo .wTxtRegularTitle { display: block; text-align: left; }
+.SusBotones .btn { flex: 1 1 0; }
+.SusDialogoBases .SusBotones .btn { flex: 0 0 auto; width: 100%; }
+.app .lnk { padding: 12px 0; margin: -12px 0; }
+.app .hoja-app .SusEnlaceTexto { font-weight: 700; }
+/* el popup del alta cambia de alto: fijo arriba */
+@media (min-width: 768px) { .SusDialogoAlta { align-items: flex-start; } }
+@media (max-width: 767px) {
+  .SusEnlace { padding: 12px 0; margin: -12px 0; }
+}

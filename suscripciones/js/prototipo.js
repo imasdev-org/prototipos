@@ -14,7 +14,7 @@
   var DESDE = ['05/05/2022', '18/06/2026']; // membresías: en el orden en que las muestra el sitio
   var APPS = [
     { id: 'margarita', nombre: 'Margarita', conectada: '21/10/2026', ultimo: 'Hace 2 días',
-      numeros: [['WhatsApp +598 99 000 111', '21/10/2026'], ['WhatsApp +598 98 000 222', '28/10/2026']] },
+      numeros: [['WhatsApp +598\u00a099\u00a0000\u00a0111', '21/10/2026'], ['WhatsApp +598\u00a098\u00a0000\u00a0222', '28/10/2026']] },
     { id: 'penca', nombre: 'Penca Tienda Inglesa', conectada: '02/09/2026', ultimo: 'Hace 3 semanas', numeros: [] }
   ];
 
@@ -27,6 +27,8 @@
   function ir(paso) { return function () { P.ir('paso', paso); }; }
   // Las confirmaciones no son pasos de la barra: se abren tocando la acción y se cierran desde el propio diálogo.
   var dlg = null, ultimoPaso = null;
+  // resultado de lo que el cliente confirmó; se reinicia al cambiar un control de la barra
+  var hecho = {}, ultimaClave = null, HOY = '09/11/2026';
   function abrir(nombre) { return function () { dlg = nombre; P.render(); }; }
   function cerrar() { dlg = null; P.render(); }
   function nuevo(doc, tag, attrs, html) {
@@ -92,8 +94,8 @@
       var bp = nuevo(doc, 'div', { class: 'SusBloque', id: 'bloque-puntos' }, '<span class="wTxtRegularTitle16">Programa Puntos</span>');
       var adherido = estado.puntos === 'adherido';
       var tp = tarjeta(doc, molde, adherido
-        ? { id: 'tarjeta-puntos', nombre: 'Adherido', descripcion: 'Desde el ' + PUNTOS.desde + ' · <button type="button" class="SusEnlace" id="ver-bases">Ver bases</button>', boton: 'Salir del programa', idBoton: 'salir-puntos', gris: gris }
-        : { id: 'tarjeta-puntos', nombre: 'No estás adherido', descripcion: '¡Juntá PUNTOS y canjealos por lo que quieras!', boton: 'Unirme', claseBoton: 'wButtonActionDefualt', idBoton: 'unirme', gris: gris });
+        ? { id: 'tarjeta-puntos', nombre: 'Adherido', descripcion: 'Desde el ' + (hecho.desde || PUNTOS.desde) + ' · <button type="button" class="SusEnlace" id="ver-bases">Ver bases</button>', boton: 'Salir del programa', idBoton: 'salir-puntos', gris: gris }
+        : { id: 'tarjeta-puntos', nombre: 'No estás adherido', descripcion: '', boton: 'Unirme', claseBoton: 'wButtonActionDefualt', idBoton: 'unirme', gris: gris });
       // adherido: documento y país, de solo lectura como hoy, ya no en Información personal
       if (adherido) q(tp, '.TxtMarginLeft15').appendChild(nuevo(doc, 'dl', { class: 'SusDetalle', id: 'detalle-puntos' }, '<dt>Documento</dt><dd>' + PUNTOS.documento + ' · ' + PUNTOS.pais + '</dd>'));
       bp.appendChild(tp);
@@ -112,6 +114,7 @@
       bloques.appendChild(bm);
       bm.appendChild(docs);
       Array.prototype.forEach.call(filas, function (f, i) {
+        if (i === 0 && hecho.sinMembresia) { f.remove(); return; }
         var c = q(f, '.wTblBorderGold'); c.id = 'membresia-' + (i + 1);
         c.classList.remove('wTblBorderGold'); c.classList.add('wTblBorderRadius'); // borde gris; la estrella marca que está activa
         // La estrella va junto al nombre: es un dato de la membresía. Sin su celda, la acción se alinea con las de los otros bloques.
@@ -136,18 +139,18 @@
     if (estado.apps !== 'sin') {
       var ba = nuevo(doc, 'div', { class: 'SusBloque', id: 'bloque-apps' }, '<span class="wTxtRegularTitle16">Apps conectadas</span>');
       bloques.appendChild(ba);
-      APPS.forEach(function (a) {
+      appsVisibles().forEach(function (a) {
         var t = tarjeta(doc, molde, { id: 'app-' + a.id, nombre: a.nombre, descripcion: 'Conectada el ' + a.conectada + ' · <button type="button" class="SusEnlace" id="ver-bases-' + a.id + '">Ver bases</button>', boton: 'Desconectar', idBoton: 'desconectar-' + a.id, gris: gris });
         tocable(q(t, '#ver-bases-' + a.id), 'Ver bases', abrir('bases-' + a.id));
         q(t, '.TxtMarginLeft15').appendChild(nuevo(doc, 'dl', { class: 'SusDetalle', id: 'detalle-' + a.id },
           '<dt>Último acceso</dt><dd id="ultimo-' + a.id + '">' + a.ultimo + '</dd>' +
           '<dt>Tus datos</dt><dd><button type="button" class="SusEnlace" id="ver-datos-' + a.id + '">Ver mis datos</button></dd>'));
-        if (a.numeros.length) {
+        if (numerosDe(a).length) {
           var n = nuevo(doc, 'div', { class: 'SusNumeros', id: 'numeros-' + a.id }, '<span class="SusNumerosTitulo">Dispositivos vinculados</span>');
-          a.numeros.forEach(function (x, i) {
+          numerosDe(a).forEach(function (x, i) {
             var fila = nuevo(doc, 'div', { class: 'SusNumero' }, '<span>' + x[0] + '<small>Vinculado el ' + x[1] + '</small></span>');
             var dv = nuevo(doc, 'button', { type: 'button', class: 'SusAccion', id: 'desvincular-' + (i + 1) }, 'Desvincular');
-            if (i === 0) tocable(dv, 'Desvincular el dispositivo', abrir('desvincular-numero'));
+            if (i === 0 && !hecho.sinNumero) tocable(dv, 'Desvincular el dispositivo', abrir('desvincular-numero')); // el diálogo habla del primer número
             fila.appendChild(dv); n.appendChild(fila);
           });
           t.appendChild(n);
@@ -189,25 +192,25 @@
   // ---------------------------------------------------------------- diálogos (popup estándar del sitio)
   var DIALOGOS = {
     'salir-puntos': { titulo: 'Deseo darme de baja del Programa Puntos de Tienda Inglesa', texto: 'Al Confirmar estas aceptando la caducidad inmediata de todos los Puntos acumulados como así también del saldo de tu cuenta',
-      accion: 'CONFIRMAR', accionApp: 'Aceptar', listo: 'Fuiste eliminado del Programa Puntos. Toda la información de tu cuenta de Puntos será eliminada en los próximos 10 días hábiles' },
+      accion: 'Confirmar', accionApp: 'Aceptar' },
     'cancelar-membresia': { titulo: '¿Cancelar tu membresía a Socio Acelu?', texto: 'Vas a dejar de recibir los beneficios del grupo.',
-      accion: 'Cancelar membresía', cancelar: 'Volver', listo: 'Su solicitud sera procesada a la brevedad.' },
+      accion: 'Confirmar', cancelar: 'Regresar' },
     'desconectar-app': { titulo: '¿Desconectar Margarita?', texto: 'Margarita ya no va a poder acceder a tu cuenta, se desvinculan sus 2 dispositivos y vamos a borrar tus datos en Margarita. Si querés volver a usarla, la conectás de nuevo desde Margarita.',
-      accion: 'Desconectar', listo: 'Margarita ya no tiene acceso a tu cuenta. Recibimos tu pedido de borrar tus datos.' },
+      accion: 'Desconectar' },
     'unirme': { titulo: 'Puntos', texto: 'Para poder comprar online y participar el programa Puntos, ingresá tu documento de identidad. ¡Juntá PUNTOS y canjealos por lo que quieras!', alta: true,
       paises: ["Uruguay","Argentina","Brasil","Chile","Paraguay","Otro"], acepto: 'Acepto suscribirme al programa de Puntos y acepto las bases y condiciones del programa establecidas',
       legal: "De conformidad con la Ley N° 18.331 de Protección de Datos Personales, presto mi consentimiento, inequívoco, libre, expreso e informado para que mis datos/información sean compartidos con Scotiabank Uruguay S.A. con la exclusiva finalidad de que éste pueda ofrecerme sus productos y servicios financieros, así como ofertas para fines informativos y/o comerciales, en virtud de la alianza comercial que mantienen el Banco y Tienda Inglesa. El responsable de la Base de datos es Tienda Inglesa., y la dirección donde Ud. podrá ejercer los derechos de acceso, rectificación, actualización, inclusión o supresión, es puntos@tiendainglesa.com.uy",
-      accion: 'Unirme', listo: 'Ya sos parte del Programa Puntos.' },
+      accion: 'Unirme' },
     'ver-datos': { titulo: 'Tus datos en Margarita', texto: 'Estos son los datos que le cediste al conectarla.',
       datos: [['Nombre', 'Ana Pérez'], ['Email', 'ana.perez@ejemplo.com']] },
-    'desvincular-numero': { titulo: '¿Desvincular WhatsApp +598 99 000 111?', texto: 'Margarita ya no va a atender pedidos desde ese número. WhatsApp +598 98 000 222 sigue vinculado.',
-      accion: 'Desvincular', listo: 'El dispositivo quedó desvinculado.' }
+    'desvincular-numero': { titulo: '¿Desvincular WhatsApp +598\u00a099\u00a0000\u00a0111?', texto: 'Margarita ya no va a atender pedidos desde ese número. WhatsApp +598\u00a098\u00a0000\u00a0222 sigue vinculado.',
+      accion: 'Desvincular' }
   };
   // «Ver bases»: solo el texto, en un popup (web) o una hoja (app). Los enlaces del texto abren afuera.
-  DIALOGOS['bases-puntos'] = { titulo: 'Bases y condiciones', bases: window.BASES_PUNTOS };
+  DIALOGOS['bases-puntos'] = { titulo: 'Bases del Programa Puntos', bases: window.BASES_PUNTOS };
   // textos de ejemplo, inventados: solo muestran cómo se ven las bases de una membresía o una app
   function basesEjemplo(nombre, secciones) {
-    return '<p><strong>TÉRMINOS Y CONDICIONES DE ' + nombre.toUpperCase() + '</strong></p><ol>' +
+    return '<ol>' +
       secciones.map(function (x) { return '<li><strong>' + x[0] + '</strong><br>' + x[1] + '</li>'; }).join('') + '</ol>' +
       '<p>Las presentes bases se someten a la jurisdicción de los tribunales competentes de la ciudad de Montevideo, Uruguay.</p>';
   }
@@ -220,16 +223,16 @@
       ['Cambios', 'Tienda Inglesa puede modificar estas condiciones y avisará los cambios por sus canales habituales.']
     ]);
   }
-  DIALOGOS['bases-membresia'] = { titulo: 'Bases y condiciones', bases: basesEjemplo('Socio Acelu', [
+  DIALOGOS['bases-membresia'] = { titulo: 'Bases de Socio Acelu', bases: basesEjemplo('Socio Acelu', [
     ['La membresía', 'Socio Acelu es un beneficio para las personas afiliadas a la institución, que da acceso a descuentos en las compras en Tienda Inglesa.'],
     ['Quiénes pueden participar', 'Clientes mayores de 18 años, con cuenta en Tienda Inglesa, que presenten la documentación que acredite su afiliación.'],
     ['Beneficios', 'Los descuentos se aplican al identificarse como cliente, y no son acumulables con otras promociones salvo que se indique lo contrario.'],
     ['Baja', 'Podés cancelar tu membresía cuando quieras desde Suscripciones. Tienda Inglesa puede darla de baja si dejás de cumplir los requisitos.'],
     ['Cambios', 'Tienda Inglesa puede modificar estas bases y avisará los cambios por sus canales habituales.']
   ]) };
-  DIALOGOS['bases-margarita'] = { titulo: 'Bases y condiciones', bases: basesApp('Margarita', 'una asistente virtual que te ayuda a buscar productos y armar tus compras') };
-  DIALOGOS['bases-penca'] = { titulo: 'Bases y condiciones', bases: basesApp('Penca Tienda Inglesa', 'un juego de pronósticos deportivos') };
-  function basesDialogo(d) { return '<div class="SusBases" id="dialogo-bases">' + d.bases + '</div>'; }
+  DIALOGOS['bases-margarita'] = { titulo: 'Bases de Margarita', bases: basesApp('Margarita', 'una asistente virtual que te ayuda a buscar productos y armar tus compras') };
+  DIALOGOS['bases-penca'] = { titulo: 'Bases de Penca Tienda Inglesa', bases: basesApp('Penca Tienda Inglesa', 'un juego de pronósticos deportivos') };
+  function basesDialogo(d) { return '<div class="SusBases" id="dialogo-bases">' + d.bases.replace(/<p>(\s|&nbsp;|<br>)*<\/p>/g, '').replace(/^\s*<p><strong>[^<]*<\/strong><\/p>/, '') + '</div>'; }
   function enlacesBases(doc) {
     doc.querySelectorAll('#dialogo-bases a').forEach(function (e) { tocable(e, 'Abrir el enlace', aviso('Enlace externo', 'Abre ' + e.getAttribute('href') + ' en otra pestaña (web) o en el navegador (app).')); });
   }
@@ -238,11 +241,11 @@
     return '<dl class="SusDatos" id="dialogo-datos">' + d.datos.map(function (x) { return '<dt>' + x[0] + '</dt><dd>' + x[1] + '</dd>'; }).join('') + '</dl>';
   }
   // alta: el formulario entero vive acá, con los textos de hoy. «Unirme» se habilita con el documento y las bases aceptadas.
-  function formAlta(d) {
+  function formAlta(d, claseEnlace) {
     return '<div class="SusAlta" id="dialogo-alta"><div class="SusCampos">' +
       '<div class="SusCampo"><label for="dialogo-documento">Documento</label><input type="text" id="dialogo-documento" class="form-control" inputmode="numeric" placeholder="Sin puntos ni guiones" autocomplete="off"></div>' +
-      '<div class="SusCampo"><label for="dialogo-pais">País de emisión</label><select id="dialogo-pais" class="form-control">' + d.paises.map(function (p) { return '<option>' + p + '</option>'; }).join('') + '</select></div></div>' +
-      '<label class="SusOpcion"><input type="checkbox" id="dialogo-opcion"><span>' + d.acepto + '</span></label>' +
+      '<div class="SusCampo"><label for="dialogo-pais">País de emisión</label><select id="dialogo-pais" class="form-control">' + d.paises.map(function (p) { return '<option>' + p + '</option>'; }).join('') + '</select></div></div><div class="SusErrorSlot" id="dialogo-error-slot"></div>' +
+      '<label class="SusOpcion"><input type="checkbox" id="dialogo-opcion"><span>' + d.acepto.replace('bases y condiciones', '<button type="button" class="' + claseEnlace + ' SusEnlaceTexto" id="dialogo-ver-bases">bases y condiciones</button>') + '</span></label>' +
       '<label class="SusOpcion SusLegal" id="dialogo-banco-fila"><input type="checkbox" id="dialogo-banco"><span>' + d.legal + '</span></label></div>';
   }
   function activarAlta(doc) {
@@ -251,14 +254,42 @@
     op.addEventListener('change', revisar);
     nu.addEventListener('input', revisar);
   }
+  function appsVisibles() { return APPS.filter(function (a) { return a.id !== hecho.sinApp; }); }
+  function numerosDe(a) { return hecho.sinNumero ? a.numeros.slice(1) : a.numeros; }
+  // la tarjeta actualizada es la confirmación: sin mensaje aparte
+  function basesSobreAlta(doc, enApp) {
+    var d = DIALOGOS['bases-puntos'], v;
+    if (enApp) {
+      v = nuevo(doc, 'div', { class: 'alerta-velo hoja', id: 'dialogo-sobre' }, '<div class="hoja-app hoja-bases" role="dialog"><h2>' + d.titulo + '</h2>' + basesDialogo(d) + '<button type="button" class="btn-primario" id="dialogo-sobre-cerrar">Cerrar</button></div>');
+      doc.querySelector('.alerta-velo').parentNode.appendChild(v);
+    } else {
+      v = nuevo(doc, 'div', { class: 'PopupContainer SusDialogo SusDialogoBases', id: 'dialogo-sobre' }, '<div class="TableRoundedShadow" role="dialog"><span class="wTxtRegularTitle">' + d.titulo + '</span>' + basesDialogo(d) + '<div class="SusBotones"><input type="button" id="dialogo-sobre-cerrar" class="wButtonActionDefualt btn btn-default" value="Cerrar"></div></div>');
+      doc.body.appendChild(v);
+    }
+    enlacesBases(doc);
+    tocable(doc.getElementById('dialogo-sobre-cerrar'), 'Cerrar', function () { v.remove(); });
+  }
+  function terminar(doc, paso) {
+    if (paso === 'unirme' && doc.getElementById('dialogo-documento').value.trim() === '12345678') {
+      doc.getElementById('dialogo-documento').classList.add('SusCampoError');
+      doc.getElementById('dialogo-error-slot').innerHTML = '<span class="SusError" id="dialogo-error">El documento ya está asociado a otro usuario</span>';
+      return;
+    }
+    if (paso === 'salir-puntos') hecho.puntos = 'no';
+    if (paso === 'unirme') { hecho.puntos = 'adherido'; hecho.desde = HOY; }
+    if (paso === 'cancelar-membresia') hecho.sinMembresia = true;
+    if (paso === 'desconectar-app') hecho.sinApp = 'margarita';
+    if (paso === 'desvincular-numero') hecho.sinNumero = true;
+    dlg = null; P.render();
+  }
   function dialogo(doc, paso) {
     var d = DIALOGOS[paso];
-    var v = nuevo(doc, 'div', { class: 'PopupContainer SusDialogo' + (d.bases ? ' SusDialogoBases' : '') },
+    var v = nuevo(doc, 'div', { class: 'PopupContainer SusDialogo' + (d.bases ? ' SusDialogoBases' : '') + (d.alta ? ' SusDialogoAlta' : '') },
       '<div class="TableRoundedShadow" id="dialogo" role="dialog"><span class="wTxtRegularTitle">' + d.titulo + '</span>' +
       (d.texto ? '<span class="wTxtRegular1">' + d.texto + '</span>' : '') +
       (d.datos ? datosDialogo(d) : '') +
       (d.bases ? basesDialogo(d) : '') +
-      (d.alta ? formAlta(d) : '') +
+      (d.alta ? formAlta(d, 'SusEnlace') : '') +
       (d.datos || d.bases
         ? '<div class="SusBotones"><input type="button" id="dialogo-cancelar" class="wButtonActionDefualt btn btn-default" value="Cerrar"></div></div>'
         : '<div class="SusBotones"><input type="button" id="dialogo-cancelar" class="ButtonCancel btn btn-default" value="' + (d.cancelar || 'Cancelar') + '">' +
@@ -267,9 +298,15 @@
     tocable(doc.getElementById('dialogo-cancelar'), d.datos || d.bases ? 'Cerrar' : 'Cerrar sin cambios', cerrar);
     if (d.bases) enlacesBases(doc);
     if (d.datos || d.bases) return;
-    if (d.alta) activarAlta(doc);
+    if (d.alta) {
+      activarAlta(doc);
+      var nd = doc.getElementById('dialogo-documento'), acc = doc.getElementById('dialogo-accion');
+      if (doc.defaultView.innerWidth >= 768) nd.focus(); // cursor en el primer campo; en mobile no: el teclado taparía el formulario
+      nd.addEventListener('keydown', function (e) { if (e.key === 'Enter' && !acc.disabled) acc.click(); });
+      tocable(doc.getElementById('dialogo-ver-bases'), 'Ver las bases', function () { basesSobreAlta(doc, false); });
+    }
     tocable(doc.getElementById('dialogo-accion'), d.accion, function () {
-      P.aviso('Listo', d.listo, [['Volver', cerrar]]);
+      terminar(doc, paso);
     });
   }
 
@@ -309,20 +346,21 @@
     if (estado.puntos !== 'sinprograma') {
       h += '<div class="seccion">Programa Puntos</div>';
       h += estado.puntos === 'adherido'
-        ? tarjetaApp({ id: 'bloque-puntos', titulo: 'Adherido', des: 'Desde el ' + PUNTOS.desde + ' · <button type="button" class="lnk" id="ver-bases">Ver bases</button>', extra: '<dl class="detalle" id="detalle-puntos"><dt>Documento</dt><dd>' + PUNTOS.documento + ' · ' + PUNTOS.pais + '</dd></dl>', boton: 'Salir del programa', idBoton: 'salir-puntos', gris: gris })
-        : tarjetaApp({ id: 'bloque-puntos', titulo: 'No estás adherido', des: '¡Juntá PUNTOS y canjealos por lo que quieras!', boton: 'Unirme', idBoton: 'unirme', claseBoton: 'btn-primario', gris: gris });
+        ? tarjetaApp({ id: 'bloque-puntos', titulo: 'Adherido', des: 'Desde el ' + (hecho.desde || PUNTOS.desde) + ' · <button type="button" class="lnk" id="ver-bases">Ver bases</button>', extra: '<dl class="detalle" id="detalle-puntos"><dt>Documento</dt><dd>' + PUNTOS.documento + ' · ' + PUNTOS.pais + '</dd></dl>', boton: 'Salir del programa', idBoton: 'salir-puntos', gris: gris })
+        : tarjetaApp({ id: 'bloque-puntos', titulo: 'No estás adherido', des: '', boton: 'Unirme', idBoton: 'unirme', claseBoton: 'btn-primario', gris: gris });
     }
     // una sección sin contenido no aparece
     var vacioM = estado.membresias === 'sin', vacioA = estado.apps === 'sin';
     var bm = vacioM ? '' : '<div class="seccion" id="bloque-membresias">Membresías</div>';
     if (!vacioM) ['Socio Acelu', 'Club del Vino'].forEach(function (g, i) {
+      if (i === 0 && hecho.sinMembresia) return;
       if (i === 1) { bm += tarjetaApp({ id: 'membresia-2', titulo: g, des: '<span class="pendiente-app">Su solicitud sera procesada a la brevedad.</span>', gris: gris }); return; } // pendiente: sin estrella, sin fecha y sin cancelar
       bm += tarjetaApp({ id: 'membresia-' + (i + 1), titulo: g, des: 'Miembro desde el ' + DESDE[i] + ' · <button type="button" class="lnk" id="ver-bases-membresia-' + (i + 1) + '">Ver bases</button>', estrella: true, gris: gris, boton: 'Cancelar membresía', idBoton: i === 0 ? 'cancelar-membresia' : 'cancelar-2' });
     });
     var ba = vacioA ? '' : '<div class="seccion" id="bloque-apps">Apps conectadas</div>';
-    if (!vacioA) APPS.forEach(function (a) {
-      var nums = a.numeros.length ? '<div class="numeros-app" id="numeros-' + a.id + '"><div class="rot">Dispositivos vinculados</div>' +
-        a.numeros.map(function (x, i) { return '<div class="num"><span>' + x[0] + '<small>Vinculado el ' + x[1] + '</small></span><button type="button" class="accion-app" id="desvincular-' + (i + 1) + '">Desvincular</button></div>'; }).join('') + '</div>' : '';
+    if (!vacioA) appsVisibles().forEach(function (a) {
+      var nums = numerosDe(a).length ? '<div class="numeros-app" id="numeros-' + a.id + '"><div class="rot">Dispositivos vinculados</div>' +
+        numerosDe(a).map(function (x, i) { return '<div class="num"><span>' + x[0] + '<small>Vinculado el ' + x[1] + '</small></span><button type="button" class="accion-app" id="desvincular-' + (i + 1) + '">Desvincular</button></div>'; }).join('') + '</div>' : '';
       ba += tarjetaApp({ id: 'app-' + a.id, titulo: a.nombre, des: 'Conectada el ' + a.conectada + ' · <button type="button" class="lnk" id="ver-bases-' + a.id + '">Ver bases</button>', gris: gris, boton: 'Desconectar', idBoton: 'desconectar-' + a.id,
         extra: '<dl class="detalle"><dt>Último acceso</dt><dd id="ultimo-' + a.id + '">' + a.ultimo + '</dd><dt>Tus datos</dt><dd><button type="button" class="lnk" id="ver-datos-' + a.id + '">Ver mis datos</button></dd></dl>', despues: nums }); // «Desconectar» es de la app: va antes de sus dispositivos
     });
@@ -346,7 +384,7 @@
       '<button type="button" class="btn-primario" id="dialogo-cancelar">Cerrar</button></div></div>';
     if (d.bases) return '<div class="alerta-velo hoja"><div class="hoja-app hoja-bases" id="dialogo" role="dialog"><h2>' + d.titulo + '</h2>' + basesDialogo(d) +
       '<button type="button" class="btn-primario" id="dialogo-cancelar">Cerrar</button></div></div>';
-    if (d.alta) return '<div class="alerta-velo hoja"><div class="hoja-app" id="dialogo" role="dialog"><h2>' + d.titulo + '</h2><p>' + d.texto + '</p>' + formAlta(d) +
+    if (d.alta) return '<div class="alerta-velo hoja"><div class="hoja-app" id="dialogo" role="dialog"><h2>' + d.titulo + '</h2><p>' + d.texto + '</p>' + formAlta(d, 'lnk') +
       '<button type="button" class="btn-primario" id="dialogo-accion" disabled>' + d.accion + '</button><button type="button" class="hoja-cancelar" id="dialogo-cancelar">Cancelar</button></div></div>';
     return '<div class="alerta-velo"><div class="alerta" id="dialogo" role="alertdialog"><div class="cuerpo-alerta"><h2>' + d.titulo + '</h2><p>' + d.texto + '</p></div>' +
       // iOS apila los botones cuando alguno no entra en medio ancho (la acción va arriba y Cancelar abajo)
@@ -367,13 +405,13 @@
     t('cancelar-membresia', 'Cancelar membresía', abrir('cancelar-membresia'));
     t('desconectar-margarita', 'Desconectar Margarita', abrir('desconectar-app'));
     t('ver-datos-margarita', 'Ver mis datos', abrir('ver-datos'));
-    t('desvincular-1', 'Desvincular el dispositivo', abrir('desvincular-numero'));
+    if (!hecho.sinNumero) t('desvincular-1', 'Desvincular el dispositivo', abrir('desvincular-numero'));
     t('borrar-cuenta', 'Borrar mi cuenta', aviso('Borrar mi cuenta', 'Sigue el flujo actual: la pantalla «Borrar cuenta», que pide la contraseña para confirmar.'));
     if (dlg) {
       t('dialogo-cancelar', DIALOGOS[dlg].datos || DIALOGOS[dlg].bases ? 'Cerrar' : 'Cerrar sin cambios', cerrar);
       if (DIALOGOS[dlg].bases) enlacesBases(doc);
-      if (DIALOGOS[dlg].alta) activarAlta(doc);
-      t('dialogo-accion', DIALOGOS[dlg].accion, function () { P.aviso('Listo', DIALOGOS[dlg].listo, [['Volver', cerrar]]); });
+      if (DIALOGOS[dlg].alta) { activarAlta(doc); t('dialogo-ver-bases', 'Ver las bases', function () { basesSobreAlta(doc, true); }); }
+      t('dialogo-accion', DIALOGOS[dlg].accion, function () { terminar(doc, dlg); });
     }
   }
   function pantallaApp(estado) {
@@ -386,6 +424,9 @@
   // ---------------------------------------------------------------- pantalla
   function pantalla(estado) {
     if (estado.paso !== ultimoPaso) { dlg = null; ultimoPaso = estado.paso; } // al cambiar de paso se cierra la confirmación
+    var clave = [estado.vista, estado.plataforma, estado.paso, estado.puntos, estado.membresias, estado.apps].join('|');
+    if (clave !== ultimaClave) { hecho = {}; ultimaClave = clave; }
+    if (hecho.puntos) estado = Object.assign({}, estado, { puntos: hecho.puntos });
     if (estado.plataforma === 'app') return pantallaApp(estado);
     var paso = estado.paso, datos = paso === 'mis-datos', base = datos ? PANT.datos : PANT.membresias;
     return {
@@ -401,6 +442,7 @@
   // ---------------------------------------------------------------- notas para desarrollo
   var NOTAS = {
     suscripciones: [
+      { d: '#TBLMYGROUPS', m: '#TBLMYGROUPS', t: '<b>Después de confirmar:</b> el diálogo se cierra y la pantalla se actualiza. Ese cambio es la confirmación: sin mensajes ni avisos flotantes. Una sola espera: el botón del diálogo queda esperando hasta que la lista se actualice, sin un segundo indicador. Si la acción falla, el error aparece dentro del diálogo. En web, al abrir un diálogo el foco queda adentro, Escape lo cierra, y al cerrar vuelve al control que lo abrió; las salidas muestran el foco.' },
       { d: '#TBLMYGROUPS', m: '#TBLMYGROUPS', t: '<b>«Membresías» pasa a llamarse «Suscripciones»</b> y suma el Programa Puntos y las apps conectadas. «Preferencias» deja de existir: la baja de Puntos viene acá y «Borrar mi cuenta» va a Información personal.' },
       { d: '#TBLMYGROUPS', m: '#TBLMYGROUPS', t: 'La pestaña se muestra <b>siempre</b>, aunque el cliente no tenga nada: solo aparecen las secciones con contenido y, si no hay ninguna, un único aviso. Hoy «Membresías» depende de una configuración y «Preferencias», de que la tienda muestre el programa de fidelidad en el perfil.' },
       { d: '#bloque-puntos', m: '#bloque-puntos', t: '<b>Programa Puntos.</b> Solo en las tiendas con el programa en el perfil (la misma configuración que hoy muestra «Preferencias»). La tarjeta es la de las membresías. Una sola fecha: en el formulario de hoy, adherirse y aceptar las bases son el mismo acto. Documento y país, de solo lectura como hoy, vienen de Información personal. <i>A confirmar:</i> de qué dato sale; «CustomerPointsDateTime» no sirve, es la última actualización de puntos.' },
@@ -421,18 +463,18 @@
       { d: '#sus-cuenta', m: '#sus-cuenta', t: '<b>Borrar mi cuenta</b> pasa acá desde Preferencias, como una zona propia al final: 48 px de aire y una línea de 1 px #E5E5E5 a todo el ancho la separan de Cancelar / Guardar, que siguen cerrando el formulario. Título y una línea que dice qué se pierde; la acción va debajo del texto, porque acá no hay tarjeta que la contenga.' },
       { d: '#borrar-cuenta', m: '#borrar-cuenta', t: 'La misma acción de texto roja que las demás salidas (#C91411, sin relleno): se encuentra, pero no compite con Guardar ni se confunde con Cancelar (hoy es un botón oscuro). Sigue al flujo actual de borrar cuenta, que pide la contraseña.' }
     ],
-    'salir-puntos': [{ d: '#dialogo', m: '#dialogo', t: 'El contenido es el de hoy, tal cual: el texto del check, el aviso, CONFIRMAR y el mensaje final. Cambia solo el layout: ahora es una confirmación. Popup estándar del sitio.' }],
-    'cancelar-membresia': [{ d: '#dialogo', m: '#dialogo', t: '<i>A confirmar:</i> qué confirmación muestra hoy «Cancelar membresía». Al confirmar, el mensaje es el de hoy («Su solicitud sera procesada a la brevedad.»).' }],
-    'unirme': [{ d: '#dialogo', m: '#dialogo', t: 'El contenido es el de hoy, tal cual: el título, el texto, documento, país y los dos checks. Lo único que cambia es el layout: en lugar de desplegarse en Información personal, se abre acá, desde «Unirme». <i>A confirmar:</i> si el check de Scotiabank es obligatorio (su texto varía por tienda), si se precarga el documento cuando ya existe, cuál es el mensaje final y cómo aplica en tiendas con otro proveedor de puntos.' }],
+    'salir-puntos': [{ d: '#dialogo', m: '#dialogo', t: 'El contenido es el de hoy, tal cual: el texto del check y el aviso. El botón pasa de CONFIRMAR a «Confirmar», como el popup real de cancelar membresía. Cambia el layout: ahora es una confirmación, en el popup estándar del sitio. Al confirmar, la tarjeta pasa a «No estás adherido», sin mensaje final.' }],
+    'cancelar-membresia': [{ d: '#dialogo', m: '#dialogo', t: 'Al confirmar, la membresía sale de la lista, como hace hoy el código, sin mensaje final. <i>A confirmar:</i> qué confirmación muestra hoy «Cancelar membresía».' }],
+    'unirme': [{ d: '#dialogo', m: '#dialogo', t: 'El contenido es el de hoy, tal cual: el título, el texto, documento, país y los dos checks. Lo único que cambia es el layout: en lugar de desplegarse en Información personal, se abre acá, desde «Unirme». Las palabras «bases y condiciones» abren las bases encima del formulario, sin perder lo escrito. El error va junto al campo, en un lugar reservado para que no mueva el botón; en web el popup queda fijo arriba, el cursor arranca en Documento y Enter envía. <i>A confirmar:</i> si el check de Scotiabank es obligatorio (su texto varía por tienda), si se precarga el documento cuando ya existe y cómo aplica en tiendas con otro proveedor de puntos.' }],
     'ver-datos': [{ d: '#dialogo', m: '#dialogo', t: '<b>Ver mis datos:</b> los datos que el cliente le cedió a la app, con su valor. Cada fila sale solo si la app tiene ese permiso: profile (Nombre), email (Email), phone (Celular), identity (Documento, País de emisión y Fecha de nacimiento). Margarita muestra solo Nombre y Email, porque en la base local el cliente del hub (Agent-Hub Trunk) tiene profile y email. <i>A confirmar:</i> sus permisos en producción. Los dispositivos vinculados no van acá: no los entrega ningún permiso y ya están en la tarjeta. Lo que la app genera después, como las conversaciones, no se le muestra al cliente.' }],
     'desconectar-app': [
-      { d: '#dialogo', m: '#dialogo', t: 'Al confirmar, la app pierde el acceso en el momento, se desvinculan todos sus dispositivos y se pide borrar los datos (pedido de Marcelo): desconectar y borrar son una sola acción. Nivel básico: un mail automático al cliente. El cliente no pierde su propia sesión. <i>A confirmar:</i> quién recibe el pedido de borrar, porque ese mail no se lo avisa al equipo que borra.' }
+      { d: '#dialogo', m: '#dialogo', t: 'Al confirmar, la tarjeta desaparece, sin mensaje final. La app pierde el acceso en el momento, se desvinculan todos sus dispositivos y se pide borrar los datos (pedido de Marcelo): desconectar y borrar son una sola acción. Nivel básico: un mail automático al cliente. El cliente no pierde su propia sesión. <i>A confirmar:</i> quién recibe el pedido de borrar, porque ese mail no se lo avisa al equipo que borra.' }
     ],
-    'bases-puntos': [{ d: '#dialogo', m: '#dialogo', t: '<b>Solo el texto de las bases</b>, no la landing de Puntos, que además trae banners, ofertas, video y preguntas frecuentes. Sale del widget de bases de esa landing (WidgetId 1105, tipo TnC, HtmlText), el mismo que muestra wTermsAndConditions. Texto real de la base local. Título y «Cerrar» quedan fijos; scrollea solo el texto. En web, el mismo popup del sitio (Tblpopup + Componentpopup).' }],
+    'bases-puntos': [{ d: '#dialogo', m: '#dialogo', t: '<b>Solo el texto de las bases</b>, no la landing de Puntos, que además trae banners, ofertas, video y preguntas frecuentes. Sale del widget de bases de esa landing (WidgetId 1105, tipo TnC, HtmlText), el mismo que muestra wTermsAndConditions. Texto real de la base local. El título del popup es propio, no sale de la landing, y el texto arranca sin su título interno ni párrafos vacíos. Título y «Cerrar» quedan fijos; scrollea solo el texto. En web, el mismo popup del sitio (Tblpopup + Componentpopup).' }],
     'bases-membresia': [{ d: '#dialogo', m: '#dialogo', t: 'El texto sale del widget de bases de la landing indicada en TermsAndConditionsLandingId. Si esa landing no tiene ese widget, se abre como hoy: pestaña nueva en web y navegador en la app. <b>Texto de ejemplo, inventado:</b> ningún grupo de la base local tiene bases cargadas.' }],
     'bases-margarita': [{ d: '#dialogo', m: '#dialogo', t: 'Muestra las bases de la app. <b>Texto de ejemplo, inventado.</b> <i>A confirmar:</i> de dónde sale ese texto, porque hoy se guarda la frase del consentimiento (ExtAppCustomerConsentText), que puede traer solo un enlace. Si solo hay un enlace, se abre afuera.' }],
     'bases-penca': [{ d: '#dialogo', m: '#dialogo', t: 'Muestra las bases de la app. <b>Texto de ejemplo, inventado.</b> <i>A confirmar:</i> de dónde sale ese texto, porque hoy se guarda la frase del consentimiento (ExtAppCustomerConsentText), que puede traer solo un enlace. Si solo hay un enlace, se abre afuera.' }],
-    'desvincular-numero': [{ d: '#dialogo', m: '#dialogo', t: 'Corta el acceso de la app desde ese dispositivo en el momento. Si es el último de la app, la confirmación es la de «Desconectar».' }]
+    'desvincular-numero': [{ d: '#dialogo', m: '#dialogo', t: 'La fila sale de la lista, sin mensaje final. Corta el acceso de la app desde ese dispositivo en el momento. Si es el último de la app, la confirmación es la de «Desconectar».' }]
   };
   // Notas de la vista App (solo mobile)
   var NOTAS_APP = {
@@ -441,6 +483,7 @@
       { d: null, m: '#app-lapiz', t: 'El lápiz abre «Mis datos», como hoy. Ahí pasa «Borrar mi cuenta».' }
     ],
     suscripciones: [
+      { d: null, m: '#app-titulo', t: '<b>Después de confirmar:</b> el diálogo se cierra y la pantalla se actualiza. Ese cambio es la confirmación: sin mensajes ni avisos flotantes. Una sola espera: el botón del diálogo queda esperando hasta que la lista se actualice, sin un segundo indicador. Si la acción falla, el error aparece dentro del diálogo.' },
       { d: null, m: '#app-titulo', t: 'Es la pantalla «Membresías» con otro nombre, que suma Puntos y las apps conectadas. Tarjeta de hoy (descripción 15 light) con tres cambios: título 16 semibold, por debajo de la sección (17 bold); borde gris #E0E0E0 de 1 pt en lugar del naranja (la estrella sigue marcando la membresía activa) y las salidas como <b>acción de texto</b>: rojo #C91411, 15 pt, a la derecha, 44 pt de alto para tocar. «Unirme» sigue siendo botón.' },
       { d: null, m: '#bloque-puntos', t: '<b>Programa Puntos</b>, solo en las tiendas con el programa en el perfil. «Salir del programa» reemplaza a la opción «Deseo darme de baja del Programa Puntos de Tienda Inglesa» + «Aceptar» de Privacidad. <i>A confirmar:</i> de qué dato sale la fecha de adhesión.' },
       { d: null, m: '#bloque-membresias', t: '<b>Membresías</b>, como hoy, con «Miembro desde el …» en lugar de «Subscripción activa».' },
@@ -455,15 +498,15 @@
       { d: null, m: '#sus-cuenta', t: '<b>Borrar tu cuenta</b> pasa acá desde Privacidad (hoy: opción «Deseo cancelar mi cuenta de Tienda Inglesa» + «Aceptar»). Tarjeta propia al final, con la misma acción de texto roja que las demás salidas. Sigue a la pantalla actual de borrar cuenta, que pide la contraseña.' }
     ],
     'salir-puntos': [{ d: null, m: '#dialogo', t: 'El contenido es el de hoy: la opción «Deseo darme de baja del Programa Puntos de Tienda Inglesa» y «Aceptar». Cambia solo el layout: ahora es una alerta nativa de iOS. <i>A confirmar:</i> que el aviso de la app sea este mismo texto, porque en la app sale de un parámetro.' }],
-    'cancelar-membresia': [{ d: null, m: '#dialogo', t: '<i>A confirmar:</i> qué confirmación muestra hoy «Cancelar membresía» en la app.' }],
-    'unirme': [{ d: null, m: '#dialogo', t: 'El contenido es el de hoy, tal cual: el título, el texto, documento, país y los dos checks. Lo único que cambia es el layout: en lugar de desplegarse en Información personal, se abre acá, desde «Unirme». <i>A confirmar:</i> si el check de Scotiabank es obligatorio (su texto varía por tienda), si se precarga el documento cuando ya existe, cuál es el mensaje final y cómo aplica en tiendas con otro proveedor de puntos. En la app es una hoja, porque una alerta de iOS no admite un check.' }],
+    'cancelar-membresia': [{ d: null, m: '#dialogo', t: 'Al confirmar, la membresía sale de la lista, sin mensaje final. <i>A confirmar:</i> qué confirmación muestra hoy «Cancelar membresía» en la app.' }],
+    'unirme': [{ d: null, m: '#dialogo', t: 'El contenido es el de hoy, tal cual: el título, el texto, documento, país y los dos checks. Lo único que cambia es el layout: en lugar de desplegarse en Información personal, se abre acá, desde «Unirme». Las palabras «bases y condiciones» abren las bases encima del formulario, sin perder lo escrito. El error va junto al campo, en un lugar reservado para que no mueva el botón; en web el popup queda fijo arriba, el cursor arranca en Documento y Enter envía. <i>A confirmar:</i> si el check de Scotiabank es obligatorio (su texto varía por tienda), si se precarga el documento cuando ya existe y cómo aplica en tiendas con otro proveedor de puntos. En la app es una hoja, porque una alerta de iOS no admite un check.' }],
     'ver-datos': [{ d: null, m: '#dialogo', t: '<b>Ver mis datos:</b> los datos que el cliente le cedió a la app, con su valor. Cada fila sale solo si la app tiene ese permiso: profile (Nombre), email (Email), phone (Celular), identity (Documento, País de emisión y Fecha de nacimiento). Margarita muestra solo Nombre y Email, porque en la base local el cliente del hub (Agent-Hub Trunk) tiene profile y email. <i>A confirmar:</i> sus permisos en producción. Los dispositivos vinculados no van acá: no los entrega ningún permiso y ya están en la tarjeta. Lo que la app genera después, como las conversaciones, no se le muestra al cliente.' }],
-    'desconectar-app': [{ d: null, m: '#dialogo', t: 'Al confirmar, la app pierde el acceso en el momento, se desvinculan sus dispositivos y se pide borrar los datos (pedido de Marcelo): desconectar y borrar son una sola acción. Nivel básico: un mail automático al cliente. <i>A confirmar:</i> quién recibe el pedido de borrar, porque ese mail no se lo avisa al equipo que borra.' }],
-    'bases-puntos': [{ d: null, m: '#dialogo', t: '<b>Solo el texto de las bases</b>, no la landing de Puntos, que además trae banners, ofertas, video y preguntas frecuentes. Sale del widget de bases de esa landing (WidgetId 1105, tipo TnC, HtmlText), el mismo que muestra wTermsAndConditions. Texto real de la base local. Título y «Cerrar» quedan fijos; scrollea solo el texto. En la app es una llamada Popup de tamaño Large; el panel de bases de cupones (sdInfoPopup) hoy muestra texto plano y este texto es HTML.' }],
+    'desconectar-app': [{ d: null, m: '#dialogo', t: 'Al confirmar, la tarjeta desaparece, sin mensaje final. La app pierde el acceso en el momento, se desvinculan sus dispositivos y se pide borrar los datos (pedido de Marcelo): desconectar y borrar son una sola acción. Nivel básico: un mail automático al cliente. <i>A confirmar:</i> quién recibe el pedido de borrar, porque ese mail no se lo avisa al equipo que borra.' }],
+    'bases-puntos': [{ d: null, m: '#dialogo', t: '<b>Solo el texto de las bases</b>, no la landing de Puntos, que además trae banners, ofertas, video y preguntas frecuentes. Sale del widget de bases de esa landing (WidgetId 1105, tipo TnC, HtmlText), el mismo que muestra wTermsAndConditions. Texto real de la base local. El título del popup es propio, no sale de la landing, y el texto arranca sin su título interno ni párrafos vacíos. Título y «Cerrar» quedan fijos; scrollea solo el texto. En la app es una llamada Popup de tamaño Large; el panel de bases de cupones (sdInfoPopup) hoy muestra texto plano y este texto es HTML.' }],
     'bases-membresia': [{ d: null, m: '#dialogo', t: 'El texto sale del widget de bases de la landing indicada en TermsAndConditionsLandingId. Si esa landing no tiene ese widget, se abre como hoy: pestaña nueva en web y navegador en la app. <b>Texto de ejemplo, inventado:</b> ningún grupo de la base local tiene bases cargadas.' }],
     'bases-margarita': [{ d: null, m: '#dialogo', t: 'Muestra las bases de la app. <b>Texto de ejemplo, inventado.</b> <i>A confirmar:</i> de dónde sale ese texto, porque hoy se guarda la frase del consentimiento (ExtAppCustomerConsentText), que puede traer solo un enlace. Si solo hay un enlace, se abre afuera.' }],
     'bases-penca': [{ d: null, m: '#dialogo', t: 'Muestra las bases de la app. <b>Texto de ejemplo, inventado.</b> <i>A confirmar:</i> de dónde sale ese texto, porque hoy se guarda la frase del consentimiento (ExtAppCustomerConsentText), que puede traer solo un enlace. Si solo hay un enlace, se abre afuera.' }],
-    'desvincular-numero': [{ d: null, m: '#dialogo', t: 'Corta el acceso desde ese dispositivo en el momento. Si es el último, es «Desconectar».' }]
+    'desvincular-numero': [{ d: null, m: '#dialogo', t: 'La fila sale de la lista, sin mensaje final. Corta el acceso desde ese dispositivo en el momento. Si es el último, es «Desconectar».' }]
   };
   Object.keys(NOTAS_APP).forEach(function (k) { NOTAS['app-' + k] = NOTAS_APP[k]; });
 
