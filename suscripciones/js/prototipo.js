@@ -376,7 +376,8 @@
       '<div class="card form-app" id="app-form">' + campoApp('Nombre', 'Ana') + campoApp('Apellido', 'Pérez') + campoApp('e-mail', 'ana.perez@ejemplo.com') +
       campoApp('Sexo', '', false, true) + campoApp('Fecha de nacimiento', 'Fecha de nacimiento', true) + campoApp('Celular', 'Celular', true) + '</div>' +
       '<div class="card cuenta-app" id="sus-cuenta"><div class="tit">Borrar tu cuenta</div><div class="des">Se borran tus datos, tus puntos, tus membresías y las apps conectadas. No se puede deshacer.</div>' +
-      '<button type="button" class="accion-app" id="borrar-cuenta">Borrar mi cuenta</button></div></div>';
+      '<button type="button" class="accion-app" id="borrar-cuenta">Borrar mi cuenta</button></div>' +
+      '<button type="button" class="lnk privacidad-app" id="app-privacidad">Declaración de privacidad</button></div>';
   }
   function alertaApp(paso) {
     var d = DIALOGOS[paso];
@@ -407,6 +408,7 @@
     t('ver-datos-margarita', 'Ver mis datos', abrir('ver-datos'));
     if (!hecho.sinNumero) t('desvincular-1', 'Desvincular el dispositivo', abrir('desvincular-numero'));
     t('borrar-cuenta', 'Borrar mi cuenta', aviso('Borrar mi cuenta', 'Sigue el flujo actual: la pantalla «Borrar cuenta», que pide la contraseña para confirmar.'));
+    t('app-privacidad', 'Declaración de privacidad', aviso('Declaración de privacidad', 'Abre la landing de privacidad de la tienda, como hoy.'));
     if (dlg) {
       t('dialogo-cancelar', DIALOGOS[dlg].datos || DIALOGOS[dlg].bases ? 'Cerrar' : 'Cerrar sin cambios', cerrar);
       if (DIALOGOS[dlg].bases) enlacesBases(doc);
@@ -479,7 +481,7 @@
   // Notas de la vista App (solo mobile)
   var NOTAS_APP = {
     menu: [
-      { d: null, m: '#app-suscripciones', t: '<b>«Membresías» pasa a llamarse «Suscripciones»</b> (mismo componente, mismo ícono) y se muestra <b>siempre</b>: hoy solo aparece si el cliente tiene algún grupo. «Privacidad» deja de existir: la baja de Puntos va a Suscripciones y «Borrar mi cuenta» a Mis datos.' },
+      { d: null, m: '#app-suscripciones', t: '<b>«Membresías» pasa a llamarse «Suscripciones»</b> (mismo componente, mismo ícono) y se muestra <b>siempre</b>: hoy solo aparece si el cliente tiene algún grupo. «Privacidad» deja de existir: la baja de Puntos va a Suscripciones; «Borrar mi cuenta» y la «Declaración de privacidad», a Mis datos.' },
       { d: null, m: '#app-lapiz', t: 'El lápiz abre «Mis datos», como hoy. Ahí pasa «Borrar mi cuenta».' }
     ],
     suscripciones: [
@@ -495,7 +497,8 @@
     ],
     'mis-datos': [
       { d: null, m: '#app-form', t: 'La edición de «Mis datos» no cambia.' },
-      { d: null, m: '#sus-cuenta', t: '<b>Borrar tu cuenta</b> pasa acá desde Privacidad (hoy: opción «Deseo cancelar mi cuenta de Tienda Inglesa» + «Aceptar»). Tarjeta propia al final, con la misma acción de texto roja que las demás salidas. Sigue a la pantalla actual de borrar cuenta, que pide la contraseña.' }
+      { d: null, m: '#sus-cuenta', t: '<b>Borrar tu cuenta</b> pasa acá desde Privacidad (hoy: opción «Deseo cancelar mi cuenta de Tienda Inglesa» + «Aceptar»). Tarjeta propia al final, con la misma acción de texto roja que las demás salidas. Sigue a la pantalla actual de borrar cuenta, que pide la contraseña.' },
+      { d: null, m: '#app-privacidad', t: '<b>Declaración de privacidad</b>, desde Privacidad: al desaparecer ese panel, este es su único acceso en la app. Solo se muestra si la tienda la tiene configurada (PrivacyPagesConfiguration.Privacy mayor que 0) y abre la misma landing de hoy. En el prototipo se ve siempre. En la web sigue en el pie del sitio.' }
     ],
     'salir-puntos': [{ d: null, m: '#dialogo', t: 'El contenido es el de hoy: la opción «Deseo darme de baja del Programa Puntos de Tienda Inglesa» y «Aceptar». Cambia solo el layout: ahora es una alerta nativa de iOS. <i>A confirmar:</i> que el aviso de la app sea este mismo texto, porque en la app sale de un parámetro.' }],
     'cancelar-membresia': [{ d: null, m: '#dialogo', t: 'Al confirmar, la membresía sale de la lista, sin mensaje final. <i>A confirmar:</i> qué confirmación muestra hoy «Cancelar membresía» en la app.' }],
@@ -521,12 +524,12 @@
     mobile: { ancho: 390 },
     estilos: ['css/prototipo.css'],
     controles: [
+      { id: 'plataforma', nombre: 'Plataforma', opciones: [['web', 'Web'], ['app', 'App', function (e) { return e.vista === 'mobile'; }]] },
       { id: 'paso', nombre: 'Paso', reiniciaScroll: true, opciones: [
         ['menu', 'Mis Datos (menú)', function (e) { return e.plataforma === 'app'; }],
         ['suscripciones', 'Suscripciones'],
         ['mis-datos', 'Información personal / Mis datos']
       ] },
-      { id: 'plataforma', nombre: 'Plataforma', opciones: [['web', 'Web'], ['app', 'App', function (e) { return e.vista === 'mobile'; }]] },
       { id: 'puntos', nombre: 'Puntos', opciones: [['adherido', 'Adherido'], ['no', 'No adherido'], ['sinprograma', 'Tienda sin programa']], mostrar: function (e) { return e.paso === 'suscripciones'; } },
       { id: 'membresias', nombre: 'Membresías', opciones: [['con', 'Con membresías'], ['sin', 'Sin membresías']], mostrar: function (e) { return e.paso === 'suscripciones'; } },
       { id: 'apps', nombre: 'Apps', opciones: [['con', 'Con apps'], ['sin', 'Sin apps']], mostrar: function (e) { return e.paso === 'suscripciones'; } }

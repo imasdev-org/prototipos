@@ -236,6 +236,7 @@ body.app { margin: 0; background: #F5F5F5; font-family: "Open Sans", sans-serif;
 .SusBotones .btn { flex: 1 1 0; }
 .SusDialogoBases .SusBotones .btn { flex: 0 0 auto; width: 100%; }
 .app .lnk { padding: 12px 0; margin: -12px 0; }
+.app .privacidad-app { display: block; margin: 16px auto 8px; font-size: 16px; } /* 16 + 12 de área de toque: los 28 entre secciones */
 .app .hoja-app .SusEnlaceTexto { font-weight: 700; }
 /* el popup del alta cambia de alto: fijo arriba */
 @media (min-width: 768px) { .SusDialogoAlta { align-items: flex-start; } }
