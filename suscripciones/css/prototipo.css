@@ -18,8 +18,6 @@
 
 /* números vinculados (apps que vinculan por teléfono) */
 /* relleno de la tarjeta parejo: 20 px por lado (el sitio deja 26 a la izquierda y 14 a la derecha) */
-.SusBloque .TxtMarginLeft15 { margin-left: 9px; }
-.SusBloque .FlexJCFlexEnd { margin-right: 6px; }
 .SusNumeros { margin: 12px 9px 0; border-top: 1px solid #e5e5e5; }
 .SusNumerosTitulo { display: block; margin: 10px 0 2px; font-family: "Open Sans Semibold", "Open Sans", sans-serif; font-size: 14px; font-weight: 600; color: #333; }
 .SusNumero { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid #f2f2f2; }
@@ -79,20 +77,12 @@
 .SusBotones { display: flex; justify-content: flex-end; gap: 12px; margin-top: 22px; }
 .SusBotones .btn { min-width: 130px; }
 
-/* en desktop, todas las salidas centradas en las dos primeras líneas de su tarjeta (nombre y descripción) */
-@media (min-width: 768px) {
-  .SusBloque .FlexJCFlexEnd .SusAccion { position: relative; top: 2.5px; }
-}
 
 @media (max-width: 767px) {
   .SusAccion { min-height: 44px; padding: 0; }
   /* los 44 de alto son para tocar: el margen negativo deja el aire inferior parejo con el superior */
-  .SusBloque .FlexJCFlexEnd .SusAccion { margin-bottom: -12px; }
   .SusNumeros { margin-top: 24px; }
   .SusCuenta .SusAccion { margin-top: 2px; }
-  /* la acción baja y deja libre la esquina: la estrella va arriba a la derecha, con el mismo borde que la acción, como en la app */
-  [id^="membresia-"] .wTxtRegularTitle { display: block; text-align: left; padding-right: 28px; }
-  .SusEstrella { position: absolute; right: 24px; top: 4px; margin: 0; }
   .SusDialogo { align-items: flex-end; padding: 0; }
   .SusDialogo .TableRoundedShadow { max-width: none; border-radius: 10px 10px 0 0; }
   .SusCampos { grid-template-columns: 1fr; }
@@ -102,7 +92,6 @@
   .SusOpcion input { margin: 0; }
   .SusBotones { flex-direction: column-reverse; }
   .SusBotones .btn { width: 100%; height: 44px; }
-  #tarjeta-puntos .wButtonActionDefualt { width: calc(100vw - 70px); margin-top: 10px; height: 44px; }
 }
 
 /* ================================================================ APP (iOS)
@@ -224,13 +213,8 @@ body.app { margin: 0; background: #F5F5F5; font-family: "Open Sans", sans-serif;
 .SusError { display: block; font-size: 13px; line-height: 18px; color: #c91411; }
 .SusErrorSlot + .SusOpcion { margin-top: 6px; }
 .SusEnlaceTexto { display: inline; }
-/* tarjeta sin adhesión: sin descripción, y «Unirme» con aire para tocarlo cómodo */
 .SusBloque .wTxtDescriptionGray3:empty { display: none; }
 .app .grupo .des:empty { display: none; }
-#tarjeta-puntos #unirme { min-width: 132px; padding: 0 32px !important; } /* desktop: el alto de 37 px del sistema */
-@media (max-width: 767px) { #tarjeta-puntos #unirme { min-height: 44px; } }
-/* desktop, sin adhesión: una sola línea de texto, centrada con el botón */
-@media (min-width: 768px) { #tarjeta-puntos:has(#unirme) > .row:first-child { display: flex; align-items: center; } }
 .form-control.SusCampoError { border-color: #c91411; }
 .SusDialogo .wTxtRegularTitle { display: block; text-align: left; }
 .SusBotones .btn { flex: 1 1 0; }
@@ -243,3 +227,226 @@ body.app { margin: 0; background: #F5F5F5; font-family: "Open Sans", sans-serif;
 @media (max-width: 767px) {
   .SusEnlace { padding: 12px 0; margin: -12px 0; }
 }
+
+/* ---- lista y detalle: la pestaña resume qué tiene el cliente; las acciones están en el detalle de cada servicio */
+.SusLista { margin-top: 10px; border: 1px solid #ccc; border-radius: 10px; overflow: hidden; background: #fff; }
+.SusFila { display: flex; align-items: center; gap: 12px; box-sizing: border-box; width: 100%; min-height: 64px; padding: 12px 20px; border: 0; border-top: 1px solid #e5e5e5; background: none; text-align: left; font: inherit; }
+.SusFila:first-child { border-top: 0; }
+.SusFilaNav { cursor: pointer; }
+.SusFilaNav:hover { background: #f7f7f7; }
+.SusFilaTexto { flex: 1; min-width: 0; }
+.SusFilaNombre { display: block; font-size: 16px; line-height: 22px; color: #333; }
+.SusFilaSub { display: block; margin-top: 2px; font-size: 14px; line-height: 20px; color: #5f6062; }
+.SusFila .wTxtRegularGreenGroups { display: block; margin: 2px 0 0; padding: 0; font-size: 14px; line-height: 20px; }
+.SusChev { flex: none; width: 8px; height: 14px; color: #8a8a8a; }
+.SusLogo { flex: none; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 8px; background: #eef3fa; color: #004795; font-size: 16px; font-weight: 600; }
+#fila-puntos #unirme { flex: none; width: auto; min-width: 132px; padding: 0 32px !important; } /* desktop: el alto de 37 px del sistema */
+.SusVolver { display: inline-flex; align-items: center; gap: 8px; margin-top: 26px; padding: 6px 0; border: 0; background: none; color: #004795; font-size: 14px; cursor: pointer; }
+.SusVolver svg { width: 7px; height: 12px; }
+.SusVolver:hover { text-decoration: underline; }
+@media (max-width: 767px) {
+  .SusFila { padding: 12px 16px; }
+  #fila-puntos #unirme { min-height: 44px; padding: 0 24px !important; min-width: 0; }
+  .SusVolver { min-height: 44px; margin-top: 14px; padding: 0; }
+}
+/* app */
+.app .lista-app { border: 1px solid #E0E0E0; overflow: hidden; }
+.app .fila-app { display: flex; align-items: center; gap: 12px; box-sizing: border-box; width: 100%; min-height: 72px; padding: 12px 16px; border: 0; border-top: 1px solid #E8E8E8; background: none; text-align: left; font-family: "Open Sans", sans-serif; }
+.app .fila-app:first-child { border-top: 0; }
+.app .fila-app .txt { flex: 1; min-width: 0; }
+.app .fila-app .nom { display: block; font-size: 16px; font-weight: 600; line-height: 22px; color: #404040; }
+.app .fila-app .sub { display: block; margin-top: 2px; font-size: 15px; font-weight: 300; line-height: 21px; color: #333; }
+.app .fila-app .chev { flex: none; width: 8px; height: 14px; color: #C7C7CC; }
+.app .fila-app .btn-primario { flex: none; width: auto; margin: 0; padding: 0 22px; font-size: 16px; }
+.SusParte { white-space: nowrap; }
+.app .fila-app .sub.pendiente-app { color: #2e7d32; }
+
+/* ícono de cada fila: Puntos y la estrella son los reales (recorte de la app sobre blanco: el recuadro también es blanco) */
+.SusLogo { box-sizing: border-box; background: #fff; border: 1px solid #e5e5e5; overflow: hidden; }
+.SusLogo img { width: 24px; height: 24px; object-fit: contain; }
+.SusLogo svg { width: 20px; height: 18px; }
+.est-activa { color: #f2c94c; }
+.est-pendiente { color: #c4c4c4; }
+/* detalle: cabecera (ícono, nombre, salida) y un bloque por tema */
+.SusFichaCab { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
+.SusFichaCab .SusLogo { width: 48px; height: 48px; border-radius: 10px; font-size: 20px; }
+.SusFichaCab .SusLogo img { width: 32px; height: 32px; }
+.SusFichaCab .SusLogo svg { width: 26px; height: 24px; }
+.SusFichaNombre { flex: 1; min-width: 0; font-family: "Open Sans Semibold", "Open Sans", sans-serif; font-size: 18px; font-weight: 600; line-height: 24px; color: #000; }
+.SusFichaBloque { margin-top: 12px; padding: 14px 20px; border: 1px solid #ccc; border-radius: 10px; background: #fff; }
+.SusFichaCab + .SusFichaBloque { margin-top: 16px; }
+.SusFichaTit { display: block; font-family: "Open Sans Semibold", "Open Sans", sans-serif; font-size: 14px; font-weight: 600; line-height: 20px; color: #333; }
+.SusFichaBloque .SusDetalle { margin: 8px 0 0; gap: 6px 16px; }
+.SusFichaBloque .SusNumero:first-of-type { margin-top: 2px; }
+.SusFichaLinea { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.SusFichaTexto { min-width: 0; }
+.SusFichaSub { display: block; margin-top: 2px; font-size: 14px; line-height: 20px; color: #5f6062; }
+.SusFichaLinea .SusEnlace { flex: none; font-size: 14px; }
+@media (max-width: 767px) { .SusFichaBloque { padding: 14px 16px; } }
+.app .SusFichaCab { margin: 4px 0 0; } /* ícono y salida alineados con los bordes de la ficha */
+.app .SusFichaCab .accion-app { flex: none; margin: 0; }
+.app .SusFichaNombre { font-family: "Open Sans", sans-serif; font-size: 18px; font-weight: 700; color: #404040; }
+.app .SusFichaBloque { padding: 14px 16px; border-color: #E0E0E0; }
+.app .SusFichaTit { font-family: "Open Sans", sans-serif; font-size: 15px; font-weight: 700; line-height: 21px; color: #404040; }
+.app .SusFichaBloque .detalle { gap: 6px 16px; }
+.app .SusFichaSub { font-size: 15px; font-weight: 300; line-height: 21px; color: #333; }
+.app .SusFichaLinea .lnk { flex: none; }
+
+/* detalle: una sola ficha, con una sección por tema */
+.SusFichaUna { margin-top: 16px; border: 1px solid #ccc; border-radius: 10px; background: #fff; overflow: hidden; }
+.SusFichaUna .SusFichaBloque { margin: 0; border: 0; border-top: 1px solid #e5e5e5; border-radius: 0; background: none; }
+.SusFichaUna .SusFichaBloque:first-child { border-top: 0; }
+.app .SusFichaUna { border-color: #E0E0E0; }
+
+/* en teléfono cada dato va en su línea: si se parten por el ancho, el «·» queda colgado */
+@media (max-width: 767px) {
+  .SusParte { display: block; }
+  .SusSep { display: none; }
+}
+/* app: el teléfono es lo principal de la fila y la fecha lo secundario (la Light de 15 se percibía más débil que la de 13) */
+.app .SusFichaBloque .num span { font-weight: 400; }
+.app .SusFichaBloque .num span small { font-weight: 400; color: #5F6062; }
+.app .SusFichaBloque .num:last-child { padding-bottom: 0; }
+.app .SusFichaBloque .num:last-child .accion-app { margin-bottom: -10px; }
+
+/* acercamiento de jerarquía: más diferencia entre niveles, con recursos del sistema real */
+.SusLogo { background: #edf5fe; border: 0; } /* --accent-color-light del sitio */
+.SusLogo img { mix-blend-mode: multiply; } /* los recortes del ícono tienen fondo blanco */
+.SusLogo:has(.est-pendiente) { background: #f4f4f4; }
+.est-pendiente { color: #b5b5b5; }
+.app .SusLogo { background: #E8EEF6; } /* AccentSoft del tema */
+.app .SusLogo:has(.est-pendiente) { background: #F4F4F4; }
+.app .fila-app .sub { font-size: 14px; font-weight: 400; line-height: 20px; color: #5F6062; }
+.SusFichaCab .SusLogo { width: 56px; height: 56px; border-radius: 12px; font-size: 22px; }
+.SusFichaCab .SusLogo img { width: 36px; height: 36px; }
+.SusFichaCab .SusLogo svg { width: 30px; height: 27px; }
+.SusFichaNombre, .app .SusFichaNombre { font-size: 20px; line-height: 26px; }
+.SusFichaTit { font-size: 16px; line-height: 22px; }
+.app .SusFichaTit { font-size: 16px; line-height: 22px; }
+.SusFichaBloque .SusDetalle, .app .SusFichaBloque .detalle { grid-template-columns: 1fr auto; gap: 0; margin: 6px 0 -6px; }
+.SusFichaBloque .SusDetalle dt, .SusFichaBloque .SusDetalle dd, .app .SusFichaBloque .detalle dt, .app .SusFichaBloque .detalle dd { padding: 7px 0; }
+.SusFichaBloque .SusDetalle dd, .app .SusFichaBloque .detalle dd { text-align: right; }
+.SusFichaBloque .SusDetalle dt:not(:first-child), .SusFichaBloque .SusDetalle dt:not(:first-child) + dd, .app .SusFichaBloque .detalle dt:not(:first-child), .app .SusFichaBloque .detalle dt:not(:first-child) + dd { border-top: 1px solid #eee; }
+.SusNumero > span { font-family: "Open Sans Semibold", "Open Sans", sans-serif; font-weight: 600; }
+.SusNumero > span small { font-family: "Open Sans", sans-serif; font-weight: 400; }
+.app .SusFichaBloque .num span { font-weight: 600; }
+.app .SusFichaBloque .num span small { font-weight: 400; }
+.SusFichaSalida { padding-top: 6px; padding-bottom: 6px; }
+.SusFichaSalida .SusAccion { display: block; width: 100%; text-align: left; }
+.app .SusFichaSalida .accion-app { width: 100%; margin: 0; text-align: left; }
+@media (max-width: 767px) {
+  .SusEnDetalle .wTab { display: none; }
+  .SusFichaSalida .SusAccion { padding: 0; }
+}
+
+/* sheets reales: entran desde abajo, salen hacia abajo; la salida y el arrastre están en armarHoja */
+.SusHoja { overflow: hidden; background: transparent !important; }
+.SusVeloToque { position: absolute; inset: 0; background: rgba(0,0,0,.3); }
+.app .SusVeloToque { background: rgba(0,0,0,.2); }
+.SusHojaPanel { position: relative; z-index: 1; will-change: transform; }
+.SusAgarre { position: absolute; top: 0; left: 0; right: 0; height: 26px; cursor: grab; touch-action: none; z-index: 2; }
+.SusAgarre::before { content: ""; position: absolute; top: 8px; left: 50%; width: 36px; height: 5px; margin-left: -18px; border-radius: 3px; background: #c7c7cc; }
+.SusHoja .TableRoundedShadow, .app .SusHoja .hoja-app { padding-top: 30px; }
+.SusHojaEntra > .SusVeloToque { animation: susVelo .3s ease backwards; }
+.SusHojaEntra > .SusHojaPanel { animation: susSube .36s cubic-bezier(.32,.72,0,1) backwards; }
+@keyframes susVelo { from { opacity: 0; } }
+@keyframes susSube { from { transform: translateY(100%); } }
+.app .SusFichaSalida { padding-top: 4px; padding-bottom: 4px; }
+@media (max-width: 767px) { .SusEnDetalle .SusVolver { margin-top: -22px; } }
+
+/* ícono en cada título de sección del detalle */
+.SusFichaTit { display: flex; align-items: center; gap: 8px; }
+/* desktop: pantalla de lectura; a todo el ancho, cada dato quedaba a 1000 px de su etiqueta y cada acción de su fila */
+@media (min-width: 768px) { #sus-bloques > [id^="ficha-"] { max-width: 720px; } }
+@media (max-width: 767px) { .SusBotones .btn, .SusDialogoBases .SusBotones .btn { flex: 0 0 44px; } } /* en columna, flex-basis 0 los dejaba en 37 */
+
+/* un solo lenguaje de íconos: logo real o inicial; el pendiente, gris */
+/* tipo de servicio bajo el nombre, en el detalle web */
+.SusFichaNombres { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+/* web: el título de sección se separa más de la fila (18 frente a 16) */
+.SusBloque > .wTxtRegularTitle16 { font-size: 18px; line-height: 24px; }
+@media (min-width: 768px) {
+  /* desktop: lista y detalle hasta 720 px, y el valor junto a su etiqueta */
+  #sus-bloques { max-width: 720px; }
+  .SusFichaBloque .SusDetalle { grid-template-columns: 170px 1fr; }
+  .SusFichaBloque .SusDetalle dd { text-align: left; }
+}
+/* app: el verde del texto pendiente vuelve al token Green del tema (el anterior era inventado) */
+.app .pendiente-app, .app .fila-app .sub.pendiente-app { color: #00A80A; }
+
+/* salida en un bloque propio, debajo de la ficha */
+.SusFichaSalida { margin-top: 24px; padding: 0; }
+.SusFichaSalida .SusAccion { display: block; width: auto; text-align: left; padding: 6px 0; }
+.app .SusFichaSalida { margin-top: 22px; padding: 0; } /* alineada al borde de la ficha, como en web */
+.app .SusFichaSalida .accion-app { width: auto; margin: 0; text-align: left; }
+@media (max-width: 767px) { .SusFichaSalida .SusAccion { padding: 0; min-height: 44px; } }
+/* texto pendiente: verde oscuro del verde del sitio, para llegar a 4,5:1 en texto chico */
+.SusFila .wTxtRegularGreenGroups, .app .pendiente-app, .app .fila-app .sub.pendiente-app { color: #008A08; }
+
+/* membresía con documentos pendientes: texto rojo del sitio y su acción debajo */
+.SusFila .wTxtRegularRedGroups { display: block; margin: 2px 0 0; padding: 0; font-size: 14px; line-height: 20px; color: #c91411; white-space: normal; }
+.SusFilaAccion { display: block; margin-top: 4px; font-size: 14px; line-height: 20px; }
+.app .fila-app .sub.documentos-app { color: #C91411; }
+.app .fila-app .SusFilaAccion { margin-top: 6px; }
+
+/* lo que descarta, en el secundario de la app (ButtonDefaultSecondary del tema iOS) */
+.app .btn-secundario { display: block; width: 100%; height: 44px; margin-top: 19px; border: 1px solid #1754A5; border-radius: 10px; background: #E8EEF6; color: #1754A5; font: 300 18px "Open Sans", sans-serif; }
+.app .hoja-app .btn-primario + .btn-secundario { margin-top: 10px; }
+.app .hoja-bases .btn-secundario { flex: none; margin-top: 14px; }
+
+/* crítica del 13/11: el error debajo de su campo; Documento y País uno debajo del otro en todos los anchos */
+.SusCampos { grid-template-columns: 1fr; }
+.SusCampo .SusErrorSlot { margin-top: 4px; }
+.SusAlta .SusCampos + .SusOpcion { margin-top: 14px; }
+.app .hoja-app .form-control.SusCampoError { border-color: #C91411; }
+/* casillas alineadas con la primera línea de su texto; el aviso de las bases, debajo de su casilla, con aire hasta el consentimiento siguiente */
+.SusOpcion { align-items: flex-start; }
+.SusOpcion input { margin: 3px 0 0; }
+.SusErrorOpcion { margin: 2px 0 8px 21px; }
+@media (max-width: 767px) { .SusOpcion { align-items: flex-start; } .SusOpcion input { margin: 3px 0 0; } }
+.app .hoja-app .SusOpcion { align-items: flex-start; }
+.app .hoja-app .SusOpcion input { margin: 0; }
+.app .hoja-app .SusErrorOpcion { margin-left: 28px; }
+/* una sola espera, en el botón */
+#dialogo-accion.SusEsperando, #dialogo-accion.SusEsperando:disabled { opacity: 1; cursor: progress; color: transparent !important; background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Ccircle%20cx%3D'12'%20cy%3D'12'%20r%3D'9'%20fill%3D'none'%20stroke%3D'%23fff'%20stroke-opacity%3D'.35'%20stroke-width%3D'3'%2F%3E%3Cpath%20d%3D'M12%203a9%209%200%200%201%209%209'%20fill%3D'none'%20stroke%3D'%23fff'%20stroke-width%3D'3'%20stroke-linecap%3D'round'%3E%3CanimateTransform%20attributeName%3D'transform'%20type%3D'rotate'%20from%3D'0%2012%2012'%20to%3D'360%2012%2012'%20dur%3D'.8s'%20repeatCount%3D'indefinite'%2F%3E%3C%2Fpath%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: center; background-size: 20px 20px; }
+/* dentro de un bloque, las filas se separan con espacio: las líneas quedan solo entre bloques */
+.SusFichaBloque .SusDetalle dt:not(:first-child), .SusFichaBloque .SusDetalle dt:not(:first-child) + dd, .app .SusFichaBloque .detalle dt:not(:first-child), .app .SusFichaBloque .detalle dt:not(:first-child) + dd { border-top-color: transparent; }
+.SusFichaBloque .SusNumero, .app .SusFichaBloque .num { border-bottom-color: transparent; }
+/* logo de cada app: contenido en un recuadro igual para todas, que también lleva la inicial de una app sin logo */
+.SusLogo, .app .SusLogo { box-sizing: border-box; width: 36px; height: 36px; border-radius: 8px; border: 1px solid #e5e5e5; background: #fff; color: #004795; overflow: hidden; }
+.app .SusLogo { border-color: #E0E0E0; }
+.SusLogo img { width: 30px; height: 30px; object-fit: contain; mix-blend-mode: normal; }
+.SusFichaCab .SusLogo { width: 56px; height: 56px; border-radius: 12px; }
+.SusFichaCab .SusLogo img { width: 46px; height: 46px; }
+/* bloque sin título (una sola fila): sin el margen que lo separa del título, el aire queda igual arriba y abajo */
+.SusFichaBloque > .SusDetalle:first-child, .app .SusFichaBloque > .detalle:first-child { margin-top: -6px; }
+/* acciones del detalle: enlaces al final, uno debajo del otro y alineados con los rótulos (no como filas con título) */
+.SusFichaEnlaces { display: flex; flex-direction: column; align-items: flex-start; gap: 14px; }
+.SusFichaEnlaces .SusEnlace { font-size: 14px; line-height: 20px; }
+.app .SusFichaEnlaces .lnk { line-height: 21px; }
+@media (min-width: 768px) {
+  /* desktop: «Desvincular» junto a su número, no en el otro borde de la ficha */
+  .SusFichaBloque .SusNumero { gap: 0; }
+  .SusFichaBloque .SusNumero > span { flex: none; width: 200px; }
+}
+/* el rótulo no se parte: la columna del rótulo es la de la etiqueta más larga y el dato ocupa el resto (si no entra, baja de línea él) */
+.SusFichaBloque .SusDetalle, .app .SusFichaBloque .detalle { grid-template-columns: max-content 1fr; }
+.SusFichaBloque .SusDetalle dt, .app .SusFichaBloque .detalle dt { white-space: nowrap; }
+@media (min-width: 768px) { .SusFichaBloque .SusDetalle { grid-template-columns: 200px 1fr; } } /* 200: entra el número más largo, y «Desvincular» cae en la columna de los valores */
+/* teléfono: un dato largo (el beneficio) va debajo de su rótulo, alineado a la izquierda, en vez de partirse contra el borde */
+@media (max-width: 767px) {
+  .SusFichaBloque dl dt.SusLargo, .SusFichaBloque dl dd.SusLargo, .app .SusFichaBloque dl dt.SusLargo, .app .SusFichaBloque dl dd.SusLargo { grid-column: 1 / -1; text-align: left; white-space: normal; }
+  .SusFichaBloque dl dt.SusLargo, .app .SusFichaBloque dl dt.SusLargo { padding-bottom: 0; }
+  .SusFichaBloque dl dd.SusLargo, .app .SusFichaBloque dl dd.SusLargo { padding-top: 2px; }
+}
+/* app: los enlaces del detalle con el estilo real de «Bases y condiciones» (TextBlockTitleV15Action: OpenSans-Regular 16, #1754A5) */
+.app .SusFichaEnlaces .lnk { font-weight: 400; font-size: 16px; line-height: 22px; }
+/* app: la salida en su propia tarjeta blanca, como las acciones destructivas de los ajustes de iOS; el texto arranca donde el de la ficha y toda la fila se toca */
+.app .SusFichaSalida { margin-top: 20px; border: 1px solid #E0E0E0; border-radius: 10px; background: #fff; overflow: hidden; }
+.app .SusFichaSalida .accion-app { display: block; width: 100%; min-height: 48px; margin: 0; padding: 0 16px; text-align: left; font-size: 16px; line-height: 22px; }
+/* app, Mis datos: cada acción es una fila en su tarjeta (como los ajustes de iOS), con el texto alineado con los campos del formulario */
+.app .fila-accion-app { margin-top: 20px; padding: 0; overflow: hidden; }
+.app .fila-accion-app .accion-app, .app .fila-accion-app .lnk { display: block; width: 100%; min-height: 48px; margin: 0; padding: 0 21px; text-align: left; font-size: 16px; font-weight: 400; line-height: 22px; }
+.app .fila-accion-app .accion-app { color: #C91411; }
+.app .fila-accion-app .lnk { color: #1754A5; }
+.app .pie-app { margin: 8px 21px 0; font-size: 13px; line-height: 18px; color: #5F6062; }

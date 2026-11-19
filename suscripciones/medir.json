@@ -1,0 +1,59 @@
+{
+  "aceptados": [
+    {
+      "regla": "contraste",
+      "texto": "Fecha de nacimiento",
+      "motivo": "Texto de ejemplo del campo vacío, igual a la app real"
+    },
+    {
+      "regla": "contraste",
+      "texto": "Celular",
+      "motivo": "Texto de ejemplo del campo vacío, igual a la app real"
+    },
+    {
+      "regla": "contraste",
+      "texto": "Cancelar",
+      "motivo": "Botón de la alerta nativa de iOS"
+    },
+    {
+      "regla": "contraste",
+      "texto": "Aceptar",
+      "motivo": "Botón de la alerta nativa de iOS"
+    },
+    {
+      "regla": "contraste",
+      "texto": "Regresar",
+      "motivo": "Botón de la alerta nativa de iOS"
+    },
+    {
+      "regla": "contraste",
+      "texto": "Confirmar",
+      "motivo": "Botón de la alerta nativa de iOS"
+    },
+    {
+      "regla": "contraste",
+      "texto": "Desvincular",
+      "motivo": "Botón de la alerta nativa de iOS"
+    },
+    {
+      "regla": "contraste",
+      "texto": "Desconectar",
+      "motivo": "Botón de la alerta nativa de iOS"
+    },
+    {
+      "regla": "toque-chico",
+      "texto": "Editar mis datos",
+      "motivo": "Lápiz de la pantalla real de la app, sin cambios en este diseño"
+    }
+  ],
+  "tope": 40,
+  "barra": [
+    [
+      "No adherido"
+    ],
+    [
+      "No adherido",
+      "Documento ya asociado"
+    ]
+  ]
+}
