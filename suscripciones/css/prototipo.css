@@ -455,3 +455,5 @@ body.app { margin: 0; background: #F5F5F5; font-family: "Open Sans", sans-serif;
 .app .fila-app .lnk { font-weight: 400; font-size: 16px; }
 #ficha-puntos .SusFichaBloque:first-child dd { font-family: "Open Sans Semibold", "Open Sans", sans-serif; font-weight: 600; }
 .app #ficha-puntos .SusFichaBloque:first-child dd { font-family: "Open Sans", sans-serif; font-weight: 600; }
+/* web: el nombre de cada fila en semibold, como en la app; la descripción sigue en regular */
+.SusFilaNombre { font-family: "Open Sans Semibold", "Open Sans", sans-serif; font-weight: 600; }
