@@ -450,3 +450,8 @@ body.app { margin: 0; background: #F5F5F5; font-family: "Open Sans", sans-serif;
 .app .fila-accion-app .accion-app { color: #C91411; }
 .app .fila-accion-app .lnk { color: #1754A5; }
 .app .pie-app { margin: 8px 21px 0; font-size: 13px; line-height: 18px; color: #5F6062; }
+/* crítico 19/11: flechas de la app visibles (3,3:1, el gris del sistema de iOS), «Ver documentos» como los demás enlaces, y el saldo de Puntos con protagonismo */
+.app .fila-app .chev { color: #8E8E93; }
+.app .fila-app .lnk { font-weight: 400; font-size: 16px; }
+#ficha-puntos .SusFichaBloque:first-child dd { font-family: "Open Sans Semibold", "Open Sans", sans-serif; font-weight: 600; }
+.app #ficha-puntos .SusFichaBloque:first-child dd { font-family: "Open Sans", sans-serif; font-weight: 600; }
